@@ -1,0 +1,22 @@
+{
+  "name": "canlifehub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Canadian Lifestyle Sharing Platform",
+  "scripts": {
+    "start:frontend": "cd frontend && npx expo start",
+    "start:backend": "cd backend && nodemon server.js",
+    "start:backend:prod": "cd backend && node server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.1"
+  }
+}

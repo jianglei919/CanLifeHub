@@ -1,0 +1,65 @@
+# Node dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.pnpm-debug.log
+
+# Expo & React Native
+.expo/
+.expo-shared/
+*.expo
+*.log
+*.tgz
+*.tmp
+*.bak
+
+# Metro bundler cache
+.metro-cache/
+*.watchmanconfig
+
+# Android & iOS (if ejected)
+android/
+ios/
+*.keystore
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# VSCode settings
+.vscode/
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.example
+
+# IDE & Editor junk
+.idea/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Backend logs, databases, compiled files
+backend/node_modules/
+backend/logs/
+backend/*.log
+backend/.env
+backend/.DS_Store
+
+# Frontend build cache
+frontend/node_modules/
+frontend/web-build/
+frontend/dist/
+frontend/.expo/
+frontend/.expo-shared/
+frontend/.DS_Store
+frontend/.env

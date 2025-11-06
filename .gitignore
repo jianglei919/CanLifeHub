@@ -48,18 +48,18 @@ ios/
 *.njsproj
 *.sln
 
-# Backend logs, databases, compiled files
-backend/node_modules/
-backend/logs/
-backend/*.log
-backend/.env
-backend/.DS_Store
+# API logs, databases, compiled files
+API/node_modules/
+API/logs/
+API/*.log
+API/.env
+API/.DS_Store
 
-# Frontend build cache
-frontend/node_modules/
-frontend/web-build/
-frontend/dist/
-frontend/.expo/
-frontend/.expo-shared/
-frontend/.DS_Store
-frontend/.env
+# UI build cache
+UI/node_modules/
+UI/web-build/
+UI/dist/
+UI/.expo/
+UI/.expo-shared/
+UI/.DS_Store
+UI/.env

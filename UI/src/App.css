@@ -8,7 +8,7 @@
 }
 
 /* 针对非全屏页面的容器 */
-#root > div:not(.auth-split-wrapper) {
+#root > div:not(.auth-split-wrapper):not(.dashboard-container) {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -17,6 +17,12 @@
   padding: 2rem;
   text-align: center;
   width: 100%;
+}
+
+#root > .dashboard-container {
+  flex: 1;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
 }
 
 .logo {

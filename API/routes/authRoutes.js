@@ -4,11 +4,12 @@ const router = express.Router();         //创建一个“路由对象（router�
 const cors = require('cors');            //CORS 允许浏览器端（例如 React 前端 http://localhost:5173）访问这个后端服务器
 const { test, registerUser, loginUser, getProfile } = require('../controllers/authController');        //从 authController.js 文件中引入 test 函数
 
+
   //middleware
   router.use(                            //用 CORS 中间件，允许跨域访问. 当 React 前端调用 fetch('http://localhost:8000/') 时，服务器不会拒绝跨域
     cors({
         credentials: true,               //允许携带凭证（如 cookies）
-        origin: 'http://localhost:5173'  //只允许来自这个前端地址（你的 React 应用）发起请求
+        origin: 'http://localhost:5174'  //只允许来自这个前端地址（你的 React 应用）发起请求
     }) 
 )
 

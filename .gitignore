@@ -63,3 +63,5 @@ UI/.expo/
 UI/.expo-shared/
 UI/.DS_Store
 UI/.env
+
+.history/

@@ -1,3 +1,4 @@
+// UI/src/pages/Dashboard.jsx
 import { useContext, useState } from "react";
 import { UserContext } from "../../context/userContext";
 import PostList from "../components/PostList";

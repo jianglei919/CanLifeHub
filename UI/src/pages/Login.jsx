@@ -1,48 +1,123 @@
-import { useState } from "react";      // 导入 useState 钩子函数，用于在函数组件中添加状态管理(React 组件默认每次重新渲染都会重新执行函数、变量会被清空。但用 useState() 创建的值不会被清空，它能“保留下来”)
-import axios from "axios";            // 导入 axios 库，用于发送 HTTP 请求
-import { toast } from 'react-hot-toast'; // 导入 react-hot-toast 库，用于显示通知消息
-import { useNavigate } from "react-router-dom"; // 导入 useNavigate 钩子函数，用于在组件中进行编程式导航
+import { useState } from "react";
+import axios from "axios";
+import { toast } from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
 
-export default function Login() {      // 表示这是模块的默认导出,别人可以这样导入: import Navbar from './Login';
-  const navigate = useNavigate();   // 使用 useNavigate 钩子函数获取导航函数
-  const [data, setData] = useState({    // 使用 useState 钩子函数创建 [当前状态值,更新该状态的函数]，初始值是一个包含 email 和 password 的对象
+export default function Login() {
+  const navigate = useNavigate();
+  const [data, setData] = useState({
     email: "",
     password: "",
-  })
+  });
 
- const [showPassword, setShowPassword] = useState(false); // ← 新增：是否显示密码
+  const [showPassword, setShowPassword] = useState(false);
 
- const loginUser = async (e) => {           // 定义一个名为 loginUser 的函数，用于处理登录表单的提交事件
-    e.preventDefault();               // 阻止表单的默认提交行为，防止页面刷新  e是表单事件对象
-      const { email, password } = data;   // 从 data 对象中解构出 email 和 password
-      try {
-        const { data } = await axios.post('/login', {
-          email,
-          password 
-        });  // 使用 axios 发送 POST 请求到后端登录接口，传递 email 和 password
-        if(data.error) {
-          toast.error(data.error);
-        } else {
-          setData({ email: "", password: ""});  // 清空表单数据
-          navigate('/dashboard');  // 编程式导航到Dashboard
-        }
-      } catch (error) {
-        
+  const loginUser = async (e) => {
+    e.preventDefault();
+    const { email, password } = data;
+    try {
+      const { data: res } = await axios.post("/login", {
+        email,
+        password,
+      });
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        setData({ email: "", password: "" });
+        toast.success("登录成功");
+        navigate("/dashboard");
       }
- }
+    } catch (error) {
+      toast.error("登录失败，请稍后重试");
+    }
+  };
 
   return (
-    <div>
-      <form onSubmit={loginUser}>     {/* 当表单提交时，调用 loginUser 函数 */}
-        <label>Email </label>
-        {/* 普通文本输入框， 提示文字,                输入框当前状态值=data.email,  每次用户输入时触发,它接收一个事件对象e       */}
-        <input type="text" placeholder='enter Email' value={data.email}           onChange={ (e) => setData({...data, email: e.target.value})} />  <br/>
+    <div className="auth-split-wrapper">
+      {/* 左侧品牌展示区 */}
+      <div className="auth-brand-section">
+        <div className="brand-content">
+          <div className="brand-logo">📱</div>
+          <h1 className="brand-title">CanLifeHub</h1>
+          <p className="brand-slogan">连接加拿大华人，分享生活点滴</p>
+          <div className="brand-features">
+            <div className="feature-item">
+              <div className="feature-icon">🏡</div>
+              <div className="feature-text">
+                <h3>生活分享</h3>
+                <p>记录并分享你在加拿大的精采生活</p>
+              </div>
+            </div>
+            <div className="feature-item">
+              <div className="feature-icon">👥</div>
+              <div className="feature-text">
+                <h3>社区互动</h3>
+                <p>结识志同道合的朋友，建立社交圈</p>
+              </div>
+            </div>
+            <div className="feature-item">
+              <div className="feature-icon">💡</div>
+              <div className="feature-text">
+                <h3>经验交流</h3>
+                <p>获取实用的生活建议和留学攻略</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <label>Password </label>
-        <input type="password" placeholder='enter password' value={data.password} onChange={ (e) => setData({...data, password: e.target.value})} />  <br/>
+      {/* 右侧登录表单区 */}
+      <div className="auth-form-section">
+        <div className="form-container">
+          <div className="form-header">
+            <h2 className="form-title">欢迎回来</h2>
+            <p className="form-subtitle">登录你的 CanLifeHub 账号，继续你的旅程</p>
+          </div>
+          
+          <form onSubmit={loginUser} className="login-form">
+            <div className="form-group">
+              <label className="label">邮箱地址</label>
+              <input
+                className="input"
+                type="email"
+                placeholder="请输入邮箱"
+                value={data.email}
+                onChange={(e) => setData({ ...data, email: e.target.value })}
+                required
+              />
+            </div>
 
-        <button type='submit'>Login</button>
-      </form>
+            <div className="form-group">
+              <label className="label">密码</label>
+              <div style={{ position: "relative" }}>
+                <input
+                  className="input"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="请输入密码"
+                  value={data.password}
+                  onChange={(e) => setData({ ...data, password: e.target.value })}
+                  required
+                />
+                <button
+                  type="button"
+                  className="btn btn-secondary password-toggle"
+                  onClick={() => setShowPassword((v) => !v)}
+                >
+                  {showPassword ? "隐藏" : "显示"}
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" className="btn btn-primary btn-login">登录账户</button>
+          </form>
+          
+          <div className="form-footer">
+            <p className="footer-text">
+              还没有账户？<Link to="/register" className="footer-link">立即注册</Link>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-  )
+  );
 }

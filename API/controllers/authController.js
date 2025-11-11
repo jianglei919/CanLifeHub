@@ -14,7 +14,7 @@ const test = (req, res) => {   //定义一个名为 test 的函数，接收请�
 // Register Endpoint
 const registerUser = async (req, res) => {
    try {
-       const { name, email, password } = req.body; // 从前端传来的请求体（req.body）中解构出 name、email、password
+       const { name, email, password, confirmPassword } = req.body; // 从前端传来的请求体（req.body）中解构出 name、email、password、confirmPassword
        // Step 1. 检查是否填写了 name
        if (!name) {
            return res.json({
@@ -25,6 +25,12 @@ const registerUser = async (req, res) => {
          if (!password || password.length < 6) {
             return res.json({
                 error: 'Password is required and should be at least 6 characters long'
+            })
+         };
+       // Step 2.5. 检查两次密码是否一致
+         if (password !== confirmPassword) {
+            return res.json({
+                error: 'Passwords do not match'
             })
          };
        // Step 3. 检查邮箱是否已注册

@@ -10,17 +10,25 @@ export default function Register() {
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
   const registerUser = async (e) => {
     e.preventDefault();
-    const { name, email, password } = data;
+    const { name, email, password, confirmPassword } = data;
+    
+    // 验证两次密码是否一致
+    if (password !== confirmPassword) {
+      toast.error("两次密码输入不一致");
+      return;
+    }
+    
     try {
-      const { data: res } = await authApi.register({ name, email, password });
+      const { data: res } = await authApi.register({ name, email, password, confirmPassword });
       if (res.error) {
         toast.error(res.error);
       } else {
-        setData({ name: "", email: "", password: "" });
+        setData({ name: "", email: "", password: "", confirmPassword: "" });
         toast.success("注册成功，欢迎加入！");
         navigate("/login");
       }
@@ -105,6 +113,18 @@ export default function Register() {
                 placeholder="至少 6 位密码"
                 value={data.password}
                 onChange={(e) => setData({ ...data, password: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="label">确认密码</label>
+              <input
+                className="input"
+                type="password"
+                placeholder="请再次输入密码"
+                value={data.confirmPassword}
+                onChange={(e) => setData({ ...data, confirmPassword: e.target.value })}
                 required
               />
             </div>

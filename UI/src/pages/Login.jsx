@@ -1,7 +1,8 @@
+// UI/src/pages/Login.jsx
 import { useState } from "react";
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
+import { authApi } from "../api/http";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -16,10 +17,7 @@ export default function Login() {
     e.preventDefault();
     const { email, password } = data;
     try {
-      const { data: res } = await axios.post("/login", {
-        email,
-        password,
-      });
+      const { data: res } = await authApi.login({ email, password });
       if (res.error) {
         toast.error(res.error);
       } else {

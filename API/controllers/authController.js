@@ -1,3 +1,4 @@
+// API/controllers/authController.js
 //负责告诉服务器“请求到达时要干什么”, 业务逻辑（注册、登录、获取个人信息）
 const User = require('../models/user');  //引入用户模型
 const { hashPassword, comparePassword } = require('../helpers/auth'); //引入密码哈希函数, 用于加密密码与验证密码是否匹配

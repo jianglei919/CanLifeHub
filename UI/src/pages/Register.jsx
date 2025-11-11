@@ -1,7 +1,8 @@
+// UI/src/pages/Register.jsx
 import { useState } from "react";
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
+import { authApi } from "../api/http";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -15,11 +16,7 @@ export default function Register() {
     e.preventDefault();
     const { name, email, password } = data;
     try {
-      const { data: res } = await axios.post("/register", {
-        name,
-        email,
-        password,
-      });
+      const { data: res } = await authApi.register({ name, email, password });
       if (res.error) {
         toast.error(res.error);
       } else {

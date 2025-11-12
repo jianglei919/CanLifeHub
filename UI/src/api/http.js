@@ -38,6 +38,10 @@ export const authApi = {
   register: (payload) => http.post('/auth/register', payload),
   login: (payload) => http.post('/auth/login', payload),
   profile: () => http.get('/auth/profile'),
+  verify: (payload) => http.post('/auth/verify', payload),
+  resendVerification: (payload) => http.post('/auth/resend-verification', payload),
+  forgotPassword: (payload) => http.post('/auth/forgot-password', payload),
+  resetPassword: (payload) => http.post('/auth/reset-password', payload),
   // logout: () => http.post('/auth/logout'),     // 后端未实现，若需要请在 API 端补一条路由
 };
 //todo: 新增 API 放在这里！！！！

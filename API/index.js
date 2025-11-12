@@ -2,6 +2,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const app = require('./app');
+const { startCleanupSchedule } = require('./helpers/cleanup'); // 引入清理任务
 
 const PORT = Number(process.env.PORT) || 8000;
 const MONGO_URI = process.env.MONGODB_URI || process.env.MONGODB_URL; // 兼容你当前变量名
@@ -15,6 +16,9 @@ async function bootstrap() {
     }
     await mongoose.connect(MONGO_URI);
     console.log('[API] Mongo connected');
+
+    // 启动定期清理过期未验证用户任务（每24小时执行一次）
+    startCleanupSchedule(24);
 
     const server = app.listen(PORT, () => {
       console.log(`[API] listening on :${PORT}`);

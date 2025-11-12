@@ -104,6 +104,11 @@ export default function Login() {
                   {showPassword ? "隐藏" : "显示"}
                 </button>
               </div>
+              <div style={{ marginTop: "8px", textAlign: "right" }}>
+                <Link to="/forgot-password" className="footer-link" style={{ fontSize: "14px" }}>
+                  忘记密码？
+                </Link>
+              </div>
             </div>
 
             <button type="submit" className="btn btn-primary btn-login">登录账户</button>

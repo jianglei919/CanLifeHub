@@ -12,6 +12,9 @@ export default function Register() {
     password: "",
     confirmPassword: "",
   });
+  const [verificationStep, setVerificationStep] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
   const registerUser = async (e) => {
     e.preventDefault();
@@ -28,13 +31,53 @@ export default function Register() {
       if (res.error) {
         toast.error(res.error);
       } else {
-        setData({ name: "", email: "", password: "", confirmPassword: "" });
-        toast.success("注册成功，欢迎加入！");
-        navigate("/login");
+        setUserEmail(email);
+        setVerificationStep(true);
+        
+        // 区分首次注册和重新注册
+        if (res.isReregistration) {
+          toast.success("该邮箱之前注册过但未验证，已为您更新信息并重新发送验证码", { duration: 5000 });
+        } else {
+          toast.success("注册成功！验证码已发送至您的邮箱");
+        }
       }
     } catch (error) {
       console.log(error);
       toast.error("注册失败，请稍后重试");
+    }
+  };
+
+  const verifyCode = async () => {
+    if (!verificationCode || verificationCode.length !== 6) {
+      toast.error("请输入6位验证码");
+      return;
+    }
+
+    try {
+      const { data: res } = await authApi.verify({ email: userEmail, code: verificationCode });
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success("验证成功！请登录");
+        navigate("/login");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("验证失败，请重试");
+    }
+  };
+
+  const resendCode = async () => {
+    try {
+      const { data: res } = await authApi.resendVerification({ email: userEmail });
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success("验证码已重新发送");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("重发失败，请稍后重试");
     }
   };
 
@@ -76,11 +119,14 @@ export default function Register() {
       <div className="auth-form-section">
         <div className="form-container">
           <div className="form-header">
-            <h2 className="form-title">创建账户</h2>
-            <p className="form-subtitle">加入 CanLifeHub 社区，开始你的旅程</p>
+            <h2 className="form-title">{verificationStep ? "验证邮箱" : "创建账户"}</h2>
+            <p className="form-subtitle">
+              {verificationStep ? "请输入发送到您邮箱的验证码" : "加入 CanLifeHub 社区，开始你的旅程"}
+            </p>
           </div>
           
-          <form onSubmit={registerUser} className="login-form">
+          {!verificationStep ? (
+            <form onSubmit={registerUser} className="login-form">
             <div className="form-group">
               <label className="label">姓名</label>
               <input
@@ -131,6 +177,41 @@ export default function Register() {
 
             <button type="submit" className="btn btn-primary btn-login">创建账户</button>
           </form>
+          ) : (
+            <div className="verification-form">
+              <div className="form-group">
+                <label className="label">验证码</label>
+                <input
+                  className="input"
+                  type="text"
+                  placeholder="请输入6位验证码"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  maxLength={6}
+                  style={{ fontSize: "24px", textAlign: "center", letterSpacing: "8px" }}
+                />
+              </div>
+              
+              <button 
+                type="button" 
+                className="btn btn-primary btn-login"
+                onClick={verifyCode}
+              >
+                验证
+              </button>
+              
+              <div style={{ marginTop: "16px", textAlign: "center" }}>
+                <button 
+                  type="button" 
+                  className="btn btn-link"
+                  onClick={resendCode}
+                  style={{ background: "none", border: "none", color: "#007bff", cursor: "pointer", textDecoration: "underline" }}
+                >
+                  重新发送验证码
+                </button>
+              </div>
+            </div>
+          )}
           
           <div className="form-footer">
             <p className="footer-text">

@@ -5,6 +5,8 @@ import { Routes, Route } from 'react-router-dom';    //Routes:路由容器,用�
 import Register from '../src/pages/Register.jsx';    // 导入注册页面组件
 import Login from '../src/pages/Login.jsx';          // 导入登录页面组件
 import Dashboard from '../src/pages/Dashboard.jsx';// 导入用户仪表盘组件
+import ForgotPassword from '../src/pages/ForgotPassword.jsx'; // 导入忘记密码页面
+import ResetPassword from '../src/pages/ResetPassword.jsx';   // 导入重置密码页面
 import axios from 'axios';                           // 引入 Axios 库，用于发送 HTTP 请求
 import { Toaster } from 'react-hot-toast';          // 引入 react-hot-toast 库中的 Toaster 组件，用于显示通知
 import { UserContextProvider } from '../context/userContext'; // 导入用户上下文提供者组件
@@ -21,6 +23,8 @@ function App() {                                     // 主界面组件函数
       <Route path="/register" element={<Register />} /> 
       <Route path="/login" element={<Login />} /> 
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
     </Routes>
     </UserContextProvider>
   )

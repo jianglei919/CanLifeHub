@@ -11,8 +11,8 @@ const chatRoutes = require('./routes/chatRoutes'); // 聊天路由
 const app = express();
 
 /** 基础中间件 */
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '50mb' })); // 增加JSON请求体大小限制，支持Base64图片
+app.use(express.urlencoded({ extended: false, limit: '50mb' })); // 增加URL编码请求体大小限制
 app.use(cookieParser());
 
 /** 静态文件服务（用于访问上传的图片） */

@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();         //创建一个“路由对象（router）”
 const cors = require('cors');            //CORS 允许浏览器端（例如 React 前端 http://localhost:5173）访问这个后端服务器
-const { test, registerUser, loginUser, getProfile, verifyEmail, resendVerification, forgotPassword, resetPassword } = require('../controllers/authController');        //从 authController.js 文件中引入 test 函数
+const { test, registerUser, loginUser, getProfile, verifyEmail, resendVerification, forgotPassword, resetPassword, logout } = require('../controllers/authController');        //从 authController.js 文件中引入 test 函数
 
 
   //middleware
@@ -21,5 +21,6 @@ router.post('/verify', verifyEmail);          //当收到对 /verify 的 POST �
 router.post('/resend-verification', resendVerification); //当收到对 /resend-verification 的 POST 请求时，调用 resendVerification 函数处理请求
 router.post('/forgot-password', forgotPassword); //当收到对 /forgot-password 的 POST 请求时，调用 forgotPassword 函数处理请求
 router.post('/reset-password', resetPassword);   //当收到对 /reset-password 的 POST 请求时，调用 resetPassword 函数处理请求
+router.post('/logout', logout);                  //当收到对 /logout 的 POST 请求时，调用 logout 函数处理请求
 
 module.exports = router;                      //导出 router，供外部文件（例如 index.js）使用

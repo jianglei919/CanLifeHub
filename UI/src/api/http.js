@@ -54,6 +54,7 @@ export const authApi = {
   resendVerification: (payload) => http.post('/auth/resend-verification', payload),
   forgotPassword: (payload) => http.post('/auth/forgot-password', payload),
   resetPassword: (payload) => http.post('/auth/reset-password', payload),
+  logout: () => http.post('/auth/logout'),
   // logout: () => http.post('/auth/logout'),     // 后端未实现，若需要请在 API 端补一条路由
 };
 

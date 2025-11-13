@@ -43,8 +43,7 @@ export default function CreatePost() {
               {image && <div className="post-image-preview">{image}</div>}
 
               <div className="post-toolbar">
-                <button className="toolbar-btn" onClick={handleImageUpload}>
-                  🖼️ 图片
+                <button className="toolbar-btn" onClick={handleImageUpload}>图片
                 </button>
                 <button className="toolbar-btn">
                   😊 表情

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { chatApi } from "../api/http";
 import toast from "react-hot-toast";
 import "../styles/Messages.css";
@@ -56,22 +56,32 @@ export default function Messages() {
     }
   };
 
-  // 加载消息
+  // 加载消息 - 优化：减少初始加载数量
   const loadMessages = async (conversationId) => {
     try {
       setLoading(true);
-      const response = await chatApi.getMessages(conversationId, { page: 1, limit: 50 });
+      // 只加载最近20条消息，加快首次加载
+      const response = await chatApi.getMessages(conversationId, { page: 1, limit: 20 });
       if (response.data.ok) {
         setMessages(response.data.messages);
-        // 标记为已读
-        await chatApi.markAsRead(conversationId);
-        // 更新会话列表中的未读计数
-        await loadConversations();
+        setLoading(false); // 立即结束加载状态
+
+        // 使用requestAnimationFrame优化滚动性能
+        requestAnimationFrame(() => {
+          scrollToBottom();
+        });
+
+        // 后台异步操作，不阻塞UI
+        Promise.all([
+          chatApi.markAsRead(conversationId),
+          loadConversations()
+        ]).catch(err => {
+          console.error("后台更新失败:", err);
+        });
       }
     } catch (error) {
       console.error("加载消息失败:", error);
       toast.error(error.message || "加载消息失败");
-    } finally {
       setLoading(false);
     }
   };
@@ -186,10 +196,26 @@ export default function Messages() {
   const handleToggleBlock = async () => {
     if (!selectedConversation) return;
 
+    const isCurrentlyBlocked = selectedConversation.isBlocked;
+    const userName = selectedConversation.otherUser?.name || "该用户";
+
+    // 拉黑前需要确认
+    if (!isCurrentlyBlocked) {
+      const confirmed = window.confirm(
+        `确定要拉黑 ${userName} 吗？\n\n拉黑后：\n· 你们将无法互相发送消息\n· 对方不会收到拉黑通知\n· 你可以随时取消拉黑`
+      );
+      if (!confirmed) return;
+    }
+
     try {
       const response = await chatApi.toggleBlock(selectedConversation._id);
       if (response.data.ok) {
-        toast.success(response.data.message);
+        // 显示操作成功提示
+        const successMessage = response.data.isBlocked
+          ? `已拉黑 ${userName}`
+          : `已取消拉黑 ${userName}`;
+        toast.success(successMessage);
+
         // 更新当前会话状态
         setSelectedConversation({
           ...selectedConversation,
@@ -200,7 +226,7 @@ export default function Messages() {
       }
     } catch (error) {
       console.error("操作失败:", error);
-      toast.error(error.message || "操作失败");
+      toast.error(error.message || "操作失败，请稍后重试");
     }
   };
 
@@ -250,16 +276,25 @@ export default function Messages() {
     }
   };
 
-  // 格式化时间
-  const formatTime = (date) => {
+  // 格式化时间 - 使用useCallback优化
+  const formatTime = useCallback((date) => {
     const d = new Date(date);
     return d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-  };
+  }, []);
 
   // 滚动到底部
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
+
+  // 缓存消息渲染结果，避免不必要的重渲染
+  const renderedMessages = useMemo(() => {
+    if (!selectedConversation) return [];
+    return messages.map((msg) => ({
+      ...msg,
+      isOwn: msg.sender._id !== selectedConversation.otherUser._id
+    }));
+  }, [messages, selectedConversation]);
 
   // 轮询获取新消息
   const pollNewMessages = async () => {
@@ -325,8 +360,8 @@ export default function Messages() {
       lastMessageTimeRef.current = messages[messages.length - 1].createdAt;
     }
 
-    // 每1秒轮询一次
-    pollingIntervalRef.current = setInterval(pollNewMessages, 1000);
+    // 优化：降低轮询频率从1秒到2秒
+    pollingIntervalRef.current = setInterval(pollNewMessages, 2000);
   };
 
   // 停止消息轮询
@@ -337,12 +372,12 @@ export default function Messages() {
     }
   };
 
-  // 启动会话列表轮询
+  // 启动会话列表轮询 - 优化：降低频率
   const startConversationPolling = () => {
     stopConversationPolling();
 
     lastConversationUpdateRef.current = new Date().toISOString();
-    conversationPollingRef.current = setInterval(pollConversationsUpdate, 2000);
+    conversationPollingRef.current = setInterval(pollConversationsUpdate, 3000); // 从2秒改为3秒
   };
 
   // 停止会话列表轮询
@@ -527,29 +562,39 @@ export default function Messages() {
           <button
             onClick={handleToggleBlock}
             className={isBlocked ? "unblock-btn" : "block-btn"}
-            title={isBlocked ? "取消拉黑" : "拉黑用户"}
+            title={isBlocked ? "点击取消拉黑" : "点击拉黑该用户"}
           >
-            {isBlocked ? "🔓" : "🚫"}
+            {isBlocked ? "取消拉黑" : "拉黑"}
           </button>
         </div>
 
         {(isBlocked || isBlockedByOther) && (
           <div className="block-notice">
-            {isBlocked && <p>⚠️ 您已拉黑该用户</p>}
-            {isBlockedByOther && <p>⚠️ 对方已将您拉黑</p>}
+            {isBlocked && (
+              <div className="block-notice-item">
+                <p className="block-notice-title">⚠️ 您已拉黑该用户</p>
+                <p className="block-notice-desc">双方将无法互相发送消息，点击右上角"取消拉黑"按钮可恢复</p>
+              </div>
+            )}
+            {isBlockedByOther && (
+              <div className="block-notice-item">
+                <p className="block-notice-title">⚠️ 对方已将您拉黑</p>
+                <p className="block-notice-desc">您暂时无法给对方发送消息</p>
+              </div>
+            )}
           </div>
         )}
 
         <div className="messages-container">
           {loading ? (
             <div className="loading">加载中...</div>
-          ) : messages.length === 0 ? (
+          ) : renderedMessages.length === 0 ? (
             <div className="no-messages">暂无消息，开始聊天吧</div>
           ) : (
-            messages.map((msg) => (
+            renderedMessages.map((msg) => (
               <div
                 key={msg._id}
-                className={`message ${msg.sender._id === selectedConversation.otherUser._id ? "other" : "own"}`}
+                className={`message ${msg.isOwn ? "own" : "other"}`}
               >
                 <div className="message-bubble">
                   {msg.messageType === "text" ? (
@@ -559,6 +604,7 @@ export default function Messages() {
                       src={msg.imageUrl}
                       alt="图片消息"
                       className="message-image"
+                      loading="lazy"
                       onClick={() => openImagePreview(msg.imageUrl)}
                       onError={(e) => {
                         e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23ddd' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3E加载失败%3C/text%3E%3C/svg%3E";
@@ -567,7 +613,7 @@ export default function Messages() {
                   )}
                   <div className="message-meta">
                     <span className="message-time">{formatTime(msg.createdAt)}</span>
-                    {msg.sender._id !== selectedConversation.otherUser._id && msg.isRead && (
+                    {msg.isOwn && msg.isRead && (
                       <span className="read-status" title="已读">✓✓</span>
                     )}
                   </div>
@@ -660,7 +706,7 @@ export default function Messages() {
     <div className="messages-module">
       <div className="messages-title">
         <h3>私信</h3>
-        <button className="new-message-btn" onClick={() => setShowNewChat(true)}>➕</button>
+        <button className="new-message-btn" onClick={() => setShowNewChat(true)} title="发起新会话"></button>
       </div>
 
       <div className="conversations-list">
@@ -683,6 +729,9 @@ export default function Messages() {
               <div className="conv-info">
                 <div className="conv-name">
                   {conv.otherUser?.name}
+                  {conv.unreadCount > 0 && (
+                    <span className="unread-badge-inline">{conv.unreadCount > 99 ? '99+' : conv.unreadCount}</span>
+                  )}
                   {conv.isBlocked && <span className="blocked-badge">已拉黑</span>}
                   {conv.isBlockedByOther && <span className="blocked-badge">被拉黑</span>}
                 </div>
@@ -692,9 +741,6 @@ export default function Messages() {
                     : conv.lastMessage?.content || "暂无消息"}
                 </div>
               </div>
-              {conv.unreadCount > 0 && (
-                <span className="unread-badge">{conv.unreadCount}</span>
-              )}
             </div>
           ))
         )}

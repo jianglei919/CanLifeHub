@@ -119,12 +119,42 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
+/* 未读消息徽章 - 内联样式 */
+.tab-item .unread-badge {
+  position: relative;
+  top: auto;
+  right: auto;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  min-width: 20px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(239, 68, 68, 0.3);
+  margin-left: 4px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
 .user-section {
   padding: 0 20px;
   border-left: 1px solid #e5e7eb;
   height: 100%;
   display: flex;
   align-items: center;
+  gap: 12px;
   min-width: 150px;
 }
 
@@ -132,6 +162,28 @@
   color: #64748b;
   font-weight: 500;
   font-size: 14px;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 16px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+  transform: translateY(-1px);
 }
 
 /* ===== Main Container ===== */

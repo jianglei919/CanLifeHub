@@ -317,6 +317,23 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// ===================== 退出登录接口 /logout =====================
+const logout = (req, res) => {
+  try {
+    // 清除 Cookie 中的 token
+    res.clearCookie('token', {
+      httpOnly: true,
+      sameSite: 'strict',
+      path: '/'
+    });
+
+    return res.json({ ok: true, message: '退出登录成功' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    return res.status(500).json({ error: '退出登录失败' });
+  }
+};
+
 module.exports = {             //把 test 函数导出，让其他文件可以使用
     test,
     registerUser,
@@ -326,4 +343,5 @@ module.exports = {             //把 test 函数导出，让其他文件可以�
     resendVerification,
     forgotPassword,
     resetPassword,
+    logout,
 }

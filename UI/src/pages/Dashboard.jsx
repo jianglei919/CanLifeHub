@@ -1,6 +1,9 @@
 // UI/src/pages/Dashboard.jsx
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
+import { authApi, chatApi } from "../api/http";
+import toast from "react-hot-toast";
 import PostList from "../components/PostList";
 import CreatePost from "../components/CreatePost";
 import UserModule from "../components/UserModule";
@@ -9,9 +12,59 @@ import Messages from "../components/Messages";
 import "../styles/Dashboard.css";
 
 export default function Dashboard() {
-  const { user } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("feed");
   const [feedType, setFeedType] = useState("all");
+  const [totalUnreadCount, setTotalUnreadCount] = useState(0);
+  const unreadPollingRef = useRef(null);
+
+  // 获取未读消息总数
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await chatApi.getConversations();
+      if (response.data.ok) {
+        const total = response.data.conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0);
+        setTotalUnreadCount(total);
+      }
+    } catch (error) {
+      console.error("获取未读消息数失败:", error);
+    }
+  };
+
+  // 启动未读消息轮询 - 优化：降低轮询频率
+  useEffect(() => {
+    fetchUnreadCount(); // 立即获取一次
+    unreadPollingRef.current = setInterval(fetchUnreadCount, 5000); // 从3秒改为5秒
+
+    return () => {
+      if (unreadPollingRef.current) {
+        clearInterval(unreadPollingRef.current);
+      }
+    };
+  }, []);
+
+  // 退出登录
+  const handleLogout = async () => {
+    // 确认对话框
+    const confirmed = window.confirm(
+      "确定要退出登录吗？\n\n退出后需要重新登录才能访问系统。"
+    );
+
+    if (!confirmed) {
+      return; // 用户取消退出
+    }
+
+    try {
+      await authApi.logout();
+      setUser(null);
+      toast.success("已退出登录");
+      navigate("/login");
+    } catch (err) {
+      console.error("退出登录失败:", err);
+      toast.error("退出登录失败");
+    }
+  };
 
   return (
     <div className="dashboard-container">
@@ -34,6 +87,9 @@ export default function Dashboard() {
               onClick={() => setActiveTab("messages")}
             >
               💬 私信
+              {totalUnreadCount > 0 && (
+                <span className="unread-badge">{totalUnreadCount > 99 ? '99+' : totalUnreadCount}</span>
+              )}
             </button>
             <button
               className={`tab-item ${activeTab === "profile" ? "active" : ""}`}
@@ -45,6 +101,9 @@ export default function Dashboard() {
 
           <div className="user-section">
             <span className="greeting">{user?.name || "用户"}</span>
+            <button className="logout-btn" onClick={handleLogout} title="退出登录">
+              退出
+            </button>
           </div>
         </div>
       </header>

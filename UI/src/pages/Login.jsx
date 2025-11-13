@@ -1,11 +1,13 @@
 // UI/src/pages/Login.jsx
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { toast } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../api/http";
+import { UserContext } from "../../context/userContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { setUser } = useContext(UserContext);
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -22,10 +24,19 @@ export default function Login() {
         toast.error(res.error);
       } else {
         setData({ email: "", password: "" });
-        toast.success("登录成功");
-        navigate("/dashboard");
+        // 登录成功后立即获取用户信息并更新Context
+        try {
+          const { data: profile } = await authApi.profile();
+          setUser(profile);
+          toast.success("登录成功");
+          navigate("/dashboard");
+        } catch (err) {
+          console.error("获取用户信息失败:", err);
+          toast.error("获取用户信息失败");
+        }
       }
-    } catch (error) {
+    } catch (err) {
+      console.error("登录失败:", err);
       toast.error("登录失败，请稍后重试");
     }
   };

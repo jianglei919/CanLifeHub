@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 
 // 路由
 const authRoutes = require('./routes/authRoutes'); // 内部路由应写成 /register /login 这种相对路径
+const chatRoutes = require('./routes/chatRoutes'); // 聊天路由
 //todo: 新增路由放在这里！！！！
 
 const app = express();
@@ -13,6 +14,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+/** 静态文件服务（用于访问上传的图片） */
+app.use('/uploads', express.static('uploads'));
 
 /** CORS（开发期：前端通过 Vite 代理即可；若直连也能工作） */
 const allowList = (process.env.CORS_ORIGIN || 'http://localhost:5173')
@@ -25,6 +29,7 @@ app.get('/healthz', (req, res) => res.status(200).send('ok'));
 
 /** 业务路由（统一前缀） */
 app.use('/api/auth', authRoutes);
+app.use('/api/chat', chatRoutes);
 //todo: 新增接口均以api开头放在这里！！！！
 
 /** 404 */

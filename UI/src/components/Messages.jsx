@@ -1,124 +1,703 @@
-import { useState } from "react";
-
-const mockConversations = [
-  {
-    id: 1,
-    name: "张三",
-    avatar: "👨",
-    lastMessage: "好的，周末见",
-    unread: 0,
-    messages: [
-      { id: 1, sender: "张三", text: "你好，最近怎么样？", time: "10:30" },
-      { id: 2, sender: "You", text: "不错啊，你呢？", time: "10:31" },
-      { id: 3, sender: "张三", text: "我也不错，周末要不要一起吃饭？", time: "10:32" },
-      { id: 4, sender: "You", text: "可以啊，什么时间？", time: "10:33" },
-      { id: 5, sender: "张三", text: "好的，周末见", time: "10:34" },
-    ],
-  },
-  {
-    id: 2,
-    name: "李四",
-    avatar: "👩",
-    lastMessage: "谢谢你的建议",
-    unread: 2,
-    messages: [
-      { id: 1, sender: "李四", text: "请问有没有好的房源推荐？", time: "14:20" },
-      { id: 2, sender: "You", text: "有的，我给你发一些链接", time: "14:21" },
-      { id: 3, sender: "李四", text: "谢谢你的建议", time: "14:22" },
-    ],
-  },
-];
+import { useState, useEffect, useRef } from "react";
+import { chatApi } from "../api/http";
+import toast from "react-hot-toast";
+import "../styles/Messages.css";
 
 export default function Messages() {
-  const [conversations, setConversations] = useState(mockConversations);
+  const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
   const [showMessages, setShowMessages] = useState(false);
+  const [showNewChat, setShowNewChat] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const fileInputRef = useRef(null);
+  const messagesEndRef = useRef(null);
+  const pollingIntervalRef = useRef(null);
+  const conversationPollingRef = useRef(null);
+  const readStatusPollingRef = useRef(null);
+  const lastMessageTimeRef = useRef(null);
+  const lastConversationUpdateRef = useRef(null);
 
-  const handleSendMessage = () => {
-    if (messageInput.trim() && selectedConversation) {
-      const newMessage = {
-        id: selectedConversation.messages.length + 1,
-        sender: "You",
-        text: messageInput,
-        time: new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }),
-      };
-      
-      const updatedConversations = conversations.map((conv) =>
-        conv.id === selectedConversation.id
-          ? { ...conv, messages: [...conv.messages, newMessage], lastMessage: messageInput }
-          : conv
-      );
-      
-      setConversations(updatedConversations);
-      setSelectedConversation({
-        ...selectedConversation,
-        messages: [...selectedConversation.messages, newMessage],
-      });
-      setMessageInput("");
+  // Emoji列表
+  const emojis = [
+    "😀", "😃", "😄", "😁", "😆", "😅", "🤣", "😂",
+    "🙂", "🙃", "😉", "😊", "😇", "🥰", "😍", "🤩",
+    "😘", "😗", "😚", "😙", "😋", "😛", "😜", "🤪",
+    "😝", "🤑", "🤗", "🤭", "🤫", "🤔", "🤐", "🤨",
+    "😐", "😑", "😶", "😏", "😒", "🙄", "😬", "🤥",
+    "😌", "😔", "😪", "🤤", "😴", "😷", "🤒", "🤕",
+    "🤢", "🤮", "🤧", "🥵", "🥶", "😵", "🤯", "🤠",
+    "🥳", "😎", "🤓", "🧐", "😕", "😟", "🙁", "😮",
+    "😯", "😲", "😳", "🥺", "😦", "😧", "😨", "😰",
+    "😥", "😢", "😭", "😱", "😖", "😣", "😞", "😓",
+    "👍", "👎", "👌", "✌️", "🤞", "🤟", "🤘", "🤙",
+    "👏", "🙌", "👐", "🤲", "🙏", "💪", "❤️", "🧡",
+    "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔",
+    "❤️‍🔥", "❤️‍🩹", "💕", "💞", "💓", "💗", "💖", "💘",
+    "💝", "💟", "☮️", "✝️", "☪️", "🕉️", "☸️", "✡️"
+  ];
+
+  // 加载会话列表
+  const loadConversations = async () => {
+    try {
+      const response = await chatApi.getConversations();
+      if (response.data.ok) {
+        setConversations(response.data.conversations);
+      }
+    } catch (error) {
+      console.error("加载会话列表失败:", error);
+      toast.error(error.message || "加载会话列表失败");
     }
   };
 
-  if (showMessages && selectedConversation) {
+  // 加载消息
+  const loadMessages = async (conversationId) => {
+    try {
+      setLoading(true);
+      const response = await chatApi.getMessages(conversationId, { page: 1, limit: 50 });
+      if (response.data.ok) {
+        setMessages(response.data.messages);
+        // 标记为已读
+        await chatApi.markAsRead(conversationId);
+        // 更新会话列表中的未读计数
+        await loadConversations();
+      }
+    } catch (error) {
+      console.error("加载消息失败:", error);
+      toast.error(error.message || "加载消息失败");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 发送文本消息
+  const handleSendMessage = async () => {
+    if (messageInput.trim() && selectedConversation) {
+      // 检查是否被拉黑
+      if (selectedConversation.isBlockedByOther) {
+        toast.error("对方已将您拉黑，无法发送消息");
+        return;
+      }
+      if (selectedConversation.isBlocked) {
+        toast.error("您已拉黑对方，无法发送消息");
+        return;
+      }
+
+      try {
+        const response = await chatApi.sendMessage(selectedConversation._id, {
+          messageType: "text",
+          content: messageInput
+        });
+
+        if (response.data.ok) {
+          setMessages([...messages, response.data.message]);
+          setMessageInput("");
+          // 更新会话列表
+          await loadConversations();
+          // 滚动到底部
+          scrollToBottom();
+        }
+      } catch (error) {
+        console.error("发送消息失败:", error);
+        toast.error(error.message || "发送消息失败");
+      }
+    }
+  };
+
+  // 处理图片上传
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 检查是否被拉黑
+    if (selectedConversation.isBlockedByOther) {
+      toast.error("对方已将您拉黑，无法发送消息");
+      return;
+    }
+    if (selectedConversation.isBlocked) {
+      toast.error("您已拉黑对方，无法发送消息");
+      return;
+    }
+
+    // 检查文件类型
+    if (!file.type.startsWith("image/")) {
+      toast.error("请选择图片文件");
+      return;
+    }
+
+    // 检查文件大小（5MB）
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("图片大小不能超过5MB");
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      // 转换图片为Base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          const base64String = reader.result;
+
+          // 发送Base64图片消息
+          const response = await chatApi.sendMessage(selectedConversation._id, {
+            messageType: "image",
+            imageUrl: base64String
+          });
+
+          if (response.data.ok) {
+            setMessages([...messages, response.data.message]);
+            await loadConversations();
+            scrollToBottom();
+            toast.success("图片发送成功");
+          }
+        } catch (error) {
+          console.error("发送图片失败:", error);
+          toast.error(error.message || "发送图片失败");
+        } finally {
+          setUploading(false);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        }
+      };
+
+      reader.onerror = () => {
+        toast.error("图片读取失败");
+        setUploading(false);
+      };
+
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error("处理图片失败:", error);
+      toast.error(error.message || "处理图片失败");
+      setUploading(false);
+    }
+  };
+
+  // 拉黑/取消拉黑
+  const handleToggleBlock = async () => {
+    if (!selectedConversation) return;
+
+    try {
+      const response = await chatApi.toggleBlock(selectedConversation._id);
+      if (response.data.ok) {
+        toast.success(response.data.message);
+        // 更新当前会话状态
+        setSelectedConversation({
+          ...selectedConversation,
+          isBlocked: response.data.isBlocked
+        });
+        // 更新会话列表
+        await loadConversations();
+      }
+    } catch (error) {
+      console.error("操作失败:", error);
+      toast.error(error.message || "操作失败");
+    }
+  };
+
+  // 搜索用户
+  const handleSearchUsers = async (query) => {
+    setSearchQuery(query);
+    if (query.trim().length === 0) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      const response = await chatApi.searchUsers(query);
+      if (response.data.ok) {
+        setSearchResults(response.data.users);
+      }
+    } catch (error) {
+      console.error("搜索用户失败:", error);
+      toast.error(error.message || "搜索用户失败");
+    }
+  };
+
+  // 创建新会话
+  const handleStartNewChat = async (userId) => {
+    try {
+      const response = await chatApi.getOrCreateConversation(userId);
+      if (response.data.ok) {
+        const conv = response.data.conversation;
+        const otherUser = conv.participants.find(p => p._id !== userId);
+
+        setSelectedConversation({
+          _id: conv._id,
+          otherUser: otherUser || conv.participants[0],
+          isBlocked: conv.isBlocked,
+          isBlockedByOther: conv.isBlockedByOther
+        });
+
+        await loadMessages(conv._id);
+        setShowNewChat(false);
+        setShowMessages(true);
+        setSearchQuery("");
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error("创建会话失败:", error);
+      toast.error(error.message || "创建会话失败");
+    }
+  };
+
+  // 格式化时间
+  const formatTime = (date) => {
+    const d = new Date(date);
+    return d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  // 滚动到底部
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // 轮询获取新消息
+  const pollNewMessages = async () => {
+    if (!selectedConversation || !showMessages) return;
+
+    try {
+      const since = lastMessageTimeRef.current;
+      const response = await chatApi.getNewMessages(selectedConversation._id, since);
+
+      if (response.data.ok && response.data.messages.length > 0) {
+        const newMessages = response.data.messages;
+
+        // 添加新消息到列表
+        setMessages(prevMessages => {
+          // 去重：检查是否已存在
+          const existingIds = new Set(prevMessages.map(m => m._id));
+          const uniqueNewMessages = newMessages.filter(m => !existingIds.has(m._id));
+          return [...prevMessages, ...uniqueNewMessages];
+        });
+
+        // 更新最后消息时间
+        const lastMsg = newMessages[newMessages.length - 1];
+        lastMessageTimeRef.current = lastMsg.createdAt;
+
+        // 更新会话列表
+        await loadConversations();
+
+        // 滚动到底部
+        setTimeout(() => scrollToBottom(), 100);
+      }
+    } catch (error) {
+      // 静默失败，不显示错误
+      console.error("轮询新消息失败:", error);
+    }
+  };
+
+  // 轮询会话列表更新
+  const pollConversationsUpdate = async () => {
+    if (showMessages || showNewChat) return; // 只在会话列表页面轮询
+
+    try {
+      const since = lastConversationUpdateRef.current;
+      const response = await chatApi.getConversationsUpdate(since);
+
+      if (response.data.ok && response.data.conversations.length > 0) {
+        // 更新会话列表
+        await loadConversations();
+
+        // 更新最后更新时间
+        lastConversationUpdateRef.current = new Date().toISOString();
+      }
+    } catch (error) {
+      console.error("轮询会话更新失败:", error);
+    }
+  };
+
+  // 启动消息轮询
+  const startMessagePolling = () => {
+    stopMessagePolling(); // 先停止之前的轮询
+
+    // 设置最后消息时间为当前最新消息的时间
+    if (messages.length > 0) {
+      lastMessageTimeRef.current = messages[messages.length - 1].createdAt;
+    }
+
+    // 每1秒轮询一次
+    pollingIntervalRef.current = setInterval(pollNewMessages, 1000);
+  };
+
+  // 停止消息轮询
+  const stopMessagePolling = () => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+  };
+
+  // 启动会话列表轮询
+  const startConversationPolling = () => {
+    stopConversationPolling();
+
+    lastConversationUpdateRef.current = new Date().toISOString();
+    conversationPollingRef.current = setInterval(pollConversationsUpdate, 2000);
+  };
+
+  // 停止会话列表轮询
+  const stopConversationPolling = () => {
+    if (conversationPollingRef.current) {
+      clearInterval(conversationPollingRef.current);
+      conversationPollingRef.current = null;
+    }
+  };
+
+  // 轮询已读状态更新
+  const pollReadStatusUpdates = async () => {
+    if (!selectedConversation || !showMessages || messages.length === 0) return;
+
+    try {
+      // 获取当前用户发送的未读消息ID
+      const myUnreadMessages = messages.filter(msg =>
+        msg.sender._id !== selectedConversation.otherUser._id && !msg.isRead
+      );
+
+      if (myUnreadMessages.length === 0) return; // 没有未读消息，不需要轮询
+
+      const messageIds = myUnreadMessages.map(msg => msg._id);
+      const response = await chatApi.getReadStatusUpdates(selectedConversation._id, messageIds);
+
+      if (response.data.ok && response.data.updates.length > 0) {
+        // 更新消息的已读状态
+        setMessages(prevMessages => {
+          return prevMessages.map(msg => {
+            const update = response.data.updates.find(u => u.messageId === msg._id);
+            if (update && update.isRead && !msg.isRead) {
+              // 消息状态从未读变为已读
+              return {
+                ...msg,
+                isRead: update.isRead,
+                readAt: update.readAt
+              };
+            }
+            return msg;
+          });
+        });
+      }
+    } catch (error) {
+      console.error("轮询已读状态失败:", error);
+    }
+  };
+
+  // 启动已读状态轮询
+  const startReadStatusPolling = () => {
+    stopReadStatusPolling();
+    // 每2秒轮询一次已读状态
+    readStatusPollingRef.current = setInterval(pollReadStatusUpdates, 2000);
+  };
+
+  // 停止已读状态轮询
+  const stopReadStatusPolling = () => {
+    if (readStatusPollingRef.current) {
+      clearInterval(readStatusPollingRef.current);
+      readStatusPollingRef.current = null;
+    }
+  };
+
+  // 插入Emoji
+  const insertEmoji = (emoji) => {
+    setMessageInput(prev => prev + emoji);
+    setShowEmojiPicker(false);
+  };
+
+  // 打开图片预览
+  const openImagePreview = (imageUrl) => {
+    setPreviewImage(imageUrl);
+  };
+
+  // 关闭图片预览
+  const closeImagePreview = () => {
+    setPreviewImage(null);
+  };
+
+  // 初始加载
+  useEffect(() => {
+    loadConversations();
+    startConversationPolling();
+
+    // 组件卸载时清理
+    return () => {
+      stopMessagePolling();
+      stopConversationPolling();
+      stopReadStatusPolling();
+    };
+  }, []);
+
+  // 消息更新时滚动到底部
+  useEffect(() => {
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [messages]);
+
+  // 当进入聊天界面时启动消息轮询，离开时停止
+  useEffect(() => {
+    if (showMessages && selectedConversation) {
+      startMessagePolling();
+      startReadStatusPolling(); // 同时启动已读状态轮询
+    } else {
+      stopMessagePolling();
+      stopReadStatusPolling();
+    }
+
+    return () => {
+      stopMessagePolling();
+      stopReadStatusPolling();
+    };
+  }, [showMessages, selectedConversation, messages]);
+
+  // 当显示会话列表时启动会话轮询
+  useEffect(() => {
+    if (!showMessages && !showNewChat) {
+      startConversationPolling();
+    } else {
+      stopConversationPolling();
+    }
+
+    return () => {
+      stopConversationPolling();
+    };
+  }, [showMessages, showNewChat]);
+
+  // 新会话对话框
+  if (showNewChat) {
     return (
-      <div className="messages-view">
-        <div className="messages-header">
-          <button onClick={() => setShowMessages(false)}>返回</button>
-          <h3>{selectedConversation.name}</h3>
+      <div className="messages-module">
+        <div className="messages-title">
+          <button onClick={() => { setShowNewChat(false); setSearchQuery(""); setSearchResults([]); }}>
+            ← 返回
+          </button>
+          <h3>新建私信</h3>
         </div>
 
-        <div className="messages-container">
-          {selectedConversation.messages.map((msg) => (
-            <div key={msg.id} className={`message ${msg.sender === "You" ? "own" : "other"}`}>
-              <div className="message-bubble">
-                <p>{msg.text}</p>
-                <span className="message-time">{msg.time}</span>
+        <div className="search-users">
+          <input
+            type="text"
+            placeholder="搜索用户名或邮箱..."
+            value={searchQuery}
+            onChange={(e) => handleSearchUsers(e.target.value)}
+            className="search-input"
+          />
+        </div>
+
+        <div className="search-results">
+          {searchResults.length === 0 && searchQuery.trim().length > 0 && (
+            <div className="no-results">未找到用户</div>
+          )}
+          {searchResults.map((user) => (
+            <div
+              key={user._id}
+              className="user-item"
+              onClick={() => handleStartNewChat(user._id)}
+            >
+              <span className="user-avatar">👤</span>
+              <div className="user-info">
+                <div className="user-name">{user.name}</div>
+                <div className="user-email">{user.email}</div>
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="message-input-area">
-          <input
-            type="text"
-            placeholder="输入消息..."
-            value={messageInput}
-            onChange={(e) => setMessageInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-            className="message-input"
-          />
-          <button onClick={handleSendMessage} className="send-btn">发送</button>
-          <button className="image-btn">📸</button>
         </div>
       </div>
     );
   }
 
+  // 消息详情视图
+  if (showMessages && selectedConversation) {
+    const isBlocked = selectedConversation.isBlocked;
+    const isBlockedByOther = selectedConversation.isBlockedByOther;
+    const canSendMessage = !isBlocked && !isBlockedByOther;
+
+    return (
+      <div className="messages-view">
+        <div className="messages-header">
+          <button onClick={() => { setShowMessages(false); setMessages([]); }}>返回</button>
+          <h3>{selectedConversation.otherUser?.name}</h3>
+          <button
+            onClick={handleToggleBlock}
+            className={isBlocked ? "unblock-btn" : "block-btn"}
+            title={isBlocked ? "取消拉黑" : "拉黑用户"}
+          >
+            {isBlocked ? "🔓" : "🚫"}
+          </button>
+        </div>
+
+        {(isBlocked || isBlockedByOther) && (
+          <div className="block-notice">
+            {isBlocked && <p>⚠️ 您已拉黑该用户</p>}
+            {isBlockedByOther && <p>⚠️ 对方已将您拉黑</p>}
+          </div>
+        )}
+
+        <div className="messages-container">
+          {loading ? (
+            <div className="loading">加载中...</div>
+          ) : messages.length === 0 ? (
+            <div className="no-messages">暂无消息，开始聊天吧</div>
+          ) : (
+            messages.map((msg) => (
+              <div
+                key={msg._id}
+                className={`message ${msg.sender._id === selectedConversation.otherUser._id ? "other" : "own"}`}
+              >
+                <div className="message-bubble">
+                  {msg.messageType === "text" ? (
+                    <p>{msg.content}</p>
+                  ) : (
+                    <img
+                      src={msg.imageUrl}
+                      alt="图片消息"
+                      className="message-image"
+                      onClick={() => openImagePreview(msg.imageUrl)}
+                      onError={(e) => {
+                        e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23ddd' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3E加载失败%3C/text%3E%3C/svg%3E";
+                      }}
+                    />
+                  )}
+                  <div className="message-meta">
+                    <span className="message-time">{formatTime(msg.createdAt)}</span>
+                    {msg.sender._id !== selectedConversation.otherUser._id && msg.isRead && (
+                      <span className="read-status" title="已读">✓✓</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div className="message-input-area">
+          <button
+            className="emoji-btn"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            disabled={!canSendMessage}
+            title="选择表情"
+          />
+          <input
+            type="text"
+            placeholder={canSendMessage ? "输入消息..." : "无法发送消息"}
+            value={messageInput}
+            onChange={(e) => setMessageInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && canSendMessage && handleSendMessage()}
+            className="message-input"
+            disabled={!canSendMessage}
+          />
+          <button
+            onClick={handleSendMessage}
+            className="send-btn"
+            disabled={!canSendMessage || !messageInput.trim()}
+          >
+            发送
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            style={{ display: "none" }}
+          />
+          <button
+            className="image-btn"
+            onClick={() => canSendMessage && fileInputRef.current?.click()}
+            disabled={!canSendMessage || uploading}
+            title="发送图片"
+          />
+
+          {/* Emoji选择器 */}
+          {showEmojiPicker && (
+            <div className="emoji-picker">
+              <div className="emoji-picker-header">
+                <span className="emoji-picker-title">选择表情</span>
+                <button
+                  className="emoji-picker-close"
+                  onClick={() => setShowEmojiPicker(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="emoji-grid">
+                {emojis.map((emoji, index) => (
+                  <button
+                    key={index}
+                    className="emoji-item"
+                    onClick={() => insertEmoji(emoji)}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 图片预览模态框 */}
+        {previewImage && (
+          <div className="image-preview-modal" onClick={closeImagePreview}>
+            <button className="image-preview-close" onClick={closeImagePreview}>
+              ✕
+            </button>
+            <img src={previewImage} alt="预览" onClick={(e) => e.stopPropagation()} />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // 会话列表视图
   return (
     <div className="messages-module">
       <div className="messages-title">
         <h3>私信</h3>
-        <button className="new-message-btn">➕</button>
+        <button className="new-message-btn" onClick={() => setShowNewChat(true)}>➕</button>
       </div>
 
       <div className="conversations-list">
-        {conversations.map((conv) => (
-          <div
-            key={conv.id}
-            className="conversation-item"
-            onClick={() => {
-              setSelectedConversation(conv);
-              setShowMessages(true);
-            }}
-          >
-            <span className="conv-avatar">{conv.avatar}</span>
-            <div className="conv-info">
-              <div className="conv-name">{conv.name}</div>
-              <div className="conv-message">{conv.lastMessage}</div>
-            </div>
-            {conv.unread > 0 && <span className="unread-badge">{conv.unread}</span>}
+        {conversations.length === 0 ? (
+          <div className="no-conversations">
+            暂无私信，点击右上角 ➕ 开始新对话
           </div>
-        ))}
+        ) : (
+          conversations.map((conv) => (
+            <div
+              key={conv._id}
+              className="conversation-item"
+              onClick={() => {
+                setSelectedConversation(conv);
+                loadMessages(conv._id);
+                setShowMessages(true);
+              }}
+            >
+              <span className="conv-avatar">👤</span>
+              <div className="conv-info">
+                <div className="conv-name">
+                  {conv.otherUser?.name}
+                  {conv.isBlocked && <span className="blocked-badge">已拉黑</span>}
+                  {conv.isBlockedByOther && <span className="blocked-badge">被拉黑</span>}
+                </div>
+                <div className="conv-message">
+                  {conv.lastMessage?.messageType === "image"
+                    ? "[图片]"
+                    : conv.lastMessage?.content || "暂无消息"}
+                </div>
+              </div>
+              {conv.unreadCount > 0 && (
+                <span className="unread-badge">{conv.unreadCount}</span>
+              )}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

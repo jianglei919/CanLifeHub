@@ -18,9 +18,10 @@ const http = axios.create({
   },
 });
 
-// 统一响应拦截：你的后端把错误放在 data.error，且多为 200 状态
+// 统一响应拦截：处理后端错误信息
 http.interceptors.response.use(
   (resp) => {
+    // 处理200状态码但是包含error字段的情况
     const data = resp?.data;
     if (data && typeof data === 'object' && 'error' in data && data.error) {
       const err = new Error(data.error);
@@ -29,7 +30,18 @@ http.interceptors.response.use(
     }
     return resp;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    // 处理非200状态码的错误（如403、404、500等）
+    if (error.response && error.response.data) {
+      // 如果后端返回了错误信息，使用后端的错误信息
+      if (error.response.data.error) {
+        error.message = error.response.data.error;
+      } else if (typeof error.response.data === 'string') {
+        error.message = error.response.data;
+      }
+    }
+    return Promise.reject(error);
+  }
 );
 
 // 常用 API：与 app.js 中 app.use('/api/auth', authRoutes) 对齐
@@ -43,6 +55,50 @@ export const authApi = {
   forgotPassword: (payload) => http.post('/auth/forgot-password', payload),
   resetPassword: (payload) => http.post('/auth/reset-password', payload),
   // logout: () => http.post('/auth/logout'),     // 后端未实现，若需要请在 API 端补一条路由
+};
+
+// 聊天 API
+export const chatApi = {
+  // 获取会话列表
+  getConversations: () => http.get('/chat/conversations'),
+
+  // 获取或创建与特定用户的会话
+  getOrCreateConversation: (otherUserId) => http.get(`/chat/conversations/${otherUserId}`),
+
+  // 获取会话中的消息
+  getMessages: (conversationId, params) => http.get(`/chat/conversations/${conversationId}/messages`, { params }),
+
+  // 发送消息
+  sendMessage: (conversationId, payload) => http.post(`/chat/conversations/${conversationId}/messages`, payload),
+
+  // 标记消息为已读
+  markAsRead: (conversationId) => http.put(`/chat/conversations/${conversationId}/read`),
+
+  // 拉黑/取消拉黑
+  toggleBlock: (conversationId) => http.put(`/chat/conversations/${conversationId}/block`),
+
+  // 搜索用户
+  searchUsers: (query) => http.get('/chat/users/search', { params: { query } }),
+
+  // 上传图片
+  uploadImage: (formData) => http.post('/chat/upload-image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+
+  // 轮询获取新消息
+  getNewMessages: (conversationId, since) => http.get(`/chat/conversations/${conversationId}/new-messages`, {
+    params: { since }
+  }),
+
+  // 轮询获取已读状态更新
+  getReadStatusUpdates: (conversationId, messageIds) => http.get(`/chat/conversations/${conversationId}/read-status`, {
+    params: { messageIds: messageIds.join(',') }
+  }),
+
+  // 轮询获取会话列表更新
+  getConversationsUpdate: (since) => http.get('/chat/conversations-update', {
+    params: { since }
+  })
 };
 //todo: 新增 API 放在这里！！！！
 

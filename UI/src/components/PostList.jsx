@@ -1,4 +1,5 @@
 import { useState } from "react";
+import CommentsBox from "./CommentsBox";
 
 const mockPosts = [
   {
@@ -55,6 +56,8 @@ const mockPosts = [
   },
 ];
 
+const TEST_POST_ID = import.meta.env.VITE_TEST_POST_ID || '64c1f0e9f7c5a4b123456789';
+
 export default function PostList({ feedType = "all" }) {
   const [posts] = useState(mockPosts);
   const [expandedComments, setExpandedComments] = useState({});
@@ -105,26 +108,16 @@ export default function PostList({ feedType = "all" }) {
             </div>
 
             <div className="post-actions">
-              <button className="post-action-btn">💬 评论</button>
+              <button className="post-action-btn" onClick={() => toggleComments(post.id)}>💬 评论</button>
+              {expandedComments[post.id] && (
+                <div className="post-comments-inline" style={{ marginTop: 8, width: '100%' }}>
+                  <CommentsBox targetType="post" targetId={post._id || TEST_POST_ID} />
+                </div>
+              )}
               <button className="post-action-btn">🔄 转发</button>
               <button className="post-action-btn">👍 赞</button>
             </div>
 
-            {expandedComments[post.id] && (
-              <div className="post-comments-section">
-                <h4>评论</h4>
-                {post.comments.map((comment) => (
-                  <div key={comment.id} className="comment-item">
-                    <span className="comment-avatar">{comment.avatar}</span>
-                    <div className="comment-info">
-                      <div className="comment-author">{comment.author}</div>
-                      <div className="comment-content">{comment.content}</div>
-                      <span className="comment-likes">👍 {comment.likes}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         ))
       )}

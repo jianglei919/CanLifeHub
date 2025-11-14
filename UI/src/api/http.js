@@ -101,6 +101,28 @@ export const chatApi = {
     params: { since }
   })
 };
+
+// 评论 API（与 /api/comments 对齐）
+export const commentsApi = {
+  // 获取某目标的顶级评论列表
+  // params: { targetType: 'post'|'comment', targetId, page?, pageSize?, sort? }
+  listByTarget: (params) => http.get('/comments', { params }),
+
+  // 获取某条评论的回复
+  // params: { page?, pageSize? }
+  listReplies: (commentId, params) => http.get(`/comments/${commentId}/replies`, { params }),
+
+  // 创建评论或回复
+  // payload: { targetType, targetId, parentId?, content, images? }
+  create: (payload) => http.post('/comments', payload),
+
+  // 编辑评论
+  update: (commentId, payload) => http.patch(`/comments/${commentId}`, payload),
+
+  // 删除评论（软删）
+  remove: (commentId) => http.delete(`/comments/${commentId}`),
+};
+
 //todo: 新增 API 放在这里！！！！
 
 // 便捷函数：直接返回 data

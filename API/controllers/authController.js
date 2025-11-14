@@ -78,6 +78,7 @@ const registerUser = async (req, res) => {
        // Step 5. 生成6位数字验证码
        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
        const expiry = Date.now() + 1000 * 60 * 10; // 10 分钟有效期
+       console.log('Generated verification code:', verificationCode);
 
        // Step 6. 创建并保存用户, 写入数据库（未验证状态）
        const user = await User.create({

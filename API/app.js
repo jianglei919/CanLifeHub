@@ -7,6 +7,11 @@ const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes'); // 内部路由应写成 /register /login 这种相对路径
 const chatRoutes = require('./routes/chatRoutes'); // 聊天路由
 const commentRoutes = require('./routes/commentRoutes'); // 评论路由
+// ==== 帖子 ===
+const postRoutes = require('./routes/postRoutes');
+const feedRoutes = require('./routes/feedRoutes');
+const reportRoutes = require('./routes/reportRoutes');
+// =============
 //todo: 新增路由放在这里！！！！
 
 const app = express();
@@ -32,6 +37,9 @@ app.get('/healthz', (req, res) => res.status(200).send('ok'));
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/comments', commentRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/feed', feedRoutes);
+app.use('/api/reports', reportRoutes);
 //todo: 新增接口均以api开头放在这里！！！！
 
 /** 404 */

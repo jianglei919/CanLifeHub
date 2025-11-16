@@ -9,6 +9,7 @@ import CreatePost from "../components/CreatePost";
 import UserModule from "../components/UserModule";
 import Advertisement from "../components/Advertisement";
 import Messages from "../components/Messages";
+import ChatbotWidget from "../components/ChatbotWidget";
 import "../styles/Dashboard.css";
 
 export default function Dashboard() {
@@ -32,17 +33,25 @@ export default function Dashboard() {
     }
   };
 
-  // 启动未读消息轮询 - 优化：降低轮询频率
+  // 启动未读消息轮询 - 优化：仅在消息页面时轮询
   useEffect(() => {
-    fetchUnreadCount(); // 立即获取一次
-    unreadPollingRef.current = setInterval(fetchUnreadCount, 5000); // 从3秒改为5秒
+    // 只在消息 tab 激活时才轮询
+    if (activeTab === 'messages') {
+      fetchUnreadCount(); // 立即获取一次
+      unreadPollingRef.current = setInterval(fetchUnreadCount, 10000); // 10秒轮询一次
+    } else {
+      // 切换到其他 tab 时清除轮询
+      if (unreadPollingRef.current) {
+        clearInterval(unreadPollingRef.current);
+      }
+    }
 
     return () => {
       if (unreadPollingRef.current) {
         clearInterval(unreadPollingRef.current);
       }
     };
-  }, []);
+  }, [activeTab]); // 依赖 activeTab
 
   // 退出登录
   const handleLogout = async () => {
@@ -155,6 +164,9 @@ export default function Dashboard() {
           </div>
         )}
       </main>
+
+      {/* AI 聊天助手 - 仅登录后可见 */}
+      {user && <ChatbotWidget />}
     </div>
   );
 }

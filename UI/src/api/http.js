@@ -124,6 +124,12 @@ export const commentsApi = {
 };
 
 //todo: 新增 API 放在这里！！！！
+export const postsApi = {
+  uploadMedia: (formData) => http.post('/posts/upload-media', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  create: (params) => http.post('/posts', params),
+};
 
 // 便捷函数：直接返回 data
 export async function $get(url, config) {

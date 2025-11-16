@@ -123,6 +123,12 @@ export const commentsApi = {
   remove: (commentId) => http.delete(`/comments/${commentId}`),
 };
 
+// AI Chatbot API
+export const chatbotApi = {
+  // 发送消息给 AI
+  sendMessage: (payload) => http.post('/chatbot/chat', payload),
+};
+
 //todo: 新增 API 放在这里！！！！
 export const postsApi = {
   uploadMedia: (formData) => http.post('/posts/upload-media', formData, {

@@ -61,13 +61,16 @@ function searchKnowledge(query) {
   });
 
   // 搜索加拿大信息
-  kb.canada_info.forEach(info => {
-    if (info.category.toLowerCase().includes(lowerQuery)) {
+  const canadaCategories = ['study', 'immigration', 'living', 'employment'];
+  canadaCategories.forEach(category => {
+    const info = kb.canada_info[category];
+    if (info && (info.category?.toLowerCase().includes(lowerQuery) || 
+        JSON.stringify(info).toLowerCase().includes(lowerQuery))) {
       results.push({
         type: '加拿大信息',
         category: info.category,
-        tips: info.tips,
-        relevance: calculateRelevance(lowerQuery, info.category + ' ' + info.tips.join(' '))
+        content: info,
+        relevance: calculateRelevance(lowerQuery, JSON.stringify(info))
       });
     }
   });
@@ -135,11 +138,11 @@ function buildEnhancedPrompt(userMessage, searchResults) {
       } else if (result.type === '常见问题') {
         prompt += `问题：${result.issue}\n   解决方案：${result.solution}`;
       } else if (result.type === '加拿大信息') {
-        prompt += `${result.category}：\n   ${result.tips.join('\n   ')}`;
+        prompt += `${result.category}相关信息（已为你检索到相关内容）`;
       }
     });
     
-    prompt += `\n\n【用户问题】\n${userMessage}\n\n请基于以上参考知识回答用户问题。如果参考知识中没有相关信息，可以使用你的通用知识回答。`;
+    prompt += `\n\n【用户问题】\n${userMessage}\n\n请基于以上参考知识回答用户问题。如果参考知识中没有相关信息，可以使用你的通用知识回答。回答要简洁明了。`;
   }
   
   return prompt;

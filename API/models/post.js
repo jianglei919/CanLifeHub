@@ -24,7 +24,7 @@ const postSchema = new Schema(
         // 可见性控制
         visibility: { 
             type: String, 
-            enum: ['public', 'followers', 'private', 'draft'], 
+            enum: ['public', 'followers', 'private'], 
             default: 'public' 
         },
 

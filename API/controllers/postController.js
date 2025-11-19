@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Post = require('../models/post');
+const PostTag = require('../models/postTag');
 const Media = require('../models/media');
 const Reaction = require('../models/reaction');
 // 假设您有 authMiddleware 注入 req.user 和 uploadMiddleware 处理文件
@@ -19,45 +20,109 @@ exports.create = async (req, res) => {
         const user = req.user;
         if (!user || !user.id) return res.status(401).json({ error: 'Unauthorized' });
 
-        const { type, title, content, visibility, tags, topics, poiId, mediaUrls } = req.body;
-        // 假设文件上传中间件（如 Multer）已处理文件，并通过 req.body 传入媒体文件信息
-
-        if (!type || !['image', 'video', 'text'].includes(type)) {
-            return res.status(400).json({ error: 'Invalid post type' });
-        }
-        if (type === 'text' && (!content || !content.trim())) {
-             return res.status(400).json({ error: 'Content is required for text posts' });
+        const { content, visibility, location, topics, mentions, coverIndex, mediaUrls } = req.body;
+        
+        // 验证必填字段
+        if (!content && (!mediaUrls || mediaUrls.length === 0)) {
+            return res.status(400).json({ error: '内容和媒体文件不能都为空' });
         }
 
+        // 确定帖子类型
+        let type = 'text';
+        if (mediaUrls && mediaUrls.length > 0) {
+            const hasVideo = mediaUrls.some(media => media.type === 'video');
+            type = hasVideo ? 'video' : 'image';
+        }
+
+        // 解析数组字段
+        const topicsArray = topics ? (topics) : [];
+        const mentionsArray = mentions ? (mentions) : [];
+        const coverIndexNum = coverIndex ? parseInt(coverIndex) : 0;
+        const mediaUrlsArray = mediaUrls || [];
+
+        // 创建帖子
         const newPost = await Post.create({
             authorId: user.id,
             type,
-            title: title || '',
+            title: '', // 前端没有标题字段
             content: content || '',
             visibility: visibility || 'public',
-            tags: tags || [],
-            topics: topics || [],
-            poiId: poiId || null,
+            status: 'active',
+            poiId: location,
+            createdAt: new Date()
         });
 
-        // 批量创建 Media 记录
-        if (mediaUrls && mediaUrls.length) {
-            const mediaDocs = mediaUrls.map(m => ({
-                postId: newPost._id,
-                url: m.url, // 假设这是上传后的 URL
-                type: m.type,
-                duration: m.duration,
-                cover: m.cover,
-                width: m.width,
-                height: m.height,
-            }));
+        // 处理媒体文件
+        if (mediaUrlsArray.length > 0) {
+            const mediaDocs = mediaUrlsArray.map((media, index) => {
+                const isCover = index === coverIndexNum;
+                
+                return {
+                    postId: newPost._id,
+                    url: media.url,
+                    type: media.type,
+                    cover: isCover,
+                    width: media.width || 0,
+                    height: media.height || 0,
+                    duration: media.duration || null,
+                    filename: media.filename,
+                    originalName: media.originalName,
+                    mimetype: media.mimetype,
+                    size: media.size
+                };
+            });
+            
             await Media.insertMany(mediaDocs);
         }
 
-        res.status(201).json(newPost);
+
+        // 处理位置信息
+        // if (location) {
+        //     // 这里需要根据位置名称查找或创建POI
+        //     // 暂时简单处理
+        //     await PostLocation.create({
+        //         postId: newPost._id,
+        //         poiId: null, // 实际项目中需要POI系统
+        //         locationName: location
+        //     });
+        // }
+
+        // 处理话题标签
+        if (topicsArray.length > 0) {
+            const topicDocs = topicsArray.map(topic => ({
+                postId: newPost._id,
+                topic: topic
+            }));
+            await PostTag.insertMany(topicDocs);
+        }
+
+        // 处理@用户
+        // if (mentionsArray.length > 0) {
+        //     // 这里需要根据用户名查找用户ID
+        //     // 暂时简单处理
+        //     const mentionDocs = mentionsArray.map(mention => ({
+        //         postId: newPost._id,
+        //         mentionedUser: mention // 实际项目中应该是用户ID
+        //     }));
+        //     await PostMention.insertMany(mentionDocs);
+        // }
+
+        // 返回完整的帖子数据（包含关联数据）
+        const populatedPost = await Post.findById(newPost._id)
+            .populate('authorId', 'username avatar')
+            .populate('poiId')
+            .populate('tags');
+
+        res.status(201).json({
+            success: true,
+            data: populatedPost
+        });
     } catch (e) {
         console.error('[posts#create]', e);
-        res.status(500).json({ error: e.message || 'Failed to create post' });
+        res.status(500).json({ 
+            success: false,
+            error: e.message || 'Failed to create post' 
+        });
     }
 };
 

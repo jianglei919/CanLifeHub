@@ -3,7 +3,7 @@ const router = express.Router();
 
 const ctrl = require('../controllers/postController');
 const { requireAuth } = require('../helpers/authMiddleware');
-// const uploadMiddleware = require('../helpers/uploadMiddleware'); // 暂时注释掉，避免模块找不到的错误
+const uploadPostMedia = require('../helpers/uploadPostMedia');
 
 // ===================================
 // 帖子 CRUD
@@ -44,6 +44,37 @@ router.post('/:id/react', requireAuth, ctrl.react);
 // 取消互动（需登录）
 // DELETE /api/posts/:id/react?type=like|favorite|share
 router.delete('/:id/react', requireAuth, ctrl.unreact);
+
+// routes/posts.js 或其他路由文件
+router.post('/upload-media', uploadPostMedia.array('media', 10), (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: '请选择要上传的媒体文件' });
+    }
+
+    // 处理多个文件，返回文件信息数组
+    const mediaFiles = req.files.map(file => {
+      const mediaType = file.mimetype.startsWith('image/') ? 'image' : 'video';
+      
+      return {
+        url: `/uploads/posts/${file.filename}`,
+        type: mediaType,
+        filename: file.filename,
+        originalName: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size
+      };
+    });
+
+    res.json({ 
+      ok: true, 
+      mediaFiles 
+    });
+  } catch (error) {
+    console.error('Upload media error:', error);
+    res.status(500).json({ error: '上传媒体文件失败' });
+  }
+});
 
 
 module.exports = router;

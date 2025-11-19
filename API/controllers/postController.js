@@ -20,7 +20,7 @@ exports.create = async (req, res) => {
         const user = req.user;
         if (!user || !user.id) return res.status(401).json({ error: 'Unauthorized' });
 
-        const { content, visibility, location, topics, mentions, coverIndex, mediaUrls } = req.body;
+        const { content, visibility, location, topics, mentions, coverIndex, mediaUrls, title } = req.body;
         
         // 验证必填字段
         if (!content && (!mediaUrls || mediaUrls.length === 0)) {
@@ -44,7 +44,7 @@ exports.create = async (req, res) => {
         const newPost = await Post.create({
             authorId: user.id,
             type,
-            title: '', // 前端没有标题字段
+            title: title, // 前端没有标题字段
             content: content || '',
             visibility: visibility || 'public',
             status: 'active',

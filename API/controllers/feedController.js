@@ -1,4 +1,5 @@
 const Post = require('../models/post');
+const Media = require('../models/media')
 // 假设您有 Follow 模型和辅助函数用于获取用户关注列表
 
 /** 辅助函数：将 page/pageSize 转换为 cursor/limit */
@@ -24,7 +25,7 @@ exports.followFeed = async (req, res) => {
             authorId: { $in: followedUserIds },
             status: 'active',
             visibility: { $in: ['public', 'followers'] }, // 仅公开或粉丝可见
-            createdAt: { $lt: new Date(cursor) } // 分页游标
+            ...(cursor && { createdAt: { $lt: new Date(cursor) } }) // 分页游标
         };
 
         const items = await Post.find(query)
@@ -33,10 +34,35 @@ exports.followFeed = async (req, res) => {
             .populate('authorId', 'name avatar')
             .lean();
 
-        const hasNext = items.length > limit;
-        const nextCursor = hasNext ? items[limit - 1].createdAt.toISOString() : null;
+        // 获取所有帖子的媒体文件
+        const postIds = items.map(item => item._id);
+        const mediaFiles = await Media.find({ 
+            postId: { $in: postIds } 
+        }).lean();
 
-        res.json({ items: items.slice(0, limit), nextCursor });
+        // 将媒体文件按 postId 分组
+        const mediaByPostId = {};
+        mediaFiles.forEach(media => {
+            if (!mediaByPostId[media.postId]) {
+                mediaByPostId[media.postId] = [];
+            }
+            mediaByPostId[media.postId].push({
+                url: media.url,
+                type: media.type, // 'image' 或 'video'
+                thumbnail: media.thumbnail // 如果有缩略图的话
+            });
+        });
+
+        // 将媒体文件添加到对应的帖子中
+        const itemsWithMedia = items.map(item => ({
+            ...item,
+            media: mediaByPostId[item._id] || []
+        }));
+
+        const hasNext = itemsWithMedia.length > limit;
+        const nextCursor = hasNext ? itemsWithMedia[limit - 1].createdAt.toISOString() : null;
+
+        res.json({ items: itemsWithMedia.slice(0, limit), nextCursor });
 
     } catch (e) {
         console.error('[feed#follow]', e);
@@ -53,7 +79,7 @@ exports.recommendFeed = async (req, res) => {
         const query = {
             status: 'active',
             visibility: 'public', // 推荐流只看公开内容
-            createdAt: { $lt: new Date(cursor) } // 分页游标
+            ...(cursor && { createdAt: { $lt: new Date(cursor) } }) // 分页游标
         };
         
         const sortSpec = { 
@@ -67,10 +93,35 @@ exports.recommendFeed = async (req, res) => {
             .populate('authorId', 'name avatar')
             .lean();
 
-        const hasNext = items.length > limit;
-        const nextCursor = hasNext ? items[limit - 1].createdAt.toISOString() : null;
+        // 获取所有帖子的媒体文件
+        const postIds = items.map(item => item._id);
+        const mediaFiles = await Media.find({ 
+            postId: { $in: postIds } 
+        }).lean();
 
-        res.json({ items: items.slice(0, limit), nextCursor });
+        // 将媒体文件按 postId 分组
+        const mediaByPostId = {};
+        mediaFiles.forEach(media => {
+            if (!mediaByPostId[media.postId]) {
+                mediaByPostId[media.postId] = [];
+            }
+            mediaByPostId[media.postId].push({
+                url: media.url,
+                type: media.type, // 'image' 或 'video'
+                thumbnail: media.thumbnail // 如果有缩略图的话
+            });
+        });
+
+        // 将媒体文件添加到对应的帖子中
+        const itemsWithMedia = items.map(item => ({
+            ...item,
+            media: mediaByPostId[item._id] || []
+        }));
+
+        const hasNext = itemsWithMedia.length > limit;
+        const nextCursor = hasNext ? itemsWithMedia[limit - 1].createdAt.toISOString() : null;
+
+        res.json({ items: itemsWithMedia.slice(0, limit), nextCursor });
 
     } catch (e) {
         console.error('[feed#recommend]', e);

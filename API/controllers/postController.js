@@ -207,16 +207,40 @@ exports.getById = async (req, res) => {
 /** GET /users/{id}/posts - 获取用户发布的帖子列表 */
 exports.listByUser = async (req, res) => {
     try {
-        const { id } = req.params;
+        const currentUser = req.user; // 当前登录用户
+        if (!currentUser || !currentUser.id) return res.status(401).json({ error: 'Unauthorized' });
+        
+        let { id } = req.params;
+        if (id == "myself")
+            id = req.user._id;
         if (!mongoose.isValidObjectId(id)) return res.status(400).json({ error: 'Invalid user id' });
 
         const { skip, limit, page, pageSize } = getPaging(req.query);
 
+        // 检查是否是查看自己的帖子
+        const isOwnPosts = currentUser.id === id;
+        
+        // 构建查询条件
         const query = { 
-            authorId: id, 
-            status: 'active',
-            visibility: { $in: ['public', 'followers'] } // 简化：只返回公开和粉丝可见的
+            authorId: id,
+            status: 'active'
         };
+
+        // 如果不是查看自己的帖子，只返回公开的帖子
+        if (!isOwnPosts) {
+            query.visibility = 'public';
+            
+            // 可选：如果用户关注了该作者，也可以看到粉丝可见的帖子
+            // const isFollowing = await Follow.exists({ followerId: currentUser.id, followingId: id, status: 'accepted' });
+            // if (isFollowing) {
+            //     query.visibility = { $in: ['public', 'followers'] };
+            // }
+        } else {
+            // 查看自己的帖子，可以看到所有状态的帖子（除了已删除的）
+            // 或者根据需求决定是否显示所有状态的帖子
+            delete query.status; // 查看自己帖子时显示所有状态的帖子
+            // 或者保持只显示active状态的帖子：query.status = 'active';
+        }
 
         const [items, total] = await Promise.all([
             Post.find(query)
@@ -227,7 +251,16 @@ exports.listByUser = async (req, res) => {
             Post.countDocuments(query),
         ]);
 
-        res.json({ page, pageSize, total, items });
+        // 如果是查看自己的帖子，可以返回更多信息（如帖子状态等）
+        const response = { 
+            page, 
+            pageSize, 
+            total, 
+            items,
+            isOwnPosts // 可选：告诉前端是否是查看自己的帖子
+        };
+
+        res.json(response);
     } catch (e) {
         console.error('[posts#listByUser]', e);
         res.status(500).json({ error: e.message || 'Failed to fetch user posts' });

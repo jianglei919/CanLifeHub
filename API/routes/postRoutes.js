@@ -30,7 +30,7 @@ router.get('/:id', ctrl.getById);
 
 // 获取某用户的帖子列表
 // GET /api/users/:id/posts?page=1&pageSize=20
-router.get('/users/:id/posts', ctrl.listByUser);
+router.get('/list/:id', requireAuth, ctrl.listByUser);
 
 
 // ===================================

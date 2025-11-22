@@ -135,6 +135,15 @@ export const postsApi = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   create: (params) => http.post('/posts', params),
+  listByUser: (userId, params = {}) => http.get(`/posts/list/${userId}`, { params }),
+};
+
+export const feedApi = {
+  // 获取推荐feed
+  getRecommend: (params = {}) => http.get('/feed/recommend', { params }),
+  
+  // 获取关注feed
+  getFollow: (params = {}) => http.get('/feed/follow', { params })
 };
 
 // 便捷函数：直接返回 data

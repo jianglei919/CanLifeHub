@@ -3,6 +3,7 @@ import { UserContext } from "../../context/userContext";
 import CommentsBox from "./CommentsBox";
 import { feedApi, postsApi, followApi } from "../api/http";
 import CreatePost from "./CreatePost";
+import Swal from 'sweetalert2';
 
 const TEST_POST_ID = import.meta.env.VITE_TEST_POST_ID || '64c1f0e9f7c5a4b123456789';
 
@@ -157,13 +158,32 @@ export default function PostList({ feedType = "all" }) {
   const closeMenu = () => setShowMenuForPost(null);
 
   const handleDeletePost = async (postId) => {
-    if (!window.confirm('确定要删除这条帖子吗？此操作不可撤销。')) return;
-    try {
-      await postsApi.delete(postId);
-      setPosts(posts.filter(post => post.id !== postId));
-      setShowMenuForPost(null);
-    } catch (err) {
-      console.error('删除帖子失败:', err);
+    const result = await Swal.fire({
+      title: '确认删除？',
+      text: "删除后无法恢复此帖子！",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: '确认删除',
+      cancelButtonText: '取消',
+      reverseButtons: true,
+      customClass: {
+        confirmButton: 'swal2-confirm',
+        cancelButton: 'swal2-cancel'
+      }
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        await postsApi.delete(postId);
+        setPosts(posts.filter(post => post.id !== postId));
+        setShowMenuForPost(null);
+        Swal.fire('已删除!', '帖子已成功删除。', 'success');
+      } catch (err) {
+        console.error('删除帖子失败:', err);
+        Swal.fire('错误!', '删除失败，请重试。', 'error');
+      }
     }
   };
 

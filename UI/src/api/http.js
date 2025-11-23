@@ -50,6 +50,7 @@ export const authApi = {
   register: (payload) => http.post('/auth/register', payload),
   login: (payload) => http.post('/auth/login', payload),
   profile: () => http.get('/auth/profile'),
+  getUserById: (userId) => http.get(`/auth/users/${userId}`), // 获取指定用户信息
   verify: (payload) => http.post('/auth/verify', payload),
   resendVerification: (payload) => http.post('/auth/resend-verification', payload),
   forgotPassword: (payload) => http.post('/auth/forgot-password', payload),

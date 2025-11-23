@@ -3,6 +3,7 @@ import { UserContext } from "../../context/userContext";
 import CommentsBox from "./CommentsBox";
 import { feedApi, postsApi, followApi } from "../api/http";
 import CreatePost from "./CreatePost";
+import UserProfileModal from "./UserProfileModal";
 
 const TEST_POST_ID = import.meta.env.VITE_TEST_POST_ID || '64c1f0e9f7c5a4b123456789';
 
@@ -19,6 +20,7 @@ export default function PostList({ feedType = "all" }) {
   const [sortBy, setSortBy] = useState('time'); // 'time' 或 'hot'
   const [followingUsers, setFollowingUsers] = useState(new Set()); // 记录正在关注的用户
   const [followLoadingUsers, setFollowLoadingUsers] = useState(new Set()); // 记录正在操作的用户
+  const [selectedUserId, setSelectedUserId] = useState(null); // 选中的用户ID用于显示资料
 
   const formatTime = (isoString) => {
     const now = new Date();
@@ -218,6 +220,13 @@ export default function PostList({ feedType = "all" }) {
     }
   };
 
+  const handleAvatarClick = (authorId, e) => {
+    e.stopPropagation();
+    if (authorId) {
+      setSelectedUserId(authorId);
+    }
+  };
+
   const renderMedia = (mediaArray) => {
     if (!mediaArray || mediaArray.length === 0) return null;
 
@@ -304,9 +313,21 @@ export default function PostList({ feedType = "all" }) {
             <div key={post.id} className="post-card">
               <div className="post-header">
                 <div className="post-author-info">
-                  <span className="post-avatar">{post.avatar}</span>
+                  <span 
+                    className="post-avatar clickable" 
+                    onClick={(e) => handleAvatarClick(post.authorId, e)}
+                    title="查看用户资料"
+                  >
+                    {post.avatar}
+                  </span>
                   <div className="post-author-meta">
-                    <div className="post-author-name">{post.author}</div>
+                    <div 
+                      className="post-author-name clickable"
+                      onClick={(e) => handleAvatarClick(post.authorId, e)}
+                      title="查看用户资料"
+                    >
+                      {post.author}
+                    </div>
                     <div className="post-timestamp">{post.timestamp}</div>
                   </div>
                   {/* 关注按钮 - 不显示在自己的帖子上 */}
@@ -429,6 +450,13 @@ export default function PostList({ feedType = "all" }) {
             />
           </div>
         </div>
+      )}
+
+      {selectedUserId && (
+        <UserProfileModal
+          userId={selectedUserId}
+          onClose={() => setSelectedUserId(null)}
+        />
       )}
     </div>
   );

@@ -47,10 +47,14 @@ export default function EditProfile({ user, onClose, onUpdate }) {
     setLoading(true);
 
     try {
+      console.log('提交更新资料:', { name: formData.name.trim(), bio: formData.bio.trim() });
+      
       const response = await authApi.updateProfile({
         name: formData.name.trim(),
         bio: formData.bio.trim()
       });
+
+      console.log('更新资料响应:', response.data);
 
       if (response.data.ok) {
         toast.success(response.data.message || '资料更新成功');
@@ -64,11 +68,16 @@ export default function EditProfile({ user, onClose, onUpdate }) {
         setTimeout(() => {
           onClose();
         }, 1000);
+      } else {
+        // 处理返回 ok: false 的情况
+        setError(response.data.error || '更新失败');
+        toast.error(response.data.error || '更新失败');
       }
     } catch (err) {
       console.error('更新资料失败:', err);
-      setError(err.message || '更新资料失败，请稍后重试');
-      toast.error(err.message || '更新资料失败');
+      console.error('错误详情:', err.response?.data);
+      setError(err.response?.data?.error || err.message || '更新资料失败，请稍后重试');
+      toast.error(err.response?.data?.error || err.message || '更新资料失败');
     } finally {
       setLoading(false);
     }

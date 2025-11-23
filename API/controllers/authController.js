@@ -130,24 +130,33 @@ const loginUser = async (req, res) => {
     const match = await comparePassword(password, user.password);
 
     if (match) {
-    // Step 3. 密码正确则生成 JWT
-    // 生成包含 email、id、name 的 token (payload)
-        jwt.sign(
-         { email: user.email, id: user._id, name: user.name }, // payload
-          process.env.JWT_SECRET,                              // 加密密钥，从 .env 文件读取
-          {},                                                  // 可选配置 (如过期时间)
-          (err, token) => {                                    // 回调函数，当 token 生成后执行
-          if (err) throw err;                                  // 如果出错则抛出
-    // Step 4. 设置 Cookie 并返回用户信息
-          res.cookie('token', token).json(user)                // 把 token 存进浏览器 Cookie 中，以维持登录状态
-    })
-     }
-    
-    // Step 5. 密码错误
-    if (!match) {
-        res.json({
-            error: '密码错误，请检查后重新输入'
-        });
+      // Step 3. 密码正确则生成 JWT
+      jwt.sign(
+        { email: user.email, id: user._id, name: user.name },
+        process.env.JWT_SECRET,
+        {},
+        (err, token) => {
+          if (err) throw err;
+          // Step 4. 返回完整用户信息
+          const userProfile = {
+            _id: user._id,
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            bio: user.bio || '',
+            avatar: user.avatar || '👤',
+            followersCount: user.followersCount || 0,
+            followingCount: user.followingCount || 0,
+            verified: user.verified
+          };
+          res.cookie('token', token).json(userProfile);
+        }
+      );
+    } else {
+      // Step 5. 密码错误
+      res.json({
+        error: '密码错误，请检查后重新输入'
+      });
     }
  } catch (error) {
     console.log(error);
@@ -156,19 +165,42 @@ const loginUser = async (req, res) => {
 }
 
 // ===================== 获取用户个人信息接口 /profile =====================
-const getProfile = (req, res) => {
-const {token} = req.cookies               // 从请求头中读取 Cookie (前端 axios 请求带上了 withCredentials)
-if(token){
-    // Step 1. 验证 JWT
-    jwt.verify(token, process.env.JWT_SECRET, {}, (err, user) =>{
-        if (err) throw err;
-    // Step 2. 返回解码后的用户信息
-        res.json(user)
-    })
-} else {
+const getProfile = async (req, res) => {
+  const {token} = req.cookies;
+  if(token){
+    try {
+      // Step 1. 验证 JWT
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Step 2. 从数据库获取完整用户信息
+      const user = await User.findById(decoded.id).select('-password -verificationToken -verificationTokenExpiry -resetPasswordToken -resetPasswordExpiry');
+      
+      if (!user) {
+        return res.status(404).json({ error: '用户不存在' });
+      }
+
+      // Step 3. 返回完整用户信息
+      const userProfile = {
+        _id: user._id,
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        bio: user.bio || '',
+        avatar: user.avatar || '👤',
+        followersCount: user.followersCount || 0,
+        followingCount: user.followingCount || 0,
+        verified: user.verified
+      };
+      
+      res.json({ user: userProfile });
+    } catch (err) {
+      console.error('Get profile error:', err);
+      res.status(401).json({ error: 'Token无效' });
+    }
+  } else {
     // Step 3. 未登录或无 token
-    res.json(null)
-}
+    res.json(null);
+  }
 }
 
 // ===================== 验证邮箱接口 /verify =====================
@@ -338,23 +370,31 @@ const logout = (req, res) => {
 // ===================== 更新用户资料接口 /update-profile =====================
 const updateProfile = async (req, res) => {
   try {
+    console.log('[updateProfile] 收到请求:', req.body);
+    
     const { token } = req.cookies;
     
     if (!token) {
+      console.log('[updateProfile] 未找到token');
       return res.status(401).json({ error: '未登录，请先登录' });
     }
 
     // 验证 token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
+    
+    console.log('[updateProfile] 用户ID:', userId);
 
     const { name, bio } = req.body;
 
     // 查找用户
     const user = await User.findById(userId);
     if (!user) {
+      console.log('[updateProfile] 用户不存在');
       return res.status(404).json({ error: '用户不存在' });
     }
+
+    console.log('[updateProfile] 更新前:', { name: user.name, bio: user.bio });
 
     // 更新字段（只更新提供的字段）
     if (name !== undefined && name.trim()) {
@@ -366,6 +406,8 @@ const updateProfile = async (req, res) => {
     }
 
     await user.save();
+    
+    console.log('[updateProfile] 更新后:', { name: user.name, bio: user.bio });
 
     // 如果修改了姓名，需要更新 JWT
     let newToken = token;
@@ -380,11 +422,17 @@ const updateProfile = async (req, res) => {
     // 返回更新后的用户信息（不包含密码）
     const updatedUser = {
       _id: user._id,
+      id: user._id,
       name: user.name,
       email: user.email,
       bio: user.bio,
+      avatar: user.avatar,
+      followersCount: user.followersCount || 0,
+      followingCount: user.followingCount || 0,
       verified: user.verified
     };
+
+    console.log('[updateProfile] 返回用户信息:', updatedUser);
 
     res.cookie('token', newToken).json({ 
       ok: true, 
@@ -393,11 +441,45 @@ const updateProfile = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update profile error:', error);
+    console.error('[updateProfile] 错误:', error);
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({ error: 'Token 无效，请重新登录' });
     }
     return res.status(500).json({ error: '更新资料失败' });
+  }
+};
+
+// ===================== 获取指定用户信息接口 /users/:id =====================
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ error: '缺少用户ID' });
+    }
+
+    const user = await User.findById(id).select('-password -verificationToken -verificationTokenExpiry -resetPasswordToken -resetPasswordExpiry');
+    
+    if (!user) {
+      return res.status(404).json({ error: '用户不存在' });
+    }
+
+    const userProfile = {
+      _id: user._id,
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      bio: user.bio || '',
+      avatar: user.avatar || '👤',
+      followersCount: user.followersCount || 0,
+      followingCount: user.followingCount || 0,
+      verified: user.verified
+    };
+
+    res.json({ ok: true, user: userProfile });
+  } catch (error) {
+    console.error('[getUserById] 错误:', error);
+    return res.status(500).json({ error: '获取用户信息失败' });
   }
 };
 
@@ -406,6 +488,7 @@ module.exports = {             //把 test 函数导出，让其他文件可以�
     registerUser,
     loginUser,
     getProfile,
+    getUserById,
     verifyEmail,
     resendVerification,
     forgotPassword,

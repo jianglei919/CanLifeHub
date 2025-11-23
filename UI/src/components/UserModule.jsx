@@ -121,13 +121,20 @@ export default function UserModule() {
     setUser(prev => ({
       ...prev,
       name: updatedUser.name,
-      bio: updatedUser.bio
+      bio: updatedUser.bio,
+      followers: updatedUser.followersCount || prev.followers,
+      following: updatedUser.followingCount || prev.following,
     }));
     
     // 更新全局用户上下文
     if (setCtxUser) {
       setCtxUser(updatedUser);
     }
+
+    // 自动刷新页面
+    setTimeout(() => {
+      window.location.reload();
+    }, 1200);
   };
 
   // 未登录状态下的兜底 UI

@@ -74,37 +74,40 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <div style={{ borderTop: '1px solid #eee', paddingTop: 8 }}>
-      <h3 style={{ margin: '8px 0' }}>评论</h3>
+    <div className="comments-box">
+      <h3 className="comments-title">💬 评论区</h3>
 
       {/* 输入框 */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+      <div className="comment-input-wrapper">
         <input
-          style={{ flex: 1, padding: 8, border: '1px solid #ddd', borderRadius: 6 }}
+          className="comment-input"
           value={newContent}
           onChange={(e) => setNewContent(e.target.value)}
           placeholder="写下你的评论…（需登录）"
           disabled={loading || isUnauthorized}
+          onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && onCreate()}
         />
-        <button onClick={onCreate} disabled={loading || !newContent.trim() || isUnauthorized}>
-          发布
+        <button className="comment-submit-btn" onClick={onCreate} disabled={loading || !newContent.trim() || isUnauthorized}>
+          {loading ? '发布中...' : '发布'}
         </button>
       </div>
 
       {/* 工具栏 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-        <label>排序：</label>
-        <select value={sort} onChange={(e) => setSort(e.target.value)}>
-          <option value="new">最新</option>
-          <option value="hot">热度</option>
-        </select>
-        <div style={{ marginLeft: 'auto', fontSize: 12, color: '#666' }}>共 {total} 条</div>
+      <div className="comments-toolbar">
+        <div className="sort-selector">
+          <label>📊 排序：</label>
+          <select className="sort-dropdown" value={sort} onChange={(e) => setSort(e.target.value)}>
+            <option value="new">🕒 最新</option>
+            <option value="hot">🔥 热度</option>
+          </select>
+        </div>
+        <div className="comments-count">共 {total} 条评论</div>
       </div>
 
       {err && (
-        <div style={{ color: 'crimson', marginBottom: 8 }}>
+        <div className="comments-error">
           {isUnauthorized ? (
-            <>未授权，<Link to="/login" style={{ color: '#0a7aff', textDecoration: 'underline' }}>请先登录</Link></>
+            <>未授权，<Link to="/login" className="login-link">请先登录</Link></>
           ) : (
             err
           )}
@@ -112,11 +115,11 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
       )}
 
       {loading ? (
-        <p>加载中…</p>
+        <div className="comments-loading">⏳ 加载中…</div>
       ) : (
-        <div>
+        <div className="comments-list">
           {items.length === 0 ? (
-            <p>暂无评论</p>
+            <div className="comments-empty">💭 暂无评论，来发表第一条评论吧！</div>
           ) : (
             items.map((c) => <CommentItem key={c._id} item={c} onAnyCommentChange={notifyDelta} />)
           )}
@@ -124,11 +127,17 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
       )}
 
       {/* 分页 */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 10 }}>
-        <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>上一页</button>
-        <span>{page} / {totalPages}</span>
-        <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>下一页</button>
-      </div>
+      {total > pageSize && (
+        <div className="comments-pagination">
+          <button className="pagination-btn" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            ← 上一页
+          </button>
+          <span className="pagination-info">第 {page} 页 / 共 {totalPages} 页</span>
+          <button className="pagination-btn" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+            下一页 →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -181,51 +190,66 @@ function CommentItem({ item, onAnyCommentChange }) {
   const ts = item.createdAt ? new Date(item.createdAt) : null;
 
   return (
-    <div style={{ borderTop: '1px solid #f2f2f2', padding: '10px 0' }}>
-      <div style={{ fontSize: 13, color: '#666' }}>
-        <b>{item.authorId?.name || '匿名'}</b> · {ts ? ts.toLocaleString() : ''}
+    <div className="comment-item-card">
+      <div className="comment-header">
+        <span className="comment-avatar">👤</span>
+        <div className="comment-meta">
+          <span className="comment-author">{item.authorId?.name || '匿名用户'}</span>
+          <span className="comment-time">{ts ? ts.toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</span>
+        </div>
       </div>
-      <div style={{ marginTop: 6, whiteSpace: 'pre-wrap', color: '#333', fontSize: 14 }}>{item.content}</div>
-      <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-        <button onClick={toggleReplies}>{repliesOpen ? '收起回复' : '查看回复'}</button>
+      <div className="comment-content">{item.content}</div>
+      <div className="comment-actions">
+        <button className="reply-btn" onClick={toggleReplies}>
+          {repliesOpen ? '▲ 收起回复' : '▼ 查看回复'}
+        </button>
       </div>
 
       {repliesOpen && (
-        <div style={{ marginTop: 8, paddingLeft: 12, borderLeft: '2px solid #f0f0f0' }}>
+        <div className="replies-section">
           {loading ? (
-            <p>加载中…</p>
+            <div className="replies-loading">加载中…</div>
           ) : (
             <>
               {replies.length === 0 ? (
-                <p>暂无回复</p>
+                <div className="replies-empty">暂无回复</div>
               ) : (
-                replies.map((r) => (
-                  <div key={r._id} style={{ padding: '6px 0' }}>
-                    <div style={{ fontSize: 12, color: '#666' }}>
-                      <b>{r.authorId?.name || '匿名'}</b> · {r.createdAt ? new Date(r.createdAt).toLocaleString() : ''}
+                <div className="replies-list">
+                  {replies.map((r) => (
+                    <div key={r._id} className="reply-item">
+                      <span className="reply-avatar">💬</span>
+                      <div className="reply-content-wrapper">
+                        <div className="reply-meta">
+                          <span className="reply-author">{r.authorId?.name || '匿名用户'}</span>
+                          <span className="reply-time">{r.createdAt ? new Date(r.createdAt).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                        </div>
+                        <div className="reply-text">{r.content}</div>
+                      </div>
                     </div>
-                    <div style={{ marginTop: 2, whiteSpace: 'pre-wrap', color: '#333', fontSize: 13 }}>{r.content}</div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
               {err && (
-                <div style={{ color: 'crimson', margin: '6px 0' }}>
+                <div className="reply-error">
                   {unauthorized ? (
-                    <>未授权，<Link to="/login" style={{ color: '#0a7aff', textDecoration: 'underline' }}>请先登录</Link></>
+                    <>未授权，<Link to="/login" className="login-link">请先登录</Link></>
                   ) : (
                     err
                   )}
                 </div>
               )}
-              <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+              <div className="reply-input-wrapper">
                 <input
-                  style={{ flex: 1, padding: 6, border: '1px solid #ddd', borderRadius: 6 }}
+                  className="reply-input"
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   placeholder="写回复…（需登录）"
                   disabled={loading || unauthorized}
+                  onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendReply()}
                 />
-                <button onClick={sendReply} disabled={loading || !replyText.trim() || unauthorized}>回复</button>
+                <button className="reply-submit-btn" onClick={sendReply} disabled={loading || !replyText.trim() || unauthorized}>
+                  {loading ? '...' : '回复'}
+                </button>
               </div>
             </>
           )}

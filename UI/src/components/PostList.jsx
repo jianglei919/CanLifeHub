@@ -16,6 +16,7 @@ export default function PostList({ feedType = "all" }) {
   const [nextCursor, setNextCursor] = useState(null);
   const [showMenuForPost, setShowMenuForPost] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
+  const [sortBy, setSortBy] = useState('time'); // 'time' 或 'hot'
 
   const formatTime = (isoString) => {
     const now = new Date();
@@ -55,9 +56,9 @@ export default function PostList({ feedType = "all" }) {
       let response;
 
       if (feedType === "all") {
-        response = await feedApi.getRecommend({ cursor });
+        response = await feedApi.getRecommend({ cursor, sort: sortBy });
       } else if (feedType === "following") {
-        response = await feedApi.getFollow({ cursor });
+        response = await feedApi.getFollow({ cursor, sort: sortBy });
       }
 
       const newPosts = (response.data.items || []).map(transformPostData);
@@ -76,7 +77,7 @@ export default function PostList({ feedType = "all" }) {
     } finally {
       setLoading(false);
     }
-  }, [feedType, nextCursor]);
+  }, [feedType, sortBy, nextCursor]);
 
   const loadMore = () => {
     if (hasMore && !loading) fetchPosts(true);
@@ -87,7 +88,7 @@ export default function PostList({ feedType = "all" }) {
     setNextCursor(null);
     setExpandedComments({});
     fetchPosts(false);
-  }, [feedType, fetchPosts]);
+  }, [feedType, sortBy, fetchPosts]);
 
   const toggleComments = (postId) => {
     setExpandedComments(prev => ({
@@ -224,6 +225,20 @@ export default function PostList({ feedType = "all" }) {
 
   return (
     <div className="post-list">
+      {/* 排序选择器 */}
+      <div className="sort-selector-container">
+        <label className="sort-label">📊 排序方式：</label>
+        <select 
+          className="sort-select" 
+          value={sortBy} 
+          onChange={(e) => setSortBy(e.target.value)}
+          disabled={loading}
+        >
+          <option value="time">⏰ 最新发布</option>
+          <option value="hot">🔥 热度排序（点赞数）</option>
+        </select>
+      </div>
+
       {loading && posts.length === 0 && (
         <div className="loading">加载中...</div>
       )}

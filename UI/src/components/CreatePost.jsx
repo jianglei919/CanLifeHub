@@ -182,6 +182,11 @@ export default function CreatePost() {
       
       // 重置表单
       handleCloseModal();
+      
+      // 延迟后刷新页面以显示新帖子
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error('发布出错:', error);
       toast.error("发布失败，请稍后再试。");

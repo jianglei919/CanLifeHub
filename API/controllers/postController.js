@@ -235,12 +235,8 @@ exports.listByUser = async (req, res) => {
             // if (isFollowing) {
             //     query.visibility = { $in: ['public', 'followers'] };
             // }
-        } else {
-            // 查看自己的帖子，可以看到所有状态的帖子（除了已删除的）
-            // 或者根据需求决定是否显示所有状态的帖子
-            delete query.status; // 查看自己帖子时显示所有状态的帖子
-            // 或者保持只显示active状态的帖子：query.status = 'active';
         }
+        // 注意：查看自己的帖子时也只显示active状态的帖子，不显示已删除的
 
         const [items, total] = await Promise.all([
             Post.find(query)

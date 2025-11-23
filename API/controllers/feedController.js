@@ -17,6 +17,7 @@ exports.followFeed = async (req, res) => {
         if (!user || !user.id) return res.status(401).json({ error: 'Unauthorized' });
 
         const { limit, cursor } = getCursorPaging(req.query);
+        const sortBy = req.query.sort || 'time'; // 'time' 或 'hot'
         
         // 1. 假设您有一个服务能获取用户关注的所有作者 ID 列表
         // const followedUserIds = await FollowService.getFollowingIds(user.id);
@@ -29,8 +30,13 @@ exports.followFeed = async (req, res) => {
             ...(cursor && { createdAt: { $lt: new Date(cursor) } }) // 分页游标
         };
 
+        // 根据排序参数设置排序规则
+        const sortSpec = sortBy === 'hot'
+            ? { likesCount: -1, createdAt: -1 }  // 热度优先（点赞数），然后按时间
+            : { createdAt: -1 };                 // 时间优先（最新）
+
         const items = await Post.find(query)
-            .sort({ createdAt: -1 }) // 按新鲜度排序
+            .sort(sortSpec)
             .limit(limit + 1) // 多取一条判断是否有下一页
             .populate('authorId', 'name avatar')
             .lean();
@@ -90,6 +96,9 @@ exports.followFeed = async (req, res) => {
 exports.recommendFeed = async (req, res) => {
     try {
         const { limit, cursor } = getCursorPaging(req.query);
+        const sortBy = req.query.sort || 'time'; // 'time' 或 'hot'
+        
+        console.log(`[feed#recommend] sortBy=${sortBy}, cursor=${cursor}, limit=${limit}`);
         
         // 推荐流的查询逻辑：混合新鲜度（时间）和互动热度（likesCount）
         const query = {
@@ -98,10 +107,12 @@ exports.recommendFeed = async (req, res) => {
             ...(cursor && { createdAt: { $lt: new Date(cursor) } }) // 分页游标
         };
         
-        const sortSpec = { 
-            likesCount: -1, // 互动热度优先
-            createdAt: -1  // 其次按新鲜度
-        };
+        // 根据排序参数设置排序规则
+        const sortSpec = sortBy === 'hot' 
+            ? { likesCount: -1, createdAt: -1 }  // 热度优先（点赞数），然后按时间
+            : { createdAt: -1 };                 // 时间优先（最新）
+
+        console.log('[feed#recommend] sortSpec:', sortSpec);
 
         const items = await Post.find(query)
             .sort(sortSpec)

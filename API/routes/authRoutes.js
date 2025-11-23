@@ -1,3 +1,4 @@
+// API/routes/authRoutes.js
 // 负责接收前端（React 页面）发来的请求，并把请求转交给相应的“控制器（controller）”去处理
 const express = require('express');
 const router = express.Router();         //创建一个“路由对象（router）”

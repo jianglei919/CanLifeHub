@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
-import { postsApi } from "../api/http"; // 假设你的API文件路径
+import { useState, useEffect, useContext } from "react";
+import { postsApi } from "../api/http";
+import { UserContext } from "../../context/userContext";
+import EditProfile from "./EditProfile";
 
 const mockUserProfile = {
   name: "Hello",
@@ -15,10 +17,12 @@ const mockUserProfile = {
 };
 
 export default function UserModule() {
+  const { user: currentUser, setUser: setCurrentUser } = useContext(UserContext);
   const [user, setUser] = useState(mockUserProfile);
   const [activeTab, setActiveTab] = useState("posts");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // 获取用户帖子数据
   const fetchUserPosts = async () => {
@@ -54,12 +58,21 @@ export default function UserModule() {
     }
   };
 
-  // 组件挂载时获取帖子数据
+  // 组件挂载时获取帖子数据和用户信息
   useEffect(() => {
     if (activeTab === "posts") {
       fetchUserPosts();
     }
-  }, [activeTab]);
+    
+    // 更新用户基本信息
+    if (currentUser) {
+      setUser(prev => ({
+        ...prev,
+        name: currentUser.name || prev.name,
+        bio: currentUser.bio || prev.bio
+      }));
+    }
+  }, [activeTab, currentUser]);
 
   // 处理标签切换
   const handleTabChange = (tab) => {
@@ -69,13 +82,28 @@ export default function UserModule() {
     }
   };
 
+  // 处理资料更新
+  const handleProfileUpdate = (updatedUser) => {
+    // 更新本地用户信息
+    setUser(prev => ({
+      ...prev,
+      name: updatedUser.name,
+      bio: updatedUser.bio
+    }));
+    
+    // 更新全局用户上下文
+    if (setCurrentUser) {
+      setCurrentUser(updatedUser);
+    }
+  };
+
   return (
     <div className="user-module">
       <div className="user-header">
         <span className="user-avatar">{user.avatar}</span>
         <div className="user-info">
           <h3>{user.name}</h3>
-          <p>{user.bio}</p>
+          <p>{user.bio || '这个人很懒，什么都没写...'}</p>
         </div>
       </div>
 
@@ -94,7 +122,12 @@ export default function UserModule() {
         </div>
       </div>
 
-      <button className="edit-profile-btn">编辑资料</button>
+      <button 
+        className="edit-profile-btn"
+        onClick={() => setShowEditModal(true)}
+      >
+        编辑资料
+      </button>
 
       <div className="user-tabs">
         <button
@@ -146,6 +179,18 @@ export default function UserModule() {
           </div>
         )}
       </div>
+
+      {/* 编辑资料弹窗 */}
+      {showEditModal && (
+        <EditProfile
+          user={{
+            name: user.name,
+            bio: user.bio
+          }}
+          onClose={() => setShowEditModal(false)}
+          onUpdate={handleProfileUpdate}
+        />
+      )}
     </div>
   );
 }

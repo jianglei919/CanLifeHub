@@ -6,6 +6,7 @@ const userSchema = new Schema({
   name: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  bio: { type: String, default: '' }, // 个人简介
   verified: { type: Boolean, default: false },
   verificationToken: { type: String },
   verificationTokenExpiry: { type: Date },

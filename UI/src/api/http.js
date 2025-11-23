@@ -55,6 +55,7 @@ export const authApi = {
   forgotPassword: (payload) => http.post('/auth/forgot-password', payload),
   resetPassword: (payload) => http.post('/auth/reset-password', payload),
   logout: () => http.post('/auth/logout'),
+  updateProfile: (payload) => http.put('/auth/update-profile', payload), // 更新用户资料
   // logout: () => http.post('/auth/logout'),     // 后端未实现，若需要请在 API 端补一条路由
 };
 
@@ -136,6 +137,9 @@ export const postsApi = {
   }),
   create: (params) => http.post('/posts', params),
   listByUser: (userId, params = {}) => http.get(`/posts/list/${userId}`, { params }),
+  delete: (postId) => http.delete(`/posts/${postId}`),
+  react: (postId, type = 'like') => http.post(`/posts/${postId}/react`, { type }),
+  unreact: (postId, type = 'like') => http.delete(`/posts/${postId}/react?type=${type}`),
 };
 
 export const feedApi = {

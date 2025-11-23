@@ -335,6 +335,72 @@ const logout = (req, res) => {
   }
 };
 
+// ===================== 更新用户资料接口 /update-profile =====================
+const updateProfile = async (req, res) => {
+  try {
+    const { token } = req.cookies;
+    
+    if (!token) {
+      return res.status(401).json({ error: '未登录，请先登录' });
+    }
+
+    // 验证 token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    const { name, bio } = req.body;
+
+    // 查找用户
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: '用户不存在' });
+    }
+
+    // 更新字段（只更新提供的字段）
+    if (name !== undefined && name.trim()) {
+      user.name = name.trim();
+    }
+    
+    if (bio !== undefined) {
+      user.bio = bio.trim();
+    }
+
+    await user.save();
+
+    // 如果修改了姓名，需要更新 JWT
+    let newToken = token;
+    if (name) {
+      newToken = jwt.sign(
+        { email: user.email, id: user._id, name: user.name },
+        process.env.JWT_SECRET,
+        {}
+      );
+    }
+
+    // 返回更新后的用户信息（不包含密码）
+    const updatedUser = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      bio: user.bio,
+      verified: user.verified
+    };
+
+    res.cookie('token', newToken).json({ 
+      ok: true, 
+      user: updatedUser,
+      message: '资料更新成功'
+    });
+
+  } catch (error) {
+    console.error('Update profile error:', error);
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Token 无效，请重新登录' });
+    }
+    return res.status(500).json({ error: '更新资料失败' });
+  }
+};
+
 module.exports = {             //把 test 函数导出，让其他文件可以使用
     test,
     registerUser,
@@ -345,4 +411,5 @@ module.exports = {             //把 test 函数导出，让其他文件可以�
     forgotPassword,
     resetPassword,
     logout,
+    updateProfile,
 }

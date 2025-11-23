@@ -598,6 +598,17 @@
   background: #f8fafc;
 }
 
+/* 已点赞状态 */
+.post-action-btn.liked {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.post-action-btn.liked:hover {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
 .post-comments-section {
   margin-top: 12px;
   padding-top: 12px;

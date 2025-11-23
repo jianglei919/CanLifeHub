@@ -1,5 +1,6 @@
 const Post = require('../models/post');
-const Media = require('../models/media')
+const Media = require('../models/media');
+const Reaction = require('../models/reaction');
 // 假设您有 Follow 模型和辅助函数用于获取用户关注列表
 
 /** 辅助函数：将 page/pageSize 转换为 cursor/limit */
@@ -59,10 +60,25 @@ exports.followFeed = async (req, res) => {
             media: mediaByPostId[item._id] || []
         }));
 
-        const hasNext = itemsWithMedia.length > limit;
-        const nextCursor = hasNext ? itemsWithMedia[limit - 1].createdAt.toISOString() : null;
+        // 查询用户是否已点赞这些帖子
+        const userReactions = await Reaction.find({
+            userId: user.id,
+            postId: { $in: postIds },
+            type: 'like'
+        }).lean();
+        
+        const likedPostIds = new Set(userReactions.map(r => r.postId.toString()));
+        
+        // 添加 isLiked 字段
+        const itemsWithReactions = itemsWithMedia.map(item => ({
+            ...item,
+            isLiked: likedPostIds.has(item._id.toString())
+        }));
 
-        res.json({ items: itemsWithMedia.slice(0, limit), nextCursor });
+        const hasNext = itemsWithReactions.length > limit;
+        const nextCursor = hasNext ? itemsWithReactions[limit - 1].createdAt.toISOString() : null;
+
+        res.json({ items: itemsWithReactions.slice(0, limit), nextCursor });
 
     } catch (e) {
         console.error('[feed#follow]', e);
@@ -118,10 +134,28 @@ exports.recommendFeed = async (req, res) => {
             media: mediaByPostId[item._id] || []
         }));
 
-        const hasNext = itemsWithMedia.length > limit;
-        const nextCursor = hasNext ? itemsWithMedia[limit - 1].createdAt.toISOString() : null;
+        // 查询用户是否已点赞这些帖子（如果用户已登录）
+        let likedPostIds = new Set();
+        const user = req.user;
+        if (user && user.id) {
+            const userReactions = await Reaction.find({
+                userId: user.id,
+                postId: { $in: postIds },
+                type: 'like'
+            }).lean();
+            likedPostIds = new Set(userReactions.map(r => r.postId.toString()));
+        }
+        
+        // 添加 isLiked 字段
+        const itemsWithReactions = itemsWithMedia.map(item => ({
+            ...item,
+            isLiked: likedPostIds.has(item._id.toString())
+        }));
 
-        res.json({ items: itemsWithMedia.slice(0, limit), nextCursor });
+        const hasNext = itemsWithReactions.length > limit;
+        const nextCursor = hasNext ? itemsWithReactions[limit - 1].createdAt.toISOString() : null;
+
+        res.json({ items: itemsWithReactions.slice(0, limit), nextCursor });
 
     } catch (e) {
         console.error('[feed#recommend]', e);

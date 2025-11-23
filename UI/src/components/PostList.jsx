@@ -42,6 +42,7 @@ export default function PostList({ feedType = "all" }) {
       isFollowing: true,
       type: apiPost.type,
       title: apiPost.title,
+      isLiked: apiPost.isLiked || false, // 从后端获取的点赞状态
       rawData: apiPost
     };
   };
@@ -104,13 +105,28 @@ export default function PostList({ feedType = "all" }) {
 
   const handleLike = async (postId) => {
     try {
-      setPosts(posts.map(post =>
-        post.id === postId
-          ? { ...post, likes: (post.likes || 0) + 1 }
-          : post
-      ));
+      // 检查是否已经点赞
+      const post = posts.find(p => p.id === postId);
+      if (post?.isLiked) {
+        // 取消点赞
+        await postsApi.unreact(postId, 'like');
+        setPosts(posts.map(p =>
+          p.id === postId
+            ? { ...p, likes: Math.max(0, (p.likes || 0) - 1), isLiked: false }
+            : p
+        ));
+      } else {
+        // 点赞
+        await postsApi.react(postId, 'like');
+        setPosts(posts.map(p =>
+          p.id === postId
+            ? { ...p, likes: (p.likes || 0) + 1, isLiked: true }
+            : p
+        ));
+      }
     } catch (err) {
-      console.error('点赞失败:', err);
+      console.error('点赞操作失败:', err);
+      alert(err.message || '点赞失败，请重试');
     }
   };
 
@@ -296,10 +312,10 @@ export default function PostList({ feedType = "all" }) {
                 </button>
 
                 <button
-                  className="post-action-btn"
+                  className={`post-action-btn ${post.isLiked ? 'liked' : ''}`}
                   onClick={() => handleLike(post.id)}
                 >
-                  👍 赞 ({post.likes || 0})
+                  {post.isLiked ? '❤️' : '👍'} 赞 ({post.likes || 0})
                 </button>
               </div>
 

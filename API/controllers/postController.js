@@ -281,12 +281,14 @@ exports.react = async (req, res) => {
         const postId = new mongoose.Types.ObjectId(id);
         const userId = user.id;
 
-        // 查找或创建 Reaction
-        const reaction = await Reaction.findOneAndUpdate(
-            { postId, userId, type },
-            { $set: { userId, postId, type } },
-            { upsert: true, new: true, runValidators: true }
-        );
+        // 先检查是否已经点过赞
+        const existingReaction = await Reaction.findOne({ postId, userId, type });
+        if (existingReaction) {
+            return res.status(400).json({ error: '您已经点过赞了，请勿重复点赞' });
+        }
+
+        // 创建新的 Reaction 记录
+        const reaction = await Reaction.create({ userId, postId, type });
 
         // 更新计数器（原子操作）
         let updateField;
@@ -298,7 +300,10 @@ exports.react = async (req, res) => {
         
         res.json({ ok: true, reaction });
     } catch (e) {
-        // E11000 错误表示重复创建，但我们使用了 findOneAndUpdate(upsert: true) 应该能避免
+        // E11000 错误表示重复创建（唯一索引冲突）
+        if (e.code === 11000) {
+            return res.status(400).json({ error: '您已经点过赞了，请勿重复点赞' });
+        }
         console.error('[posts#react]', e);
         res.status(500).json({ error: e.message || 'Failed to react to post' });
     }

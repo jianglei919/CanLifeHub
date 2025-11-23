@@ -169,7 +169,7 @@ function CommentItem({ item, onAnyCommentChange }) {
       <div style={{ fontSize: 13, color: '#666' }}>
         <b>{item.authorId?.name || '匿名'}</b> · {ts ? ts.toLocaleString() : ''}
       </div>
-      <div style={{ marginTop: 6, whiteSpace: 'pre-wrap' }}>{item.content}</div>
+      <div style={{ marginTop: 6, whiteSpace: 'pre-wrap', color: '#333', fontSize: 14 }}>{item.content}</div>
       <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
         <button onClick={toggleReplies}>{repliesOpen ? '收起回复' : '查看回复'}</button>
       </div>
@@ -188,7 +188,7 @@ function CommentItem({ item, onAnyCommentChange }) {
                     <div style={{ fontSize: 12, color: '#666' }}>
                       <b>{r.authorId?.name || '匿名'}</b> · {r.createdAt ? new Date(r.createdAt).toLocaleString() : ''}
                     </div>
-                    <div style={{ marginTop: 2, whiteSpace: 'pre-wrap' }}>{r.content}</div>
+                    <div style={{ marginTop: 2, whiteSpace: 'pre-wrap', color: '#333', fontSize: 13 }}>{r.content}</div>
                   </div>
                 ))
               )}

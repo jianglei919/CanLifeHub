@@ -2,6 +2,9 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
+// 前端登录页路径（可通过环境变量覆盖）
+const LOGIN_URL = process.env.FRONTEND_LOGIN_URL || '/login';
+
 // 验证JWT token的中间件
 const requireAuth = async (req, res, next) => {
   try {
@@ -9,7 +12,10 @@ const requireAuth = async (req, res, next) => {
     const token = req.cookies.token;
 
     if (!token) {
-      return res.status(401).json({ error: '未授权，请先登录' });
+      return res
+        .status(401)
+        .set('X-Login-Url', LOGIN_URL)
+        .json({ error: '未授权，请先登录', loginUrl: LOGIN_URL });
     }
 
     // 验证token
@@ -19,7 +25,10 @@ const requireAuth = async (req, res, next) => {
     const user = await User.findById(decoded.id).select('-password');
 
     if (!user) {
-      return res.status(401).json({ error: '用户不存在' });
+      return res
+        .status(401)
+        .set('X-Login-Url', LOGIN_URL)
+        .json({ error: '用户不存在', loginUrl: LOGIN_URL });
     }
 
     if (!user.verified) {
@@ -31,7 +40,10 @@ const requireAuth = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
-    return res.status(401).json({ error: '无效的token' });
+    return res
+      .status(401)
+      .set('X-Login-Url', LOGIN_URL)
+      .json({ error: '无效的token', loginUrl: LOGIN_URL });
   }
 };
 

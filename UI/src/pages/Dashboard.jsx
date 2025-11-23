@@ -14,6 +14,7 @@ import "../styles/Dashboard.css";
 
 export default function Dashboard() {
   const { user, setUser } = useContext(UserContext);
+  const isAuthenticated = !!user;
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("feed");
   const [feedType, setFeedType] = useState("all");
@@ -35,12 +36,12 @@ export default function Dashboard() {
 
   // 启动未读消息轮询 - 优化：仅在消息页面时轮询
   useEffect(() => {
-    // 只在消息 tab 激活时才轮询
-    if (activeTab === 'messages') {
+    // 只在已登录且消息 tab 激活时才轮询
+    if (isAuthenticated && activeTab === 'messages') {
       fetchUnreadCount(); // 立即获取一次
       unreadPollingRef.current = setInterval(fetchUnreadCount, 10000); // 10秒轮询一次
     } else {
-      // 切换到其他 tab 时清除轮询
+      // 切换到其他 tab 或未登录时清除轮询
       if (unreadPollingRef.current) {
         clearInterval(unreadPollingRef.current);
       }
@@ -51,13 +52,19 @@ export default function Dashboard() {
         clearInterval(unreadPollingRef.current);
       }
     };
-  }, [activeTab]); // 依赖 activeTab
+  }, [activeTab, isAuthenticated]);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setFeedType('all');
+      if (activeTab !== 'feed') setActiveTab('feed');
+    }
+  }, [isAuthenticated]);
 
   // 退出登录
   const handleLogout = async () => {
     // 确认对话框
     const confirmed = window.confirm(
-      "确定要退出登录吗？\n\n退出后需要重新登录才能访问系统。"
+      "确定要退出登录吗？\n"
     );
 
     if (!confirmed) {
@@ -83,7 +90,7 @@ export default function Dashboard() {
           <div className="logo-section">
             <span className="logo">📱 CanLifeHub</span>
           </div>
-          
+
           <nav className="tab-navigation">
             <button
               className={`tab-item ${activeTab === "feed" ? "active" : ""}`}
@@ -91,28 +98,40 @@ export default function Dashboard() {
             >
               🏠 首页
             </button>
-            <button
-              className={`tab-item ${activeTab === "messages" ? "active" : ""}`}
-              onClick={() => setActiveTab("messages")}
-            >
-              💬 私信
-              {totalUnreadCount > 0 && (
-                <span className="unread-badge">{totalUnreadCount > 99 ? '99+' : totalUnreadCount}</span>
-              )}
-            </button>
-            <button
-              className={`tab-item ${activeTab === "profile" ? "active" : ""}`}
-              onClick={() => setActiveTab("profile")}
-            >
-              👤 我的资料
-            </button>
+            {isAuthenticated && (
+              <button
+                className={`tab-item ${activeTab === "messages" ? "active" : ""}`}
+                onClick={() => setActiveTab("messages")}
+              >
+                💬 私信
+                {totalUnreadCount > 0 && (
+                  <span className="unread-badge">{totalUnreadCount > 99 ? '99+' : totalUnreadCount}</span>
+                )}
+              </button>
+            )}
+            {isAuthenticated && (
+              <button
+                className={`tab-item ${activeTab === "profile" ? "active" : ""}`}
+                onClick={() => setActiveTab("profile")}
+              >
+                👤 我的资料
+              </button>
+            )}
           </nav>
 
           <div className="user-section">
-            <span className="greeting">{user?.name || "用户"}</span>
-            <button className="logout-btn" onClick={handleLogout} title="退出登录">
-              退出
-            </button>
+            {user ? (
+              <>
+                <span className="greeting">{user.name || "用户"}</span>
+                <button className="logout-btn" onClick={handleLogout} title="退出登录">
+                  退出
+                </button>
+              </>
+            ) : (
+              <button className="login-btn" onClick={() => navigate('/login')} title="登录">
+                登录
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -123,8 +142,8 @@ export default function Dashboard() {
         {activeTab === "feed" && (
           <div className="feed-container">
             <div className="feed-main">
-              <CreatePost />
-              
+              {isAuthenticated && <CreatePost />}
+
               {/* 帖子分类 */}
               <div className="feed-type-selector">
                 <button
@@ -133,32 +152,36 @@ export default function Dashboard() {
                 >
                   全部动态
                 </button>
-                <button
-                  className={`type-btn ${feedType === "following" ? "active" : ""}`}
-                  onClick={() => setFeedType("following")}
-                >
-                  关注的人
-                </button>
+                {isAuthenticated && (
+                  <button
+                    className={`type-btn ${feedType === "following" ? "active" : ""}`}
+                    onClick={() => setFeedType("following")}
+                  >
+                    关注的人
+                  </button>
+                )}
               </div>
-              
+
               <PostList feedType={feedType} />
             </div>
-            <div className="feed-sidebar">
-              <UserModule />
-              <Advertisement />
-            </div>
+            {isAuthenticated && (
+              <div className="feed-sidebar">
+                <UserModule />
+                <Advertisement />
+              </div>
+            )}
           </div>
         )}
 
         {/* 我的资料 */}
-        {activeTab === "profile" && (
+        {isAuthenticated && activeTab === "profile" && (
           <div className="profile-container">
             <UserModule />
           </div>
         )}
 
         {/* 私信 */}
-        {activeTab === "messages" && (
+        {isAuthenticated && activeTab === "messages" && (
           <div className="messages-container">
             <Messages />
           </div>

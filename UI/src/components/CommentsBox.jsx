@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { commentsApi } from '../api/http';
 
 export default function CommentsBox({ targetType = 'post', targetId, onCountChange }) {
@@ -18,6 +19,9 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
   const notifyDelta = useCallback((delta) => {
     if (typeof onCountChange === 'function') onCountChange(delta);
   }, [onCountChange]);
+
+  const isUnauthorized = typeof err === 'string'
+    && (err.includes('未授权') || err.includes('未登录') || err.toLowerCase().includes('unauthorized'));
 
   async function fetchList() {
     if (!targetId) return;
@@ -80,9 +84,9 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
           value={newContent}
           onChange={(e) => setNewContent(e.target.value)}
           placeholder="写下你的评论…（需登录）"
-          disabled={loading}
+          disabled={loading || isUnauthorized}
         />
-        <button onClick={onCreate} disabled={loading || !newContent.trim()}>
+        <button onClick={onCreate} disabled={loading || !newContent.trim() || isUnauthorized}>
           发布
         </button>
       </div>
@@ -97,7 +101,16 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
         <div style={{ marginLeft: 'auto', fontSize: 12, color: '#666' }}>共 {total} 条</div>
       </div>
 
-      {err && <div style={{ color: 'crimson', marginBottom: 8 }}>{err}</div>}
+      {err && (
+        <div style={{ color: 'crimson', marginBottom: 8 }}>
+          {isUnauthorized ? (
+            <>未授权，<Link to="/login" style={{ color: '#0a7aff', textDecoration: 'underline' }}>请先登录</Link></>
+          ) : (
+            err
+          )}
+        </div>
+      )}
+
       {loading ? (
         <p>加载中…</p>
       ) : (
@@ -126,6 +139,9 @@ function CommentItem({ item, onAnyCommentChange }) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [replyText, setReplyText] = useState('');
+
+  const unauthorized = typeof err === 'string'
+    && (err.includes('未授权') || err.includes('未登录') || err.toLowerCase().includes('unauthorized'));
 
   async function toggleReplies() {
     if (repliesOpen) return setRepliesOpen(false);
@@ -192,16 +208,24 @@ function CommentItem({ item, onAnyCommentChange }) {
                   </div>
                 ))
               )}
-              {err && <div style={{ color: 'crimson', margin: '6px 0' }}>{err}</div>}
+              {err && (
+                <div style={{ color: 'crimson', margin: '6px 0' }}>
+                  {unauthorized ? (
+                    <>未授权，<Link to="/login" style={{ color: '#0a7aff', textDecoration: 'underline' }}>请先登录</Link></>
+                  ) : (
+                    err
+                  )}
+                </div>
+              )}
               <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
                 <input
                   style={{ flex: 1, padding: 6, border: '1px solid #ddd', borderRadius: 6 }}
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   placeholder="写回复…（需登录）"
-                  disabled={loading}
+                  disabled={loading || unauthorized}
                 />
-                <button onClick={sendReply} disabled={loading || !replyText.trim()}>回复</button>
+                <button onClick={sendReply} disabled={loading || !replyText.trim() || unauthorized}>回复</button>
               </div>
             </>
           )}

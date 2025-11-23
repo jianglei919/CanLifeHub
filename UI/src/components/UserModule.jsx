@@ -3,9 +3,12 @@ import { useState, useEffect, useContext } from "react";
 import { postsApi, authApi, followApi } from "../api/http";
 import { UserContext } from "../../context/userContext";
 import EditProfile from "./EditProfile";
+import DetailPost from "./DetailPost";
 
 export default function UserModule() {
   const { user: ctxUser, setUser: setCtxUser } = useContext(UserContext);
+  const [selectedPostId, setSelectedPostId] = useState(null);
+const [detailMode, setDetailMode] = useState('view');
 
   // 真实用户资料
   const [user, setUser] = useState({
@@ -201,27 +204,35 @@ export default function UserModule() {
             {loading && <div className="loading">加载中...</div>}
             {error && <div className="error">{error}</div>}
             {!loading && !error && (
-              <>
-                {(!user.posts || user.posts.length === 0) ? (
-                  <div className="empty-state">暂无帖子</div>
-                ) : (
-                  user.posts.map((post) => (
-                    <div key={post._id || post.id} className="user-post-item">
-                      {post.title && <h4>{post.title}</h4>}
-                      <p>{post.content}</p>
-                      <div className="post-meta">
-                        {post.createdAt && (
-                          <span className="post-date">
-                            {new Date(post.createdAt).toLocaleDateString()}
-                          </span>
-                        )}
-                        <span className="post-likes">❤️ {post.likesCount ?? post.likes ?? 0}</span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </>
+  <>
+    {(!user.posts || user.posts.length === 0) ? (
+      <div className="empty-state">暂无帖子</div>
+    ) : (
+      user.posts.map((post) => (
+        <div 
+          key={post._id || post.id} 
+          className="user-post-item clickable"
+          onClick={() => {
+            setSelectedPostId(post._id || post.id);
+            setDetailMode('view');
+          }}
+          style={{ cursor: 'pointer' }}
+        >
+          {post.title && <h4>{post.title}</h4>}
+          <p>{post.content}</p>
+          <div className="post-meta">
+            {post.createdAt && (
+              <span className="post-date">
+                {new Date(post.createdAt).toLocaleDateString()}
+              </span>
             )}
+            <span className="post-likes">❤️ {post.likesCount ?? post.likes ?? 0}</span>
+          </div>
+        </div>
+      ))
+    )}
+  </>
+)}
           </div>
         )}
         {activeTab === "likes" && (
@@ -242,6 +253,24 @@ export default function UserModule() {
           onUpdate={handleProfileUpdate}
         />
       )}
+
+{selectedPostId && (
+  <DetailPost
+    postId={selectedPostId}
+    mode={detailMode}
+    onClose={() => {
+      setSelectedPostId(null);
+      setDetailMode('view');
+    }}
+    onUpdate={() => {
+      // 帖子更新后刷新列表
+      // fetchUserPosts();
+      // setSelectedPostId(null);
+      // setDetailMode('view');
+      window.location.reload();
+    }}
+  />
+)}
     </div>
   );
 }

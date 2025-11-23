@@ -26,7 +26,7 @@ router.delete('/:id', requireAuth, ctrl.remove);
 
 // 获取单个帖子详情
 // GET /api/posts/:id
-router.get('/:id', ctrl.getById);
+router.get('/:id', requireAuth, ctrl.getById);
 
 // 获取某用户的帖子列表
 // GET /api/users/:id/posts?page=1&pageSize=20

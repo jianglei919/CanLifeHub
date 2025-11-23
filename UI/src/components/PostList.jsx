@@ -5,6 +5,8 @@ import { feedApi, postsApi, followApi } from "../api/http";
 import CreatePost from "./CreatePost";
 import UserProfileModal from "./UserProfileModal";
 import Swal from 'sweetalert2';
+import DetailPost from "./DetailPost";
+import { toast } from "react-hot-toast";
 
 const TEST_POST_ID = import.meta.env.VITE_TEST_POST_ID || '64c1f0e9f7c5a4b123456789';
 
@@ -22,6 +24,8 @@ export default function PostList({ feedType = "all" }) {
   const [followingUsers, setFollowingUsers] = useState(new Set()); // 记录正在关注的用户
   const [followLoadingUsers, setFollowLoadingUsers] = useState(new Set()); // 记录正在操作的用户
   const [selectedUserId, setSelectedUserId] = useState(null); // 选中的用户ID用于显示资料
+  const [selectedPostId, setSelectedPostId] = useState(null);
+const [detailMode, setDetailMode] = useState('view'); // 'view' 或 'edit'
 
   const formatTime = (isoString) => {
     const now = new Date();
@@ -190,10 +194,75 @@ export default function PostList({ feedType = "all" }) {
   };
 
   const handleEditPost = (post) => {
-    // 预留编辑能力
-    // setEditingPost(post);
-    // setShowMenuForPost(null);
+    setSelectedPostId(post.id);
+    setDetailMode('edit');
+    setShowMenuForPost(null);
   };
+
+  // 修改帖子内容渲染部分
+  const renderPostContent = (post) => (
+    <div 
+      className="post-content clickable" 
+      onClick={() => {
+        setSelectedPostId(post.id);
+        setDetailMode('view');
+      }}
+      style={{ cursor: 'pointer' }}
+    >
+      {post.title && <h4 className="post-title">{post.title}</h4>}
+      <p>{post.content}</p>
+      {renderMedia(post.media)}
+    </div>
+  );
+
+  // 简洁版举报函数
+const handleReportPost = async (postId) => {
+  const reportReasons = {
+    spam: '垃圾营销',
+    porn: '色情内容', 
+    violence: '暴力血腥',
+    harassment: '骚扰谩骂',
+    illegal: '违法违规',
+    false_info: '不实信息',
+    privacy: '侵犯隐私',
+    other: '其他原因'
+  };
+
+  const { value: reason } = await Swal.fire({
+    title: '举报帖子',
+    input: 'select',
+    inputOptions: reportReasons,
+    inputPlaceholder: '请选择举报理由',
+    showCancelButton: true,
+    confirmButtonText: '提交举报',
+    cancelButtonText: '取消',
+    confirmButtonColor: '#dc3545',
+    inputValidator: (value) => {
+      if (!value) {
+        return '请选择举报理由';
+      }
+    }
+  });
+
+  if (reason) {
+    try {
+      // 这里调用举报API
+      // await postsApi.report(postId, reason);
+      
+      setShowMenuForPost(null);
+      toast.success('举报提交成功！');
+      
+      console.log('举报信息:', {
+        postId,
+        reason: reportReasons[reason]
+      });
+      
+    } catch (error) {
+      console.error('举报失败:', error);
+      toast.error('举报失败，请稍后重试');
+    }
+  }
+};
 
   const handleEditComplete = () => {
     // setEditingPost(null);
@@ -384,7 +453,11 @@ export default function PostList({ feedType = "all" }) {
                         <>
                           <button
                             className="menu-item"
-                            onClick={() => handleEditPost(post)}
+                            onClick={() => {
+                              setSelectedPostId(post.id);
+                              setDetailMode('edit');
+                              setShowMenuForPost(null);
+                            }}
                           >
                             编辑
                           </button>
@@ -396,13 +469,25 @@ export default function PostList({ feedType = "all" }) {
                           </button>
                         </>
                       )}
-                      <button className="menu-item">举报</button>
+                      <button 
+                        className="menu-item"
+                        onClick={() => handleReportPost(post.id)}
+                      >
+                        举报
+                      </button>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="post-content">
+              <div 
+                className="post-content clickable" 
+                onClick={() => {
+                  setSelectedPostId(post.id);
+                  setDetailMode('view');
+                }}
+                style={{ cursor: 'pointer' }}
+              >
                 {post.title && <h4 className="post-title">{post.title}</h4>}
                 <p>{post.content}</p>
                 {renderMedia(post.media)}
@@ -457,6 +542,23 @@ export default function PostList({ feedType = "all" }) {
             </div>
           )}
         </>
+      )}
+
+{selectedPostId && (
+        <DetailPost
+          postId={selectedPostId}
+          mode={detailMode}
+          onClose={() => {
+            setSelectedPostId(null);
+            setDetailMode('view');
+          }}
+          onUpdate={() => {
+            // 帖子更新后刷新列表
+            fetchPosts(false);
+            setSelectedPostId(null);
+            setDetailMode('view');
+          }}
+        />
       )}
 
       {editingPost && (

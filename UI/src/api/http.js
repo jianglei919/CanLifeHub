@@ -138,6 +138,8 @@ export const postsApi = {
   }),
   create: (params) => http.post('/posts', params),
   listByUser: (userId, params = {}) => http.get(`/posts/list/${userId}`, { params }),
+  getById: (postId) => http.get(`/posts/${postId}`),
+  update: (postId, params) => http.patch(`/posts/${postId}`, params),
   delete: (postId) => http.delete(`/posts/${postId}`),
   react: (postId, type = 'like') => http.post(`/posts/${postId}/react`, { type }),
   unreact: (postId, type = 'like') => http.delete(`/posts/${postId}/react?type=${type}`),

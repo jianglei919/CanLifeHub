@@ -184,20 +184,57 @@ exports.remove = async (req, res) => {
 /** GET /posts/{id} - 获取单个帖子详情 */
 exports.getById = async (req, res) => {
     try {
+        const currentUser = req.user; // 当前登录用户
         const { id } = req.params;
-        if (!mongoose.isValidObjectId(id)) return res.status(400).json({ error: 'Invalid post id' });
+        
+        if (!mongoose.isValidObjectId(id)) {
+            return res.status(400).json({ error: 'Invalid post id' });
+        }
 
         const post = await Post.findById(id)
             .populate('authorId', 'name avatar') // 填充作者信息
-            .lean(); 
+            .lean();
 
-        if (!post || post.status === 'deleted') return res.status(404).json({ error: 'Post not found' });
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        // 检查帖子状态
+        if (post.status === 'deleted') {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        // 检查可见性权限
+        const isOwnPost = currentUser && currentUser.id === post.authorId._id.toString();
+        if (!isOwnPost) {
+            // 非作者只能看到公开或粉丝可见的帖子
+            if (post.visibility === 'private') {
+                return res.status(403).json({ error: 'Access denied' });
+            }
+            
+            // 如果是粉丝可见，检查关注关系
+            if (post.visibility === 'followers') {
+                const isFollowing = await Follow.exists({
+                    followerId: currentUser.id,
+                    followingId: post.authorId._id,
+                    status: 'accepted'
+                });
+                if (!isFollowing) {
+                    return res.status(403).json({ error: 'Access denied' });
+                }
+            }
+        }
 
         // 获取媒体文件
         const media = await Media.find({ postId: id }).lean();
         
-        // 组装返回数据 (TODO: 检查可见性权限)
-        res.json({ ...post, media });
+        // 返回帖子详情和权限信息
+        res.json({ 
+            ...post, 
+            media,
+            canEdit: isOwnPost, // 是否可以编辑
+            canDelete: isOwnPost // 是否可以删除
+        });
     } catch (e) {
         console.error('[posts#getById]', e);
         res.status(500).json({ error: e.message || 'Failed to fetch post' });

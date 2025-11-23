@@ -1,24 +1,62 @@
-import { useState, useEffect } from "react";
-import { postsApi } from "../api/http"; // 假设你的API文件路径
-
-const mockUserProfile = {
-  name: "Hello",
-  avatar: "👨",
-  bio: "加拿大生活分享者",
-  followers: 1234,
-  following: 567,
-  postsCount: 89,
-  posts: [
-    { id: 1, content: "我发的第一篇帖子", likes: 45 },
-    { id: 2, content: "我发的第二篇帖子", likes: 32 },
-  ],
-};
+// UI/src/components/UserModule.jsx
+import { useState, useEffect, useContext } from "react";
+import { postsApi, authApi } from "../api/http";
+import { UserContext } from "../../context/userContext";
 
 export default function UserModule() {
-  const [user, setUser] = useState(mockUserProfile);
+  const { user: ctxUser } = useContext(UserContext);
+
+  // 真实用户资料
+  const [user, setUser] = useState({
+    name: "",
+    avatar: "👤",
+    bio: "",
+    followers: 0,
+    following: 0,
+    postsCount: 0,
+    posts: [],
+  });
+
   const [activeTab, setActiveTab] = useState("posts");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // 拉取当前用户资料（优先上下文，其次 /auth/profile）
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchProfile() {
+      try {
+        setError(null);
+        // 若上下文已有用户，直接用；否则向后端获取
+        if (ctxUser) {
+          if (!cancelled) {
+            setUser((prev) => ({
+              ...prev,
+              name: ctxUser.name || ctxUser.username || "",
+              avatar: ctxUser.avatar || "👤",
+              bio: ctxUser.bio || "",
+            }));
+          }
+        } else {
+          const resp = await authApi.profile();
+          const data = resp?.data?.user || resp?.data || {};
+          if (!cancelled) {
+            setUser((prev) => ({
+              ...prev,
+              name: data.name || data.username || "",
+              avatar: data.avatar || "👤",
+              bio: data.bio || "",
+            }));
+          }
+        }
+      } catch (e) {
+        // 未登录时静默处理，由下方未登录提示兜底
+        if (!cancelled) setError(null);
+      }
+    }
+    fetchProfile();
+    return () => { cancelled = true; };
+  }, [ctxUser]);
 
   // 获取用户帖子数据
   const fetchUserPosts = async () => {
@@ -26,56 +64,67 @@ export default function UserModule() {
       setLoading(true);
       setError(null);
 
-      // 获取当前用户ID
-      const currentUserId = "myself";
+      // 后端通常支持 "myself" 或具体 userId，这里优先使用别名以简化权限校验
+      const currentUserId = ctxUser?.id || ctxUser?._id || "myself";
 
-      // 构建查询参数
-      const queryParams = {
-        page: 1,
-        pageSize: 10, // 限制最多10个帖子
-        // 可以根据需要添加其他参数，如排序方式等
-      };
+      const queryParams = { page: 1, pageSize: 10 };
 
-      // 调用获取用户帖子列表的API
-      const { data } = await postsApi.listByUser("myself", queryParams);
+      // 兼容 postsApi.listByUser 不存在的情况：后退到通用 GET
+      let data;
+      if (postsApi.listByUser) {
+        ({ data } = await postsApi.listByUser(currentUserId, queryParams));
+      } else {
+        // 与后端路由 `/api/users/:id/posts` 对齐
+        const res = await fetch(
+          `${import.meta.env.VITE_API_BASE || "/api"}/users/${currentUserId}/posts?page=${queryParams.page}&pageSize=${queryParams.pageSize}`,
+          { credentials: "include" }
+        );
+        data = await res.json();
+      }
 
-      // 更新用户数据，将获取到的帖子合并到用户信息中
-      setUser(prevUser => ({
+      setUser((prevUser) => ({
         ...prevUser,
-        posts: data.items || [], // 使用API返回的帖子列表
-        postsCount: data.total || 0 // 更新帖子总数
+        posts: data?.items || [],
+        postsCount: data?.total || (data?.items ? data.items.length : 0),
       }));
-
     } catch (err) {
-      console.error('获取用户帖子失败:', err);
-      setError(err.response?.data?.error || '获取帖子失败');
+      console.error("获取用户帖子失败:", err);
+      setError(err?.response?.data?.error || err?.message || "获取帖子失败");
     } finally {
       setLoading(false);
     }
   };
 
-  // 组件挂载时获取帖子数据
+  // 组件挂载或切换到“我的帖子”时获取数据
   useEffect(() => {
     if (activeTab === "posts") {
       fetchUserPosts();
     }
-  }, [activeTab]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, ctxUser?.id]);
 
-  // 处理标签切换
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    if (tab === "posts") {
-      fetchUserPosts(); // 切换到帖子标签时重新获取数据
-    }
   };
+
+  // 未登录状态下的兜底 UI
+  if (!ctxUser) {
+    return (
+      <div className="user-module">
+        <div className="empty-state">
+          未授权，请先 <a href="/login">登录</a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="user-module">
       <div className="user-header">
-        <span className="user-avatar">{user.avatar}</span>
+        <span className="user-avatar">{user.avatar || "👤"}</span>
         <div className="user-info">
-          <h3>{user.name}</h3>
-          <p>{user.bio}</p>
+          <h3>{user.name || ""}</h3>
+          <p>{user.bio || ""}</p>
         </div>
       </div>
 
@@ -118,7 +167,7 @@ export default function UserModule() {
             {error && <div className="error">{error}</div>}
             {!loading && !error && (
               <>
-                {user.posts.length === 0 ? (
+                {(!user.posts || user.posts.length === 0) ? (
                   <div className="empty-state">暂无帖子</div>
                 ) : (
                   user.posts.map((post) => (
@@ -131,7 +180,7 @@ export default function UserModule() {
                             {new Date(post.createdAt).toLocaleDateString()}
                           </span>
                         )}
-                        <span className="post-likes">{post.likes || 0}</span>
+                        <span className="post-likes">{post.likesCount ?? post.likes ?? 0}</span>
                       </div>
                     </div>
                   ))

@@ -150,6 +150,24 @@ export const feedApi = {
   getFollow: (params = {}) => http.get('/feed/follow', { params })
 };
 
+// 关注 API
+export const followApi = {
+  // 关注用户
+  follow: (userId) => http.post(`/follow/${userId}`),
+  
+  // 取消关注
+  unfollow: (userId) => http.delete(`/follow/${userId}`),
+  
+  // 检查关注状态
+  checkStatus: (userId) => http.get(`/follow/status/${userId}`),
+  
+  // 获取关注列表
+  getFollowing: (userId, params = {}) => http.get(`/follow/following/${userId}`, { params }),
+  
+  // 获取粉丝列表
+  getFollowers: (userId, params = {}) => http.get(`/follow/followers/${userId}`, { params })
+};
+
 // 便捷函数：直接返回 data
 export async function $get(url, config) {
   const res = await http.get(url, config);

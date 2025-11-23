@@ -1,6 +1,7 @@
 const Post = require('../models/post');
 const Media = require('../models/media');
 const Reaction = require('../models/reaction');
+const Follow = require('../models/follow');
 // 假设您有 Follow 模型和辅助函数用于获取用户关注列表
 
 /** 辅助函数：将 page/pageSize 转换为 cursor/limit */
@@ -19,9 +20,14 @@ exports.followFeed = async (req, res) => {
         const { limit, cursor } = getCursorPaging(req.query);
         const sortBy = req.query.sort || 'time'; // 'time' 或 'hot'
         
-        // 1. 假设您有一个服务能获取用户关注的所有作者 ID 列表
-        // const followedUserIds = await FollowService.getFollowingIds(user.id);
-        const followedUserIds = []; // 替换为实际获取的 ID 列表
+        // 从 Follow 模型获取用户关注的所有作者 ID 列表
+        const followRecords = await Follow.find({ followerId: user.id }).select('followingId').lean();
+        const followedUserIds = followRecords.map(f => f.followingId);
+
+        // 如果用户没有关注任何人，返回空列表
+        if (followedUserIds.length === 0) {
+            return res.json({ items: [], nextCursor: null });
+        }
 
         const query = {
             authorId: { $in: followedUserIds },

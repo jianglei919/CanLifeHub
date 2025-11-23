@@ -12,6 +12,7 @@ const chatbotRoutes = require('./routes/chatbotRoutes'); // AI Chatbot 路由
 const postRoutes = require('./routes/postRoutes');
 const feedRoutes = require('./routes/feedRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const followRoutes = require('./routes/followRoutes'); // 关注路由
 // =============
 //todo: 新增路由放在这里！！！！
 
@@ -42,6 +43,7 @@ app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/feed', feedRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/follow', followRoutes);
 //todo: 新增接口均以api开头放在这里！！！！
 
 /** 404 */

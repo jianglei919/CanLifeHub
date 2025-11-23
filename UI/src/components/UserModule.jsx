@@ -1,6 +1,6 @@
 // UI/src/components/UserModule.jsx
 import { useState, useEffect, useContext } from "react";
-import { postsApi, authApi } from "../api/http";
+import { postsApi, authApi, followApi } from "../api/http";
 import { UserContext } from "../../context/userContext";
 import EditProfile from "./EditProfile";
 
@@ -22,6 +22,8 @@ export default function UserModule() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   // 拉取当前用户资料（优先上下文，其次 /auth/profile）
   useEffect(() => {
@@ -37,6 +39,8 @@ export default function UserModule() {
               name: ctxUser.name || ctxUser.username || "",
               avatar: ctxUser.avatar || "👤",
               bio: ctxUser.bio || "",
+              followers: ctxUser.followersCount || 0,
+              following: ctxUser.followingCount || 0,
             }));
           }
         } else {
@@ -48,6 +52,8 @@ export default function UserModule() {
               name: data.name || data.username || "",
               avatar: data.avatar || "👤",
               bio: data.bio || "",
+              followers: data.followersCount || 0,
+              following: data.followingCount || 0,
             }));
           }
         }

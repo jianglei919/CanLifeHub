@@ -1,7 +1,7 @@
 import { useContext, useState, useEffect, useCallback } from "react";
 import { UserContext } from "../../context/userContext";
 import CommentsBox from "./CommentsBox";
-import { feedApi, postsApi } from "../api/http";
+import { feedApi, postsApi, followApi } from "../api/http";
 import CreatePost from "./CreatePost";
 
 const TEST_POST_ID = import.meta.env.VITE_TEST_POST_ID || '64c1f0e9f7c5a4b123456789';
@@ -17,6 +17,8 @@ export default function PostList({ feedType = "all" }) {
   const [showMenuForPost, setShowMenuForPost] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
   const [sortBy, setSortBy] = useState('time'); // 'time' 或 'hot'
+  const [followingUsers, setFollowingUsers] = useState(new Set()); // 记录正在关注的用户
+  const [followLoadingUsers, setFollowLoadingUsers] = useState(new Set()); // 记录正在操作的用户
 
   const formatTime = (isoString) => {
     const now = new Date();
@@ -37,7 +39,6 @@ export default function PostList({ feedType = "all" }) {
       content: apiPost.content || apiPost.title || "",
       media: apiPost.media || [],
       likes: apiPost.likesCount || 0,
-      retweets: apiPost.sharesCount || 0,
       commentsCount: apiPost.commentsCount || 0,
       comments: [],
       isFollowing: true,
@@ -90,6 +91,23 @@ export default function PostList({ feedType = "all" }) {
     fetchPosts(false);
   }, [feedType, sortBy, fetchPosts]);
 
+  // 获取用户关注列表
+  useEffect(() => {
+    if (!user?.id) return;
+    
+    const fetchFollowing = async () => {
+      try {
+        const response = await followApi.getFollowing(user.id, { pageSize: 1000 });
+        const followedIds = response.data.users.map(u => u._id || u.id);
+        setFollowingUsers(new Set(followedIds));
+      } catch (err) {
+        console.error('获取关注列表失败:', err);
+      }
+    };
+
+    fetchFollowing();
+  }, [user?.id]);
+
   const toggleComments = (postId) => {
     setExpandedComments(prev => ({
       ...prev,
@@ -131,18 +149,6 @@ export default function PostList({ feedType = "all" }) {
     }
   };
 
-  const handleRetweet = async (postId) => {
-    try {
-      setPosts(posts.map(post =>
-        post.id === postId
-          ? { ...post, retweets: (post.retweets || 0) + 1 }
-          : post
-      ));
-    } catch (err) {
-      console.error('转发失败:', err);
-    }
-  };
-
   const toggleMenu = (postId, event) => {
     event.stopPropagation();
     setShowMenuForPost(showMenuForPost === postId ? null : postId);
@@ -177,6 +183,39 @@ export default function PostList({ feedType = "all" }) {
   const isOwnPost = (post) => {
     const currentUserId = user?.id;
     return post.authorId === currentUserId;
+  };
+
+  // 处理关注/取关
+  const handleFollowToggle = async (authorId, e) => {
+    e.stopPropagation();
+    if (!user) return;
+    if (followLoadingUsers.has(authorId)) return;
+
+    try {
+      setFollowLoadingUsers(prev => new Set([...prev, authorId]));
+      
+      if (followingUsers.has(authorId)) {
+        // 取消关注
+        await followApi.unfollow(authorId);
+        setFollowingUsers(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(authorId);
+          return newSet;
+        });
+      } else {
+        // 关注
+        await followApi.follow(authorId);
+        setFollowingUsers(prev => new Set([...prev, authorId]));
+      }
+    } catch (err) {
+      console.error('关注操作失败:', err);
+    } finally {
+      setFollowLoadingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(authorId);
+        return newSet;
+      });
+    }
   };
 
   const renderMedia = (mediaArray) => {
@@ -270,6 +309,24 @@ export default function PostList({ feedType = "all" }) {
                     <div className="post-author-name">{post.author}</div>
                     <div className="post-timestamp">{post.timestamp}</div>
                   </div>
+                  {/* 关注按钮 - 不显示在自己的帖子上 */}
+                  {user && !isOwnPost(post) && (
+                    <button
+                      className={`follow-btn follow-btn-small ${
+                        followingUsers.has(post.authorId) ? 'follow-btn-following' : 'follow-btn-follow'
+                      }`}
+                      onClick={(e) => handleFollowToggle(post.authorId, e)}
+                      disabled={followLoadingUsers.has(post.authorId)}
+                    >
+                      {followLoadingUsers.has(post.authorId) ? (
+                        '...'
+                      ) : followingUsers.has(post.authorId) ? (
+                        '✓ 已关注'
+                      ) : (
+                        '+ 关注'
+                      )}
+                    </button>
+                  )}
                 </div>
 
                 <div className="post-menu-container">
@@ -317,13 +374,6 @@ export default function PostList({ feedType = "all" }) {
                 >
                   {/* —— 这里由原来的 (0) 改为展示真实 commentsCount —— */}
                   💬 评论 ({post.commentsCount || 0})
-                </button>
-
-                <button
-                  className="post-action-btn"
-                  onClick={() => handleRetweet(post.id)}
-                >
-                  🔄 转发 ({post.retweets || 0})
                 </button>
 
                 <button

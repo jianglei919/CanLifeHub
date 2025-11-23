@@ -1245,6 +1245,75 @@
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
+/* ===== 关注按钮样式 ===== */
+.follow-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.follow-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.follow-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.follow-btn-follow {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.follow-btn-follow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.follow-btn-following {
+  background: white;
+  color: #64748b;
+  border: 2px solid #e2e8f0;
+}
+
+.follow-btn-following:hover {
+  border-color: #ff4444;
+  color: #ff4444;
+  background: #fff5f5;
+}
+
+.follow-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.follow-btn-small {
+  padding: 4px 12px;
+  font-size: 12px;
+  border-radius: 16px;
+}
+
 .user-tabs {
   display: flex;
   gap: 0;

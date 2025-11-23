@@ -1,8 +1,7 @@
-// UI/src/components/CommentsBox.jsx
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { commentsApi } from '../api/http';
 
-export default function CommentsBox({ targetType = 'post', targetId }) {
+export default function CommentsBox({ targetType = 'post', targetId, onCountChange }) {
   const [sort, setSort] = useState('new');
   const [page, setPage] = useState(1);
   const pageSize = 10;
@@ -15,6 +14,10 @@ export default function CommentsBox({ targetType = 'post', targetId }) {
   const [newContent, setNewContent] = useState('');
 
   const q = useMemo(() => ({ targetType, targetId, sort, page, pageSize }), [targetType, targetId, sort, page]);
+
+  const notifyDelta = useCallback((delta) => {
+    if (typeof onCountChange === 'function') onCountChange(delta);
+  }, [onCountChange]);
 
   async function fetchList() {
     if (!targetId) return;
@@ -53,6 +56,8 @@ export default function CommentsBox({ targetType = 'post', targetId }) {
         content: text,
       });
       setNewContent('');
+      // 成功后本地+1并刷新列表
+      notifyDelta(1);
       setPage(1);
       await fetchList();
     } catch (e) {
@@ -75,6 +80,7 @@ export default function CommentsBox({ targetType = 'post', targetId }) {
           value={newContent}
           onChange={(e) => setNewContent(e.target.value)}
           placeholder="写下你的评论…（需登录）"
+          disabled={loading}
         />
         <button onClick={onCreate} disabled={loading || !newContent.trim()}>
           发布
@@ -99,7 +105,7 @@ export default function CommentsBox({ targetType = 'post', targetId }) {
           {items.length === 0 ? (
             <p>暂无评论</p>
           ) : (
-            items.map((c) => <CommentItem key={c._id} item={c} />)
+            items.map((c) => <CommentItem key={c._id} item={c} onAnyCommentChange={notifyDelta} />)
           )}
         </div>
       )}
@@ -114,7 +120,7 @@ export default function CommentsBox({ targetType = 'post', targetId }) {
   );
 }
 
-function CommentItem({ item }) {
+function CommentItem({ item, onAnyCommentChange }) {
   const [repliesOpen, setRepliesOpen] = useState(false);
   const [replies, setReplies] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -144,6 +150,8 @@ function CommentItem({ item }) {
       setLoading(true);
       await commentsApi.create({ targetType: 'comment', targetId: item._id, parentId: item._id, content: text });
       setReplyText('');
+      // 成功后刷新回复 & 通知外层评论数+1（后端对回复也会累计到 Post.commentsCount）
+      if (typeof onAnyCommentChange === 'function') onAnyCommentChange(1);
       const { data } = await commentsApi.listReplies(item._id, { page: 1, pageSize: 20 });
       setReplies(data.items || []);
       setRepliesOpen(true);
@@ -191,6 +199,7 @@ function CommentItem({ item }) {
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   placeholder="写回复…（需登录）"
+                  disabled={loading}
                 />
                 <button onClick={sendReply} disabled={loading || !replyText.trim()}>回复</button>
               </div>

@@ -17,10 +17,10 @@ import { useContext } from 'react';
 axios.defaults.baseURL = 'http://localhost:8000';    // 设置 Axios 的默认基础 URL，所有通过 Axios 发送的请求都会以这个 URL 为前缀
 axios.defaults.withCredentials = true                // 配置 Axios 以在跨域请求中携带凭据（如 cookies）
 
-// 已登录用户访问登录/注册时跳转回 Home
+// 已登录用户访问登录/注册时跳转回 Forum
 function AuthGuard({ children }) {
   const { user } = useContext(UserContext);
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/forum" replace />;
   return children;
 }
 

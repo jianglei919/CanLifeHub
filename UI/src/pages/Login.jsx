@@ -29,8 +29,8 @@ export default function Login() {
         setData({ email: "", password: "" });
         // 登录成功后立即获取用户信息并更新Context
         try {
-          const { data: profile } = await authApi.profile();
-          setUser(profile);
+          const { data: profileData } = await authApi.profile();
+          setUser(profileData.user || profileData);
           toast.success(t('loginSuccess'));
           navigate("/forum");
         } catch (err) {

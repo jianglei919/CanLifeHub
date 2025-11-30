@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { commentsApi } from '../api/http';
 import { useLanguage } from "../../context/LanguageContext";
+import { UserContext } from "../../context/userContext";
 
 export default function CommentsBox({ targetType = 'post', targetId, onCountChange }) {
   const { t } = useLanguage();
@@ -123,7 +124,7 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
           {items.length === 0 ? (
             <div className="comments-empty">💭 {t('noCommentsYet')}</div>
           ) : (
-            items.map((c) => <CommentItem key={c._id} item={c} onAnyCommentChange={notifyDelta} />)
+            items.map((c) => <CommentItem key={c._id} item={c} onAnyCommentChange={notifyDelta} onRefresh={fetchList} />)
           )}
         </div>
       )}
@@ -144,8 +145,9 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
   );
 }
 
-function CommentItem({ item, onAnyCommentChange }) {
+function CommentItem({ item, onAnyCommentChange, onRefresh }) {
   const { t } = useLanguage();
+  const { user } = useContext(UserContext);
   const [repliesOpen, setRepliesOpen] = useState(false);
   const [replies, setReplies] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -155,19 +157,23 @@ function CommentItem({ item, onAnyCommentChange }) {
   const unauthorized = typeof err === 'string'
     && (err.includes('未授权') || err.includes('未登录') || err.toLowerCase().includes('unauthorized'));
 
-  async function toggleReplies() {
-    if (repliesOpen) return setRepliesOpen(false);
+  async function fetchReplies() {
     try {
       setErr('');
       setLoading(true);
       const { data } = await commentsApi.listReplies(item._id, { page: 1, pageSize: 20 });
       setReplies(data.items || []);
-      setRepliesOpen(true);
     } catch (e) {
       setErr(e.message || t('loadRepliesFailed'));
     } finally {
       setLoading(false);
     }
+  }
+
+  async function toggleReplies() {
+    if (repliesOpen) return setRepliesOpen(false);
+    await fetchReplies();
+    setRepliesOpen(true);
   }
 
   async function sendReply() {
@@ -180,8 +186,7 @@ function CommentItem({ item, onAnyCommentChange }) {
       setReplyText('');
       // 成功后刷新回复 & 通知外层评论数+1（后端对回复也会累计到 Post.commentsCount）
       if (typeof onAnyCommentChange === 'function') onAnyCommentChange(1);
-      const { data } = await commentsApi.listReplies(item._id, { page: 1, pageSize: 20 });
-      setReplies(data.items || []);
+      await fetchReplies();
       setRepliesOpen(true);
     } catch (e) {
       setErr(e.message || t('replyFailed'));
@@ -190,7 +195,30 @@ function CommentItem({ item, onAnyCommentChange }) {
     }
   }
 
+  async function handleDeleteComment() {
+    if (!window.confirm(t('confirmDelete') || '确定要删除这条评论吗？')) return;
+    try {
+      await commentsApi.remove(item._id);
+      if (onAnyCommentChange) onAnyCommentChange(-1);
+      if (onRefresh) onRefresh();
+    } catch (e) {
+      alert(e.message || t('deleteFailed') || '删除失败');
+    }
+  }
+
+  async function handleDeleteReply(replyId) {
+    if (!window.confirm(t('confirmDelete') || '确定要删除这条回复吗？')) return;
+    try {
+      await commentsApi.remove(replyId);
+      if (onAnyCommentChange) onAnyCommentChange(-1);
+      await fetchReplies();
+    } catch (e) {
+      alert(e.message || t('deleteFailed') || '删除失败');
+    }
+  }
+
   const ts = item.createdAt ? new Date(item.createdAt) : null;
+  const isAuthor = user && (user.id === item.authorId?._id || user.id === item.authorId);
 
   return (
     <div className="comment-item-card">
@@ -206,6 +234,11 @@ function CommentItem({ item, onAnyCommentChange }) {
         <button className="reply-btn" onClick={toggleReplies}>
           {repliesOpen ? `▲ ${t('hideReplies')}` : `▼ ${t('viewReplies')}`}
         </button>
+        {isAuthor && (
+          <button className="delete-btn" onClick={handleDeleteComment} style={{ marginLeft: '10px', color: '#ff4d4f', border: 'none', background: 'none', cursor: 'pointer' }}>
+            {t('delete') || '删除'}
+          </button>
+        )}
       </div>
 
       {repliesOpen && (
@@ -218,18 +251,30 @@ function CommentItem({ item, onAnyCommentChange }) {
                 <div className="replies-empty">{t('noReplies')}</div>
               ) : (
                 <div className="replies-list">
-                  {replies.map((r) => (
-                    <div key={r._id} className="reply-item">
-                      <span className="reply-avatar">💬</span>
-                      <div className="reply-content-wrapper">
-                        <div className="reply-meta">
-                          <span className="reply-author">{r.authorId?.name || t('anonymousUser')}</span>
-                          <span className="reply-time">{r.createdAt ? new Date(r.createdAt).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                  {replies.map((r) => {
+                    const isReplyAuthor = user && (user.id === r.authorId?._id || user.id === r.authorId);
+                    return (
+                      <div key={r._id} className="reply-item">
+                        <span className="reply-avatar">💬</span>
+                        <div className="reply-content-wrapper">
+                          <div className="reply-meta">
+                            <span className="reply-author">{r.authorId?.name || t('anonymousUser')}</span>
+                            <span className="reply-time">{r.createdAt ? new Date(r.createdAt).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                            {isReplyAuthor && (
+                              <button 
+                                className="delete-reply-btn" 
+                                onClick={() => handleDeleteReply(r._id)}
+                                style={{ marginLeft: 'auto', color: '#ff4d4f', border: 'none', background: 'none', cursor: 'pointer', fontSize: '12px' }}
+                              >
+                                {t('delete') || '删除'}
+                              </button>
+                            )}
+                          </div>
+                          <div className="reply-text">{r.content}</div>
                         </div>
-                        <div className="reply-text">{r.content}</div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
               {err && (

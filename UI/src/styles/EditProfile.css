@@ -6,7 +6,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25,13 +26,14 @@
 
 .edit-profile-modal {
   background: white;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-xl);
   animation: slideUp 0.3s ease;
+  border: 1px solid var(--border-color);
 }
 
 @keyframes slideUp {
@@ -47,23 +49,25 @@
 
 .edit-profile-header {
   padding: 20px 24px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: var(--slate-50);
 }
 
 .edit-profile-header h2 {
   margin: 0;
-  font-size: 20px;
-  color: #333;
+  font-size: 18px;
+  color: var(--text-main);
+  font-weight: 700;
 }
 
 .close-btn {
   background: none;
   border: none;
   font-size: 24px;
-  color: #666;
+  color: var(--text-muted);
   cursor: pointer;
   width: 32px;
   height: 32px;
@@ -75,8 +79,8 @@
 }
 
 .close-btn:hover {
-  background: #f0f0f0;
-  color: #333;
+  background: var(--slate-200);
+  color: var(--text-main);
 }
 
 .edit-profile-body {
@@ -90,120 +94,150 @@
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  font-weight: 500;
-  color: #333;
+  font-weight: 600;
+  color: var(--text-main);
   font-size: 14px;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   font-size: 14px;
   transition: all 0.2s;
   box-sizing: border-box;
+  background: var(--slate-50);
+  color: var(--text-main);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--primary-500);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .form-group textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 100px;
   font-family: inherit;
+  line-height: 1.6;
 }
 
 .form-hint {
   font-size: 12px;
-  color: #999;
-  margin-top: 4px;
+  color: var(--text-muted);
+  margin-top: 6px;
 }
 
 .form-warning {
   font-size: 12px;
-  color: #ff6b6b;
-  margin-top: 4px;
+  color: #ef4444;
+  margin-top: 6px;
 }
 
 .edit-profile-footer {
-  padding: 16px 24px;
-  border-top: 1px solid #e0e0e0;
+  padding: 20px 24px;
+  border-top: 1px solid var(--border-color);
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+  background: var(--slate-50);
 }
 
 .cancel-btn,
 .save-btn {
   padding: 10px 24px;
-  border-radius: 8px;
+  border-radius: 999px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   border: none;
 }
 
 .cancel-btn {
-  background: #f0f0f0;
-  color: #666;
+  background: white;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
 }
 
 .cancel-btn:hover {
-  background: #e0e0e0;
+  background: var(--slate-100);
+  color: var(--text-main);
 }
 
 .save-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary-gradient);
   color: white;
+  box-shadow: var(--shadow-sm);
 }
 
 .save-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: var(--shadow-md);
+  opacity: 0.95;
 }
 
 .save-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  background: var(--slate-300);
 }
 
 .error-message {
-  background: #fff3f3;
-  color: #ff6b6b;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 16px;
+  background: #fef2f2;
+  color: #ef4444;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
   font-size: 14px;
-  border: 1px solid #ffcccc;
+  border: 1px solid #fee2e2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .success-message {
-  background: #f0f9ff;
+  background: #eff6ff;
   color: #3b82f6;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
   font-size: 14px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid #dbeafe;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .edit-profile-modal {
-    width: 95%;
-    max-height: 95vh;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
   }
 
   .edit-profile-header,
   .edit-profile-body,
   .edit-profile-footer {
     padding: 16px;
+  }
+  
+  .edit-profile-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  
+  .edit-profile-body {
+    padding-bottom: 80px;
   }
 }

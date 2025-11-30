@@ -87,16 +87,19 @@ export default function Dashboard() {
       {/* ... existing code ... */}
       <header className="dashboard-header">
         <div className="header-wrapper">
-          <div className="logo-section">
-            <span className="logo">📱 CanLifeHub</span>
+          <div className="logo-section" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>
+            <span className="logo">🍁 CanLifeHub</span>
           </div>
 
           <nav className="tab-navigation">
+            <button className="tab-item" onClick={() => navigate('/')}>
+              🏠 首页
+            </button>
             <button
               className={`tab-item ${activeTab === "feed" ? "active" : ""}`}
               onClick={() => setActiveTab("feed")}
             >
-              🏠 首页
+              💬 论坛
             </button>
             {isAuthenticated && (
               <button

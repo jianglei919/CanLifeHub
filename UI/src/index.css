@@ -4,9 +4,9 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color-scheme: light;
+  color: #213547;
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -50,7 +50,7 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #f9f9f9;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -62,28 +62,53 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
+/* Removed @media (prefers-color-scheme: light) block as we are forcing light theme */
 
 /* ===== Custom design system for CanLifeHub ===== */
 :root {
-  --clh-primary: #6366f1;  /* indigo-500 */
-  --clh-primary-hover: #4f46e5;
-  --clh-text: #213547;
-  --clh-muted: #64748b;
-  --clh-border: #e5e7eb;
-  --clh-bg-card: #ffffff;
-  --clh-shadow: 0 10px 25px rgba(2, 6, 23, 0.08);
+  /* Slate Palette (Admin Style) */
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+
+  /* Primary Brand Colors */
+  --primary-500: #6366f1;
+  --primary-600: #4f46e5;
+  --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); /* Indigo to Violet */
+
+  /* Semantic Colors */
+  --bg-body: #f6f7fb;
+  --bg-card: #ffffff;
+  --text-main: var(--slate-900);
+  --text-muted: var(--slate-500);
+  --border-color: var(--slate-200);
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  /* Radius */
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --radius-full: 9999px;
+
+  /* Legacy variables mapping */
+  --clh-primary: var(--primary-500);
+  --clh-primary-hover: var(--primary-600);
+  --clh-text: var(--text-main);
+  --clh-muted: var(--text-muted);
+  --clh-border: var(--border-color);
+  --clh-bg-card: var(--bg-card);
+  --clh-shadow: var(--shadow-lg);
 }
 
 /* Layout wrappers */
@@ -93,7 +118,7 @@ button:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary-gradient);
   position: relative;
   padding: 20px;
   overflow: hidden;
@@ -241,7 +266,7 @@ button:focus-visible {
 /* 左侧品牌展示区 */
 .auth-brand-section {
   flex: 1;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -488,7 +513,7 @@ button:focus-visible {
   
   .auth-form-section {
     flex: 1;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-gradient);
   }
   
   .form-container {

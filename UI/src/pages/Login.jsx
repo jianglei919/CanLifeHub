@@ -29,7 +29,7 @@ export default function Login() {
           const { data: profile } = await authApi.profile();
           setUser(profile);
           toast.success("登录成功");
-          navigate("/dashboard");
+          navigate("/");
         } catch (err) {
           console.error("获取用户信息失败:", err);
           toast.error("获取用户信息失败");

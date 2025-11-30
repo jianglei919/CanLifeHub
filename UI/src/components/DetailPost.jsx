@@ -300,9 +300,17 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
 
   if (!post) {
     return (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <div className="error">帖子不存在或已被删除</div>
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3>提示</h3>
+            <button className="modal-close" onClick={onClose}>✕</button>
+          </div>
+          <div className="modal-body">
+            <div className="error" style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
+              帖子不存在或已被删除
+            </div>
+          </div>
         </div>
       </div>
     );

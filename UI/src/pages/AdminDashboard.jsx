@@ -502,7 +502,7 @@ export default function AdminDashboard() {
   };
 
   const handleBackToApp = () => {
-    navigate('/dashboard');
+    navigate('/forum');
   };
 
   if (!user || user.role !== 'admin') {

@@ -1,18 +1,13 @@
-// UI/src/components/ChatbotWidget.jsx
 import { useState, useRef, useEffect } from 'react';
 import { chatbotApi } from '../api/http';
 import { toast } from 'react-hot-toast';
+import { useLanguage } from '../../context/LanguageContext';
 import '../styles/ChatbotWidget.css';
 
 export default function ChatbotWidget() {
+  const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: '你好！我是 CanLifeHub AI 助手，有什么可以帮助你的吗？',
-      timestamp: new Date().toISOString()
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [position, setPosition] = useState({ x: window.innerWidth - 380, y: window.innerHeight - 520 });
@@ -21,6 +16,17 @@ export default function ChatbotWidget() {
   
   const messagesEndRef = useRef(null);
   const widgetRef = useRef(null);
+
+  // Initialize welcome message when language changes or component mounts
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([{
+        role: 'assistant',
+        content: t('welcomeMessage'),
+        timestamp: new Date().toISOString()
+      }]);
+    }
+  }, [t, messages.length]);
 
   // 自动滚动到最新消息
   const scrollToBottom = () => {
@@ -96,7 +102,8 @@ export default function ChatbotWidget() {
 
       const { data: res } = await chatbotApi.sendMessage({
         message: inputMessage,
-        conversationHistory
+        conversationHistory,
+        language // Pass current language to backend
       });
 
       if (res.error) {
@@ -111,12 +118,12 @@ export default function ChatbotWidget() {
       }
     } catch (error) {
       console.error('Chatbot error:', error);
-      toast.error('发送失败，请稍后重试');
+      toast.error(t('sendFailed'));
       
       // 添加错误消息
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: '抱歉，我现在无法回复。请稍后再试。',
+        content: t('chatbotError'),
         timestamp: new Date().toISOString()
       }]);
     } finally {
@@ -126,10 +133,10 @@ export default function ChatbotWidget() {
 
   // 快捷问题
   const quickQuestions = [
-    '如何发布帖子？',
-    '如何修改个人信息？',
-    '如何使用聊天功能？',
-    '平台使用指南'
+    t('quickQ1'),
+    t('quickQ2'),
+    t('quickQ3'),
+    t('quickQ4')
   ];
 
   const handleQuickQuestion = (question) => {
@@ -140,9 +147,15 @@ export default function ChatbotWidget() {
   const handleClearChat = () => {
     setMessages([{
       role: 'assistant',
-      content: '你好！我是 CanLifeHub AI 助手，有什么可以帮助你的吗？',
+      content: t('welcomeMessage'),
       timestamp: new Date().toISOString()
     }]);
+  };
+
+  // 复制消息
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success(t('copied'));
   };
 
   return (
@@ -160,28 +173,31 @@ export default function ChatbotWidget() {
           onMouseDown={handleMouseDown}
         >
           {/* 头部 */}
-          <div className="chatbot-header">
+          <div className="chatbot-header" title={t('dragToMove')}>
             <div className="chatbot-header-left">
               <div className="chatbot-avatar">
                 <span>🤖</span>
               </div>
               <div>
-                <div className="chatbot-title">AI 助手</div>
-                <div className="chatbot-status">在线</div>
+                <div className="chatbot-title">{t('chatbotTitle')}</div>
+                <div className="chatbot-status">
+                  {t('chatbotStatus')}
+                  <span className="chatbot-drag-hint"> · {t('dragHint')}</span>
+                </div>
               </div>
             </div>
             <div className="chatbot-header-actions">
               <button
                 className="chatbot-action-btn"
                 onClick={handleClearChat}
-                title="清空对话"
+                title={t('clearChat')}
               >
                 🗑️
               </button>
               <button
                 className="chatbot-action-btn"
                 onClick={() => setIsOpen(false)}
-                title="最小化"
+                title={t('minimize')}
               >
                 ➖
               </button>
@@ -200,11 +216,20 @@ export default function ChatbotWidget() {
                 </div>
                 <div className="message-content">
                   <div className="message-text">{msg.content}</div>
-                  <div className="message-time">
-                    {new Date(msg.timestamp).toLocaleTimeString('zh-CN', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                  <div className="message-actions">
+                    <span className="message-time">
+                      {new Date(msg.timestamp).toLocaleTimeString(language === 'zh' ? 'zh-CN' : 'en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                    <button 
+                      className="message-copy-btn" 
+                      onClick={() => handleCopy(msg.content)}
+                      title={t('copy')}
+                    >
+                      📋
+                    </button>
                   </div>
                 </div>
               </div>
@@ -229,7 +254,7 @@ export default function ChatbotWidget() {
           {/* 快捷问题 */}
           {messages.length === 1 && (
             <div className="chatbot-quick-questions">
-              <div className="quick-questions-title">常见问题：</div>
+              <div className="quick-questions-title">{t('quickQuestionsTitle')}</div>
               <div className="quick-questions-list">
                 {quickQuestions.map((question, index) => (
                   <button
@@ -249,7 +274,7 @@ export default function ChatbotWidget() {
             <input
               type="text"
               className="chatbot-input"
-              placeholder="输入消息..."
+              placeholder={t('chatbotPlaceholder')}
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -270,7 +295,7 @@ export default function ChatbotWidget() {
       <button
         className={`chatbot-toggle-btn ${isOpen ? 'active' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
-        title="AI 助手"
+        title={t('chatbotTitle')}
       >
         {isOpen ? '✕' : '💬'}
       </button>

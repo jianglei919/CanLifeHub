@@ -2,10 +2,12 @@
 import { useState, useEffect, useContext } from "react";
 import { postsApi, authApi, followApi } from "../api/http";
 import { UserContext } from "../../context/userContext";
+import { useLanguage } from "../../context/LanguageContext";
 import EditProfile from "./EditProfile";
 import DetailPost from "./DetailPost";
 
 export default function UserModule() {
+  const { t } = useLanguage();
   const { user: ctxUser, setUser: setCtxUser } = useContext(UserContext);
   const [selectedPostId, setSelectedPostId] = useState(null);
 const [detailMode, setDetailMode] = useState('view');
@@ -100,7 +102,7 @@ const [detailMode, setDetailMode] = useState('view');
       }));
     } catch (err) {
       console.error("获取用户帖子失败:", err);
-      setError(err?.response?.data?.error || err?.message || "获取帖子失败");
+      setError(err?.response?.data?.error || err?.message || t('error'));
     } finally {
       setLoading(false);
     }
@@ -145,7 +147,7 @@ const [detailMode, setDetailMode] = useState('view');
     return (
       <div className="user-module">
         <div className="empty-state">
-          未授权，请先 <a href="/login">登录</a>
+          {t('unauthorized')} <a href="/login">{t('loginLink')}</a>
         </div>
       </div>
     );
@@ -157,22 +159,22 @@ const [detailMode, setDetailMode] = useState('view');
         <span className="user-avatar">{user.avatar || "👤"}</span>
         <div className="user-info">
           <h3>{user.name || ""}</h3>
-          <p>{user.bio || "这个人很懒，什么都没写..."}</p>
+          <p>{user.bio || t('lazyBio')}</p>
         </div>
       </div>
 
       <div className="user-stats">
         <div className="stat">
           <span className="stat-value">{user.followers}</span>
-          <span className="stat-label">粉丝</span>
+          <span className="stat-label">{t('followers')}</span>
         </div>
         <div className="stat">
           <span className="stat-value">{user.following}</span>
-          <span className="stat-label">关注</span>
+          <span className="stat-label">{t('following')}</span>
         </div>
         <div className="stat">
           <span className="stat-value">{user.postsCount}</span>
-          <span className="stat-label">帖子</span>
+          <span className="stat-label">{t('posts')}</span>
         </div>
       </div>
 
@@ -180,7 +182,7 @@ const [detailMode, setDetailMode] = useState('view');
         className="edit-profile-btn"
         onClick={() => setShowEditModal(true)}
       >
-        编辑资料
+        {t('editProfile')}
       </button>
 
       <div className="user-tabs">
@@ -188,25 +190,25 @@ const [detailMode, setDetailMode] = useState('view');
           className={`tab-btn ${activeTab === "posts" ? "active" : ""}`}
           onClick={() => handleTabChange("posts")}
         >
-          我的帖子
+          {t('myPosts')}
         </button>
         <button
           className={`tab-btn ${activeTab === "likes" ? "active" : ""}`}
           onClick={() => handleTabChange("likes")}
         >
-          我的赞
+          {t('myLikes')}
         </button>
       </div>
 
       <div className="user-content">
         {activeTab === "posts" && (
           <div className="posts-list">
-            {loading && <div className="loading">加载中...</div>}
+            {loading && <div className="loading">{t('loading')}</div>}
             {error && <div className="error">{error}</div>}
             {!loading && !error && (
   <>
     {(!user.posts || user.posts.length === 0) ? (
-      <div className="empty-state">暂无帖子</div>
+      <div className="empty-state">{t('noPosts')}</div>
     ) : (
       user.posts.map((post) => (
         <div 
@@ -237,7 +239,7 @@ const [detailMode, setDetailMode] = useState('view');
         )}
         {activeTab === "likes" && (
           <div className="likes-list">
-            <p>暂无赞过的内容</p>
+            <p>{t('noLikes')}</p>
           </div>
         )}
       </div>

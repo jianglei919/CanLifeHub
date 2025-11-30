@@ -1,444 +1,890 @@
 {
-  "platform_info": {
-    "name": "CanLifeHub",
-    "description": "CanLifeHub 是一个面向加拿大华人留学生和新移民的综合社区平台，提供信息分享、社交互动、生活指南等服务",
-    "features": [
-      "社交动态：用户可以发布帖子、评论、点赞，分享留学和生活经验",
-      "私信功能：用户之间可以发送私信进行一对一交流",
-      "AI 助手：提供智能聊天助手，解答留学、移民、生活等问题",
-      "个人资料：用户可以管理自己的个人信息和隐私设置",
-      "关注系统：用户可以关注其他用户，查看关注者的动态"
-    ],
-    "target_users": [
-      "加拿大留学生（本科、研究生、博士）",
-      "准备申请加拿大留学的学生",
-      "加拿大新移民和移民申请者",
-      "在加拿大工作的华人"
-    ]
-  },
-  "faqs": [
-    {
-      "question": "如何发布帖子？",
-      "answer": "在首页顶部有「创建帖子」区域，输入内容后点击「发布」按钮即可。支持文字和图片上传。发帖时请遵守社区规范，不要发布违法、广告、垃圾信息。",
-      "tags": ["发帖", "使用指南"]
-    },
-    {
-      "question": "如何私信其他用户？",
-      "answer": "点击顶部导航栏的「私信」标签，可以看到你的对话列表。点击任意对话进入聊天界面，或者在用户个人资料页面点击「发私信」按钮开始新对话。",
-      "tags": ["私信", "聊天"]
-    },
-    {
-      "question": "如何查看和编辑我的个人资料？",
-      "answer": "点击顶部导航栏的「我的资料」标签，可以查看个人信息。在个人资料页面可以编辑昵称、头像、个人简介等信息。",
-      "tags": ["个人资料", "设置"]
-    },
-    {
-      "question": "如何关注或取消关注其他用户？",
-      "answer": "在用户的个人资料页面点击「关注」按钮即可关注该用户。如果已经关注，按钮会显示「已关注」，点击可以取消关注。关注后可以在首页的「关注的人」标签中看到他们的动态。",
-      "tags": ["关注", "社交"]
-    },
-    {
-      "question": "如何查看关注的人的动态？",
-      "answer": "在首页点击「关注的人」标签，即可只看到你关注的用户发布的内容。这样可以更方便地追踪感兴趣用户的分享。",
-      "tags": ["动态", "关注"]
-    },
-    {
-      "question": "如何评论和点赞帖子？",
-      "answer": "在帖子下方点击「评论」图标可以发表评论，点击「❤️」图标可以点赞。你可以在评论区与其他用户互动交流。",
-      "tags": ["评论", "点赞", "互动"]
-    },
-    {
-      "question": "如何搜索其他用户？",
-      "answer": "在私信页面可以通过用户名搜索其他用户。未来会添加更多搜索功能，让你更容易找到感兴趣的用户和内容。",
-      "tags": ["搜索", "用户"]
-    },
-    {
-      "question": "忘记密码怎么办？",
-      "answer": "目前平台正在开发密码重置功能。如果忘记密码，请联系管理员协助重置。建议记录好你的登录信息。",
-      "tags": ["密码", "账号"]
-    }
-  ],
-  "help_topics": [
-    {
-      "topic": "账号安全",
-      "content": "请妥善保管你的账号密码，不要与他人分享。建议使用强密码（包含字母、数字、符号）。如果发现账号异常活动或被盗用，请立即联系管理员。不要在公共电脑上保存登录状态。",
-      "tips": [
-        "使用复杂且独特的密码",
-        "不要在多个网站使用相同密码",
-        "定期更换密码",
-        "不要点击可疑链接"
-      ]
-    },
-    {
-      "topic": "社区规范",
-      "content": "CanLifeHub 致力于创建一个友好、互助的社区环境。请尊重其他用户，不要发布违法、暴力、色情、歧视性内容。禁止发布广告、垃圾信息、虚假信息。违规内容将被删除，严重违规者将被封号。",
-      "rules": [
-        "尊重他人，文明交流",
-        "真实分享，不造谣传谣",
-        "保护隐私，不泄露他人信息",
-        "禁止广告和商业推广",
-        "禁止骚扰、诽谤他人"
-      ]
-    },
-    {
-      "topic": "隐私保护",
-      "content": "你的个人信息受到保护。其他用户只能看到你公开的资料（昵称、头像、个人简介）。私信内容仅你和对方可见，平台不会查看或泄露。建议不要在公开帖子中分享敏感个人信息（如具体地址、电话号码、银行账号等）。",
-      "privacy_tips": [
-        "谨慎分享个人联系方式",
-        "不要公开护照、签证等证件信息",
-        "注意保护家人和朋友的隐私",
-        "可以通过设置控制谁能看到你的动态"
-      ]
-    },
-    {
-      "topic": "内容发布指南",
-      "content": "发布内容时请确保真实、有价值。推荐分享：留学申请经验、学校生活、租房攻略、工作机会、生活技巧等。避免发布：广告推广、政治敏感话题、个人隐私信息。高质量的内容会获得更多关注和互动。",
-      "content_suggestions": [
-        "留学申请经验分享",
-        "学校和专业介绍",
-        "租房、买车等生活经验",
-        "找工作、实习经验",
-        "旅游景点推荐",
-        "美食餐厅分享"
-      ]
-    }
-  ],
-  "common_issues": [
-    {
-      "issue": "无法登录",
-      "solution": "请检查用户名和密码是否正确（区分大小写）。确认网络连接正常。清除浏览器缓存和 Cookie 后重试。如仍无法登录，可能是账号被锁定，请联系管理员。",
-      "troubleshooting": [
-        "验证用户名拼写是否正确",
-        "确认密码输入准确（注意大小写）",
-        "尝试刷新页面或更换浏览器",
-        "清除浏览器缓存和 Cookie"
-      ]
-    },
-    {
-      "issue": "图片上传失败",
-      "solution": "请确保图片大小不超过 5MB，格式为 JPG、PNG 或 GIF。检查网络连接是否稳定。如果图片过大，可以使用压缩工具减小文件大小后重试。",
-      "image_requirements": {
-        "max_size": "5MB",
-        "formats": ["JPG", "JPEG", "PNG", "GIF"],
-        "recommended_resolution": "不超过 4096x4096 像素"
-      }
-    },
-    {
-      "issue": "私信发送失败",
-      "solution": "请检查网络连接是否正常。确认对方没有拉黑你。私信内容不要包含违规信息。稍后重试，如持续失败请联系管理员。",
-      "reasons": [
-        "网络连接不稳定",
-        "对方可能设置了隐私限制",
-        "消息内容触发敏感词过滤",
-        "服务器临时故障"
-      ]
-    },
-    {
-      "issue": "看不到最新动态",
-      "solution": "尝试刷新页面（F5）。检查是否选择了「全部动态」还是「关注的人」。清除浏览器缓存。如果问题持续，可能是网络延迟，请稍后再试。"
-    },
-    {
-      "issue": "评论或点赞没有反应",
-      "solution": "确认你已经登录。刷新页面查看是否已经成功。检查网络连接。如果帖子被删除或用户被封禁，可能无法进行操作。"
-    },
-    {
-      "issue": "收不到未读消息提示",
-      "solution": "确保你在「私信」标签页时，系统会实时更新未读数。刷新页面查看最新状态。检查浏览器是否阻止了通知权限。"
-    }
-  ],
-  "canada_info": {
-    "study": {
-      "category": "留学",
-      "application_process": [
-        "选择学校和专业：根据兴趣、成绩、预算选择合适的学校",
-        "准备申请材料：成绩单、推荐信、个人陈述、语言成绩等",
-        "提交申请：通过学校官网或申请平台提交",
-        "获得录取通知书（LOA）：通常需要 2-8 周",
-        "申请学习许可（Study Permit）：需要录取通知书、资金证明等",
-        "获签后准备出发：预订机票、安排住宿、准备行李"
+  "zh": {
+    "platform_info": {
+      "name": "CanLifeHub",
+      "description": "CanLifeHub 是一个面向加拿大华人留学生和新移民的综合社区平台，提供信息分享、社交互动、生活指南等服务",
+      "features": [
+        "社交动态：用户可以发布帖子、评论、点赞，分享留学和生活经验",
+        "私信功能：用户之间可以发送私信进行一对一交流",
+        "AI 助手：提供智能聊天助手，解答留学、移民、生活等问题",
+        "个人资料：用户可以管理自己的个人信息和隐私设置",
+        "关注系统：用户可以关注其他用户，查看关注者的动态"
       ],
-      "visa_requirements": [
-        "有效护照",
-        "学校录取通知书",
-        "学费收据或资金证明",
-        "体检报告",
-        "无犯罪记录证明",
-        "语言成绩（IELTS/TOEFL/雅思等）",
-        "学习计划说明"
-      ],
-      "tips": [
-        "申请学签需要提前准备好录取通知书、资金证明（建议准备第一年学费+生活费）",
-        "到达加拿大后记得办理 SIN（社会保险号），这是工作和报税的必备证件",
-        "可以申请校内或校外工作许可来获得工作经验，每周最多工作20小时（假期可全职）",
-        "加入学校的中国学生会，可以快速融入、找到朋友、获取信息",
-        "尽早适应英语环境，多参加课堂讨论和小组作业"
-      ],
-      "popular_schools": [
-        "多伦多大学（University of Toronto）",
-        "英属哥伦比亚大学（UBC）",
-        "麦吉尔大学（McGill University）",
-        "滑铁卢大学（University of Waterloo）- 计算机专业强",
-        "女王大学（Queen's University）",
-        "西安大略大学（Western University）- 商科知名",
-        "约克大学（York University）- 商科和艺术",
-        "西蒙菲莎大学（SFU）"
+      "target_users": [
+        "加拿大留学生（本科、研究生、博士）",
+        "准备申请加拿大留学的学生",
+        "加拿大新移民和移民申请者",
+        "在加拿大工作的华人"
       ]
     },
-    "immigration": {
-      "category": "移民",
-      "pathways": [
-        "Express Entry（快速通道）：适合有工作经验和较高语言成绩的申请者",
-        "省提名计划（PNP）：各省自己的移民项目，要求相对灵活",
-        "加拿大经验类移民（CEC）：适合有加拿大工作经验的申请者",
-        "联邦技术移民（FSW）：适合海外技术人才",
-        "留学生移民：毕业后获得工作经验，通过 CEC 或 PNP 申请",
-        "家庭团聚移民：已有PR或公民的家人可以担保"
-      ],
-      "express_entry_score": {
-        "factors": [
-          "年龄（最高30分）：25-29岁最高分",
-          "教育（最高150分）：硕士及以上学历得分高",
-          "语言能力（最高160分）：CLB 9以上（雅思听8说7读7写7）",
-          "工作经验（最高80分）：3年以上加拿大工作经验",
-          "额外加分：配偶、省提名、加拿大学历、工作offer等"
-        ],
-        "minimum_score": "通常需要 470-500 分以上才有机会获邀"
+    "faqs": [
+      {
+        "question": "如何发布帖子？",
+        "answer": "在首页顶部有「创建帖子」区域，输入内容后点击「发布」按钮即可。支持文字和图片上传。发帖时请遵守社区规范，不要发布违法、广告、垃圾信息。",
+        "tags": ["发帖", "使用指南"]
       },
-      "tips": [
-        "Express Entry 是最常见的移民途径，需要通过 CRS 评分系统竞争",
-        "省提名计划（PNP）可以为你的移民申请加 600 分，几乎保证获邀",
-        "保持良好的语言成绩（IELTS/CELPIP）很重要，语言分数占比很高",
-        "积累加拿大本地工作经验对移民申请有很大帮助",
-        "尽早开始规划移民路径，准备相关材料和提升评分",
-        "考虑找移民顾问或律师咨询，避免走弯路"
-      ],
-      "post_graduation_work_permit": {
-        "description": "毕业工签（PGWP）允许留学生毕业后在加拿大工作",
-        "duration": "根据学习时长决定，最长3年",
-        "eligibility": [
-          "在指定学习机构（DLI）完成至少8个月的课程",
-          "持有有效的学习许可",
-          "毕业后180天内申请"
-        ],
+      {
+        "question": "如何私信其他用户？",
+        "answer": "点击顶部导航栏的「私信」标签，可以看到你的对话列表。点击任意对话进入聊天界面，或者在用户个人资料页面点击「发私信」按钮开始新对话。",
+        "tags": ["私信", "聊天"]
+      },
+      {
+        "question": "如何查看和编辑我的个人资料？",
+        "answer": "点击顶部导航栏的「我的资料」标签，可以查看个人信息。在个人资料页面可以编辑昵称、头像、个人简介等信息。",
+        "tags": ["个人资料", "设置"]
+      },
+      {
+        "question": "如何关注或取消关注其他用户？",
+        "answer": "在用户的个人资料页面点击「关注」按钮即可关注该用户。如果已经关注，按钮会显示「已关注」，点击可以取消关注。关注后可以在首页的「关注的人」标签中看到他们的动态。",
+        "tags": ["关注", "社交"]
+      },
+      {
+        "question": "如何查看关注的人的动态？",
+        "answer": "在首页点击「关注的人」标签，即可只看到你关注的用户发布的内容。这样可以更方便地追踪感兴趣用户的分享。",
+        "tags": ["动态", "关注"]
+      },
+      {
+        "question": "如何评论和点赞帖子？",
+        "answer": "在帖子下方点击「评论」图标可以发表评论，点击「❤️」图标可以点赞。你可以在评论区与其他用户互动交流。",
+        "tags": ["评论", "点赞", "互动"]
+      },
+      {
+        "question": "如何搜索其他用户？",
+        "answer": "在私信页面可以通过用户名搜索其他用户。未来会添加更多搜索功能，让你更容易找到感兴趣的用户和内容。",
+        "tags": ["搜索", "用户"]
+      },
+      {
+        "question": "忘记密码怎么办？",
+        "answer": "目前平台正在开发密码重置功能。如果忘记密码，请联系管理员协助重置。建议记录好你的登录信息。",
+        "tags": ["密码", "账号"]
+      }
+    ],
+    "help_topics": [
+      {
+        "topic": "账号安全",
+        "content": "请妥善保管你的账号密码，不要与他人分享。建议使用强密码（包含字母、数字、符号）。如果发现账号异常活动或被盗用，请立即联系管理员。不要在公共电脑上保存登录状态。",
         "tips": [
-          "PGWP 只能申请一次，好好规划使用",
-          "有了工作经验后可以通过 CEC 申请移民",
-          "工作时长和职位类别会影响移民申请"
+          "使用复杂且独特的密码",
+          "不要在多个网站使用相同密码",
+          "定期更换密码",
+          "不要点击可疑链接"
+        ]
+      },
+      {
+        "topic": "社区规范",
+        "content": "CanLifeHub 致力于创建一个友好、互助的社区环境。请尊重其他用户，不要发布违法、暴力、色情、歧视性内容。禁止发布广告、垃圾信息、虚假信息。违规内容将被删除，严重违规者将被封号。",
+        "rules": [
+          "尊重他人，文明交流",
+          "真实分享，不造谣传谣",
+          "保护隐私，不泄露他人信息",
+          "禁止广告和商业推广",
+          "禁止骚扰、诽谤他人"
+        ]
+      },
+      {
+        "topic": "隐私保护",
+        "content": "你的个人信息受到保护。其他用户只能看到你公开的资料（昵称、头像、个人简介）。私信内容仅你和对方可见，平台不会查看或泄露。建议不要在公开帖子中分享敏感个人信息（如具体地址、电话号码、银行账号等）。",
+        "privacy_tips": [
+          "谨慎分享个人联系方式",
+          "不要公开护照、签证等证件信息",
+          "注意保护家人和朋友的隐私",
+          "可以通过设置控制谁能看到你的动态"
+        ]
+      },
+      {
+        "topic": "内容发布指南",
+        "content": "发布内容时请确保真实、有价值。推荐分享：留学申请经验、学校生活、租房攻略、工作机会、生活技巧等。避免发布：广告推广、政治敏感话题、个人隐私信息。高质量的内容会获得更多关注和互动。",
+        "content_suggestions": [
+          "留学申请经验分享",
+          "学校和专业介绍",
+          "租房、买车等生活经验",
+          "找工作、实习经验",
+          "旅游景点推荐",
+          "美食餐厅分享"
         ]
       }
-    },
-    "living": {
-      "category": "生活",
-      "housing": {
-        "rental_platforms": [
-          "Kijiji.ca - 最常用的二手交易和租房平台",
-          "Facebook Marketplace - 适合找短租和二手家具",
-          "Craigslist.ca - 租房和二手交易",
-          "租房网站：Rentals.ca, PadMapper, Zumper",
-          "学校官网或学生会 - 有时提供住宿信息"
-        ],
-        "rental_tips": [
-          "看房时检查水电、暖气、网络等设施",
-          "了解租约条款，注意租期、押金、utilities 是否包含",
-          "拍照记录房屋初始状态，避免退房纠纷",
-          "与室友提前沟通生活习惯和费用分担",
-          "注意防范租房诈骗，不要在看房前转账"
-        ],
-        "average_rent": {
-          "Toronto": "一室公寓 $2000-2500/月，合租 $800-1500/月",
-          "Vancouver": "一室公寓 $2200-2800/月，合租 $900-1600/月",
-          "Montreal": "一室公寓 $1200-1600/月，合租 $600-1000/月",
-          "Ottawa": "一室公寓 $1500-2000/月，合租 $700-1200/月"
+    ],
+    "common_issues": [
+      {
+        "issue": "无法登录",
+        "solution": "请检查用户名和密码是否正确（区分大小写）。确认网络连接正常。清除浏览器缓存和 Cookie 后重试。如仍无法登录，可能是账号被锁定，请联系管理员。",
+        "troubleshooting": [
+          "验证用户名拼写是否正确",
+          "确认密码输入准确（注意大小写）",
+          "尝试刷新页面或更换浏览器",
+          "清除浏览器缓存和 Cookie"
+        ]
+      },
+      {
+        "issue": "图片上传失败",
+        "solution": "请确保图片大小不超过 5MB，格式为 JPG、PNG 或 GIF。检查网络连接是否稳定。如果图片过大，可以使用压缩工具减小文件大小后重试。",
+        "image_requirements": {
+          "max_size": "5MB",
+          "formats": ["JPG", "JPEG", "PNG", "GIF"],
+          "recommended_resolution": "不超过 4096x4096 像素"
         }
       },
-      "banking": {
-        "recommended_banks": [
-          "RBC（皇家银行）- 最大的银行，服务网点多",
-          "TD（道明银行）- 营业时间长，周末也开门",
-          "Scotiabank（丰业银行）- 学生优惠多",
-          "BMO（蒙特利尔银行）- 历史悠久",
-          "CIBC（帝国商业银行）"
+      {
+        "issue": "私信发送失败",
+        "solution": "请检查网络连接是否正常。确认对方没有拉黑你。私信内容不要包含违规信息。稍后重试，如持续失败请联系管理员。",
+        "reasons": [
+          "网络连接不稳定",
+          "对方可能设置了隐私限制",
+          "消息内容触发敏感词过滤",
+          "服务器临时故障"
+        ]
+      },
+      {
+        "issue": "看不到最新动态",
+        "solution": "尝试刷新页面（F5）。检查是否选择了「全部动态」还是「关注的人」。清除浏览器缓存。如果问题持续，可能是网络延迟，请稍后再试。"
+      },
+      {
+        "issue": "评论或点赞没有反应",
+        "solution": "确认你已经登录。刷新页面查看是否已经成功。检查网络连接。如果帖子被删除或用户被封禁，可能无法进行操作。"
+      },
+      {
+        "issue": "收不到未读消息提示",
+        "solution": "确保你在「私信」标签页时，系统会实时更新未读数。刷新页面查看最新状态。检查浏览器是否阻止了通知权限。"
+      }
+    ],
+    "canada_info": {
+      "study": {
+        "category": "留学",
+        "application_process": [
+          "选择学校和专业：根据兴趣、成绩、预算选择合适的学校",
+          "准备申请材料：成绩单、推荐信、个人陈述、语言成绩等",
+          "提交申请：通过学校官网或申请平台提交",
+          "获得录取通知书（LOA）：通常需要 2-8 周",
+          "申请学习许可（Study Permit）：需要录取通知书、资金证明等",
+          "获签后准备出发：预订机票、安排住宿、准备行李"
         ],
-        "account_types": [
-          "Chequing Account（支票账户）- 日常使用",
-          "Savings Account（储蓄账户）- 存钱有利息",
-          "学生账户 - 通常免月费，有优惠"
+        "visa_requirements": [
+          "有效护照",
+          "学校录取通知书",
+          "学费收据或资金证明",
+          "体检报告",
+          "无犯罪记录证明",
+          "语言成绩（IELTS/TOEFL/雅思等）",
+          "学习计划说明"
         ],
         "tips": [
-          "带护照、学签、学校录取通知书去开户",
-          "选择学生账户可以免月费",
-          "申请 Debit Card 和 Credit Card（信用卡可以积累信用记录）",
-          "下载银行 App，方便随时查看账户和转账"
+          "申请学签需要提前准备好录取通知书、资金证明（建议准备第一年学费+生活费）",
+          "到达加拿大后记得办理 SIN（社会保险号），这是工作和报税的必备证件",
+          "可以申请校内或校外工作许可来获得工作经验，每周最多工作20小时（假期可全职）",
+          "加入学校的中国学生会，可以快速融入、找到朋友、获取信息",
+          "尽早适应英语环境，多参加课堂讨论和小组作业"
+        ],
+        "popular_schools": [
+          "多伦多大学（University of Toronto）",
+          "英属哥伦比亚大学（UBC）",
+          "麦吉尔大学（McGill University）",
+          "滑铁卢大学（University of Waterloo）- 计算机专业强",
+          "女王大学（Queen's University）",
+          "西安大略大学（Western University）- 商科知名",
+          "约克大学（York University）- 商科和艺术",
+          "西蒙菲莎大学（SFU）"
         ]
       },
-      "shopping": {
-        "supermarkets": [
-          "Costco - 会员制，大包装便宜，适合囤货",
-          "Walmart - 商品种类全，价格适中",
-          "No Frills - 平价超市，适合预算有限的学生",
-          "Loblaws/Real Canadian Superstore - 品质好，价格稍高",
-          "T&T 大统华 - 亚洲食品超市，中国食材齐全",
-          "Foodie Mart/华泰 - 华人超市"
+      "immigration": {
+        "category": "移民",
+        "pathways": [
+          "Express Entry（快速通道）：适合有工作经验和较高语言成绩的申请者",
+          "省提名计划（PNP）：各省自己的移民项目，要求相对灵活",
+          "加拿大经验类移民（CEC）：适合有加拿大工作经验的申请者",
+          "联邦技术移民（FSW）：适合海外技术人才",
+          "留学生移民：毕业后获得工作经验，通过 CEC 或 PNP 申请",
+          "家庭团聚移民：已有PR或公民的家人可以担保"
         ],
-        "online_shopping": [
-          "Amazon.ca - 商品最全，Prime 会员包邮",
-          "Best Buy - 电子产品",
-          "Wayfair - 家具家居",
-          "Instacart - 生鲜配送"
+        "express_entry_score": {
+          "factors": [
+            "年龄（最高30分）：25-29岁最高分",
+            "教育（最高150分）：硕士及以上学历得分高",
+            "语言能力（最高160分）：CLB 9以上（雅思听8说7读7写7）",
+            "工作经验（最高80分）：3年以上加拿大工作经验",
+            "额外加分：配偶、省提名、加拿大学历、工作offer等"
+          ],
+          "minimum_score": "通常需要 470-500 分以上才有机会获邀"
+        },
+        "tips": [
+          "Express Entry 是最常见的移民途径，需要通过 CRS 评分系统竞争",
+          "省提名计划（PNP）可以为你的移民申请加 600 分，几乎保证获邀",
+          "保持良好的语言成绩（IELTS/CELPIP）很重要，语言分数占比很高",
+          "积累加拿大本地工作经验对移民申请有很大帮助",
+          "尽早开始规划移民路径，准备相关材料和提升评分",
+          "考虑找移民顾问或律师咨询，避免走弯路"
         ],
-        "saving_tips": [
-          "办理各超市的会员卡积分",
-          "关注每周的 Flyer 打折信息",
-          "使用 Rakuten、Honey 等返现插件",
-          "黑五、Boxing Day、Prime Day 大促时囤货"
+        "post_graduation_work_permit": {
+          "description": "毕业工签（PGWP）允许留学生毕业后在加拿大工作",
+          "duration": "根据学习时长决定，最长3年",
+          "eligibility": [
+            "在指定学习机构（DLI）完成至少8个月的课程",
+            "持有有效的学习许可",
+            "毕业后180天内申请"
+          ],
+          "tips": [
+            "PGWP 只能申请一次，好好规划使用",
+            "有了工作经验后可以通过 CEC 申请移民",
+            "工作时长和职位类别会影响移民申请"
+          ]
+        }
+      },
+      "living": {
+        "category": "生活",
+        "housing": {
+          "rental_platforms": [
+            "Kijiji.ca - 最常用的二手交易和租房平台",
+            "Facebook Marketplace - 适合找短租和二手家具",
+            "Craigslist.ca - 租房和二手交易",
+            "租房网站：Rentals.ca, PadMapper, Zumper",
+            "学校官网或学生会 - 有时提供住宿信息"
+          ],
+          "rental_tips": [
+            "看房时检查水电、暖气、网络等设施",
+            "了解租约条款，注意租期、押金、utilities 是否包含",
+            "拍照记录房屋初始状态，避免退房纠纷",
+            "与室友提前沟通生活习惯和费用分担",
+            "注意防范租房诈骗，不要在看房前转账"
+          ],
+          "average_rent": {
+            "Toronto": "一室公寓 $2000-2500/月，合租 $800-1500/月",
+            "Vancouver": "一室公寓 $2200-2800/月，合租 $900-1600/月",
+            "Montreal": "一室公寓 $1200-1600/月，合租 $600-1000/月",
+            "Ottawa": "一室公寓 $1500-2000/月，合租 $700-1200/月"
+          }
+        },
+        "banking": {
+          "recommended_banks": [
+            "RBC（皇家银行）- 最大的银行，服务网点多",
+            "TD（道明银行）- 营业时间长，周末也开门",
+            "Scotiabank（丰业银行）- 学生优惠多",
+            "BMO（蒙特利尔银行）- 历史悠久",
+            "CIBC（帝国商业银行）"
+          ],
+          "account_types": [
+            "Chequing Account（支票账户）- 日常使用",
+            "Savings Account（储蓄账户）- 存钱有利息",
+            "学生账户 - 通常免月费，有优惠"
+          ],
+          "tips": [
+            "带护照、学签、学校录取通知书去开户",
+            "选择学生账户可以免月费",
+            "申请 Debit Card 和 Credit Card（信用卡可以积累信用记录）",
+            "下载银行 App，方便随时查看账户和转账"
+          ]
+        },
+        "shopping": {
+          "supermarkets": [
+            "Costco - 会员制，大包装便宜，适合囤货",
+            "Walmart - 商品种类全，价格适中",
+            "No Frills - 平价超市，适合预算有限的学生",
+            "Loblaws/Real Canadian Superstore - 品质好，价格稍高",
+            "T&T 大统华 - 亚洲食品超市，中国食材齐全",
+            "Foodie Mart/华泰 - 华人超市"
+          ],
+          "online_shopping": [
+            "Amazon.ca - 商品最全，Prime 会员包邮",
+            "Best Buy - 电子产品",
+            "Wayfair - 家具家居",
+            "Instacart - 生鲜配送"
+          ],
+          "saving_tips": [
+            "办理各超市的会员卡积分",
+            "关注每周的 Flyer 打折信息",
+            "使用 Rakuten、Honey 等返现插件",
+            "黑五、Boxing Day、Prime Day 大促时囤货"
+          ]
+        },
+        "transportation": {
+          "public_transit": [
+            "多伦多：TTC（地铁、公交、streetcar），Presto 卡",
+            "温哥华：TransLink（Skytrain、公交、SeaBus），Compass 卡",
+            "蒙特利尔：STM（地铁、公交），OPUS 卡",
+            "学生可以购买月票，比单次更划算"
+          ],
+          "driving": [
+            "考驾照：先考 G1 笔试，然后 G2 路考，最后 Full G",
+            "买车：Kijiji、AutoTrader、Facebook Marketplace",
+            "汽车保险：新司机保险很贵，可以找保险经纪比价",
+            "冬天开车注意安全，换雪胎（11月-4月）"
+          ],
+          "tips": [
+            "学生持学生证坐公交有折扣",
+            "Uber/Lyft 打车方便但较贵，适合紧急情况",
+            "自行车是短距离代步的好选择",
+            "冬天注意保暖，公交站等车时间可能较长"
+          ]
+        },
+        "healthcare": {
+          "provincial_health_insurance": [
+            "OHIP（安省）- 留学生通常要等3个月才能使用",
+            "MSP（BC省）",
+            "RAMQ（魁省）"
+          ],
+          "tips": [
+            "留学生必须购买医疗保险，学校通常提供",
+            "找家庭医生（Family Doctor）建立医疗档案",
+            "看病先预约家庭医生，急诊去 Walk-in Clinic 或医院 ER",
+            "处方药在药房（Pharmacy）购买，保留收据报销",
+            "牙科和眼科不在公共医保范围，需要额外保险"
+          ]
+        },
+        "phone_internet": {
+          "phone_providers": [
+            "Rogers - 覆盖最好但较贵",
+            "Bell - 大运营商",
+            "Telus - 西部覆盖好",
+            "Fido、Virgin、Koodo - 平价副品牌",
+            "Freedom Mobile、Chatr - 低价选择"
+          ],
+          "internet_providers": [
+            "Bell、Rogers - 主要运营商",
+            "Teksavvy、Start.ca - 独立运营商，价格便宜"
+          ],
+          "tips": [
+            "学生套餐有优惠",
+            "关注黑五等大促的优惠活动",
+            "考虑和室友共享家庭套餐更省钱"
+          ]
+        },
+        "general_tips": [
+          "办理银行账户推荐选择 RBC、TD、Scotiabank 等大银行，学生账户通常免月费",
+          "租房可以通过 Kijiji、Facebook Marketplace 等平台查找，注意安全",
+          "购物推荐 Costco（需要会员）、Walmart、No Frills 等超市，T&T 可以买到中国食材",
+          "办理 SIN 卡（社会保险号）后才能合法工作",
+          "报税很重要，即使没收入也要报税，可以获得退税和福利",
+          "加入华人社区和微信群，获取最新信息和优惠",
+          "冬天很冷，准备好羽绒服、雪地靴、手套等保暖衣物"
         ]
       },
-      "transportation": {
-        "public_transit": [
-          "多伦多：TTC（地铁、公交、streetcar），Presto 卡",
-          "温哥华：TransLink（Skytrain、公交、SeaBus），Compass 卡",
-          "蒙特利尔：STM（地铁、公交），OPUS 卡",
-          "学生可以购买月票，比单次更划算"
+      "employment": {
+        "category": "就业",
+        "job_search_platforms": [
+          "Indeed.ca - 最常用的求职网站",
+          "LinkedIn - 专业社交和求职平台",
+          "Glassdoor - 可以查看公司评价和薪资",
+          "Workopolis - 加拿大本地求职网站",
+          "学校 Career Center - 提供实习和工作机会",
+          "公司官网 - 直接申请"
         ],
-        "driving": [
-          "考驾照：先考 G1 笔试，然后 G2 路考，最后 Full G",
-          "买车：Kijiji、AutoTrader、Facebook Marketplace",
-          "汽车保险：新司机保险很贵，可以找保险经纪比价",
-          "冬天开车注意安全，换雪胎（11月-4月）"
+        "resume_tips": [
+          "使用加拿大格式的简历（不需要照片、年龄、婚姻状况）",
+          "突出量化成果（如：提升销售额30%）",
+          "针对不同职位定制简历内容",
+          "添加 LinkedIn 链接",
+          "让 Career Center 或朋友帮忙审阅"
+        ],
+        "work_permit_options": [
+          "校内工作：持学签可直接工作，无需额外许可",
+          "校外工作：学习期间每周最多20小时，假期可全职",
+          "Co-op/实习：专业相关实习需要 Co-op Work Permit",
+          "毕业工签（PGWP）：毕业后可申请，最长3年"
         ],
         "tips": [
-          "学生持学生证坐公交有折扣",
-          "Uber/Lyft 打车方便但较贵，适合紧急情况",
-          "自行车是短距离代步的好选择",
-          "冬天注意保暖，公交站等车时间可能较长"
+          "利用学校的 Career Services 修改简历和准备面试",
+          "参加 Career Fair 和 Networking 活动，建立人脉",
+          "多申请实习（Co-op/Internship），积累本地工作经验",
+          "考虑考取行业证书（如 CPA、PMP 等）提升竞争力",
+          "加入行业相关的 LinkedIn 群组和专业协会"
         ]
-      },
-      "healthcare": {
-        "provincial_health_insurance": [
-          "OHIP（安省）- 留学生通常要等3个月才能使用",
-          "MSP（BC省）",
-          "RAMQ（魁省）"
-        ],
-        "tips": [
-          "留学生必须购买医疗保险，学校通常提供",
-          "找家庭医生（Family Doctor）建立医疗档案",
-          "看病先预约家庭医生，急诊去 Walk-in Clinic 或医院 ER",
-          "处方药在药房（Pharmacy）购买，保留收据报销",
-          "牙科和眼科不在公共医保范围，需要额外保险"
-        ]
-      },
-      "phone_internet": {
-        "phone_providers": [
-          "Rogers - 覆盖最好但较贵",
-          "Bell - 大运营商",
-          "Telus - 西部覆盖好",
-          "Fido、Virgin、Koodo - 平价副品牌",
-          "Freedom Mobile、Chatr - 低价选择"
-        ],
-        "internet_providers": [
-          "Bell、Rogers - 主要运营商",
-          "Teksavvy、Start.ca - 独立运营商，价格便宜"
-        ],
-        "tips": [
-          "学生套餐有优惠",
-          "关注黑五等大促的优惠活动",
-          "考虑和室友共享家庭套餐更省钱"
-        ]
-      },
-      "general_tips": [
-        "办理银行账户推荐选择 RBC、TD、Scotiabank 等大银行，学生账户通常免月费",
-        "租房可以通过 Kijiji、Facebook Marketplace 等平台查找，注意安全",
-        "购物推荐 Costco（需要会员）、Walmart、No Frills 等超市，T&T 可以买到中国食材",
-        "办理 SIN 卡（社会保险号）后才能合法工作",
-        "报税很重要，即使没收入也要报税，可以获得退税和福利",
-        "加入华人社区和微信群，获取最新信息和优惠",
-        "冬天很冷，准备好羽绒服、雪地靴、手套等保暖衣物"
-      ]
+      }
     },
-    "employment": {
-      "category": "就业",
-      "job_search_platforms": [
-        "Indeed.ca - 最常用的求职网站",
-        "LinkedIn - 专业社交和求职平台",
-        "Glassdoor - 可以查看公司评价和薪资",
-        "Workopolis - 加拿大本地求职网站",
-        "学校 Career Center - 提供实习和工作机会",
-        "公司官网 - 直接申请"
-      ],
-      "resume_tips": [
-        "使用加拿大格式的简历（不需要照片、年龄、婚姻状况）",
-        "突出量化成果（如：提升销售额30%）",
-        "针对不同职位定制简历内容",
-        "添加 LinkedIn 链接",
-        "让 Career Center 或朋友帮忙审阅"
-      ],
-      "work_permit_options": [
-        "校内工作：持学签可直接工作，无需额外许可",
-        "校外工作：学习期间每周最多20小时，假期可全职",
-        "Co-op/实习：专业相关实习需要 Co-op Work Permit",
-        "毕业工签（PGWP）：毕业后可申请，最长3年"
-      ],
+    "seasonal_tips": {
+      "winter": {
+        "season": "冬季（11月-3月）",
+        "tips": [
+          "准备好羽绒服、雪地靴、手套、帽子、围巾",
+          "开车换雪胎，注意路面结冰",
+          "室内暖气很足，洋葱式穿搭方便增减衣物",
+          "注意保湿，室内空气干燥",
+          "可以体验滑雪、滑冰等冬季运动"
+        ]
+      },
+      "spring": {
+        "season": "春季（4月-5月）",
+        "tips": [
+          "天气逐渐变暖，但早晚温差大",
+          "樱花季，可以去赏花",
+          "准备报税（截止4月30日）",
+          "开始找夏季实习和工作"
+        ]
+      },
+      "summer": {
+        "season": "夏季（6月-8月）",
+        "tips": [
+          "温度适宜，多参加户外活动",
+          "学生可以全职工作赚生活费",
+          "加拿大国庆日 7月1日 Canada Day 有庆祝活动",
+          "注意防晒，紫外线强"
+        ]
+      },
+      "fall": {
+        "season": "秋季（9月-10月）",
+        "tips": [
+          "开学季，准备新学期课程和教材",
+          "秋季景色美，可以去赏枫叶",
+          "感恩节（10月第二个周一）Thanksgiving",
+          "准备冬季衣物和雪胎"
+        ]
+      }
+    },
+    "emergency_contacts": {
+      "emergency": "紧急情况拨打 911（警察、消防、救护车）",
+      "non_emergency_police": "非紧急情况联系当地警局",
+      "chinese_embassy": {
+        "Ottawa": "中国驻加拿大大使馆：+1-613-789-3434",
+        "Toronto": "中国驻多伦多总领馆：+1-416-964-7260",
+        "Vancouver": "中国驻温哥华总领馆：+1-604-734-7492"
+      },
       "tips": [
-        "利用学校的 Career Services 修改简历和准备面试",
-        "参加 Career Fair 和 Networking 活动，建立人脉",
-        "多申请实习（Co-op/Internship），积累本地工作经验",
-        "考虑考取行业证书（如 CPA、PMP 等）提升竞争力",
-        "加入行业相关的 LinkedIn 群组和专业协会"
+        "记住你的地址和邮编",
+        "保存重要联系人电话",
+        "医疗紧急情况先拨 911",
+        "护照丢失立即联系领馆"
       ]
     }
   },
-  "seasonal_tips": {
-    "winter": {
-      "season": "冬季（11月-3月）",
-      "tips": [
-        "准备好羽绒服、雪地靴、手套、帽子、围巾",
-        "开车换雪胎，注意路面结冰",
-        "室内暖气很足，洋葱式穿搭方便增减衣物",
-        "注意保湿，室内空气干燥",
-        "可以体验滑雪、滑冰等冬季运动"
+  "en": {
+    "platform_info": {
+      "name": "CanLifeHub",
+      "description": "CanLifeHub is a comprehensive community platform for Chinese international students and new immigrants in Canada, providing information sharing, social interaction, and life guides.",
+      "features": [
+        "Social Feed: Users can post, comment, and like to share study and life experiences.",
+        "Messaging: Users can send private messages for one-on-one communication.",
+        "AI Assistant: Provides an intelligent chatbot to answer questions about studying, immigration, and life.",
+        "Profile: Users can manage their personal information and privacy settings.",
+        "Follow System: Users can follow others and view their updates."
+      ],
+      "target_users": [
+        "International students in Canada (Undergraduate, Graduate, PhD)",
+        "Students preparing to apply for study in Canada",
+        "New immigrants and immigration applicants in Canada",
+        "Chinese working in Canada"
       ]
     },
-    "spring": {
-      "season": "春季（4月-5月）",
-      "tips": [
-        "天气逐渐变暖，但早晚温差大",
-        "樱花季，可以去赏花",
-        "准备报税（截止4月30日）",
-        "开始找夏季实习和工作"
-      ]
+    "faqs": [
+      {
+        "question": "How to create a post?",
+        "answer": "There is a 'Create Post' area at the top of the home page. Enter your content and click 'Post'. Text and image uploads are supported. Please follow community guidelines and do not post illegal, advertising, or spam content.",
+        "tags": ["Post", "Guide"]
+      },
+      {
+        "question": "How to message other users?",
+        "answer": "Click the 'Messages' tab in the top navigation bar to see your conversation list. Click any conversation to enter the chat interface, or click the 'Message' button on a user's profile page to start a new conversation.",
+        "tags": ["Message", "Chat"]
+      },
+      {
+        "question": "How to view and edit my profile?",
+        "answer": "Click the 'My Profile' tab in the top navigation bar to view your personal information. You can edit your nickname, avatar, bio, etc., on the profile page.",
+        "tags": ["Profile", "Settings"]
+      },
+      {
+        "question": "How to follow or unfollow users?",
+        "answer": "Click the 'Follow' button on a user's profile page to follow them. If already following, the button will show 'Followed', click to unfollow. After following, you can see their updates in the 'Following' tab on the home page.",
+        "tags": ["Follow", "Social"]
+      },
+      {
+        "question": "How to view updates from people I follow?",
+        "answer": "Click the 'Following' tab on the home page to see content only from users you follow. This makes it easier to track shares from users you are interested in.",
+        "tags": ["Feed", "Follow"]
+      },
+      {
+        "question": "How to comment and like posts?",
+        "answer": "Click the 'Comment' icon below a post to leave a comment, and click the '❤️' icon to like. You can interact with other users in the comments section.",
+        "tags": ["Comment", "Like", "Interaction"]
+      },
+      {
+        "question": "How to search for other users?",
+        "answer": "You can search for other users by username on the Messages page. More search functions will be added in the future to help you find interesting users and content more easily.",
+        "tags": ["Search", "User"]
+      },
+      {
+        "question": "What if I forgot my password?",
+        "answer": "The platform is currently developing a password reset function. If you forget your password, please contact the administrator for assistance. It is recommended to keep your login information safe.",
+        "tags": ["Password", "Account"]
+      }
+    ],
+    "help_topics": [
+      {
+        "topic": "Account Security",
+        "content": "Please keep your account password safe and do not share it with others. Use a strong password (containing letters, numbers, symbols). If you notice suspicious activity or your account is compromised, contact the administrator immediately. Do not save login status on public computers.",
+        "tips": [
+          "Use a complex and unique password",
+          "Do not use the same password on multiple websites",
+          "Change your password regularly",
+          "Do not click on suspicious links"
+        ]
+      },
+      {
+        "topic": "Community Guidelines",
+        "content": "CanLifeHub is committed to creating a friendly and helpful community environment. Please respect other users and do not post illegal, violent, pornographic, or discriminatory content. Advertising, spam, and false information are prohibited. Violating content will be deleted, and serious offenders will be banned.",
+        "rules": [
+          "Respect others, communicate civilly",
+          "Share truthfully, do not spread rumors",
+          "Protect privacy, do not leak others' information",
+          "No advertising or commercial promotion",
+          "No harassment or defamation"
+        ]
+      },
+      {
+        "topic": "Privacy Protection",
+        "content": "Your personal information is protected. Other users can only see your public profile (nickname, avatar, bio). Private messages are only visible to you and the recipient; the platform will not view or leak them. It is recommended not to share sensitive personal information (such as specific address, phone number, bank account, etc.) in public posts.",
+        "privacy_tips": [
+          "Be cautious when sharing personal contact information",
+          "Do not publish passport, visa, or other ID information",
+          "Protect the privacy of family and friends",
+          "Use settings to control who can see your updates"
+        ]
+      },
+      {
+        "topic": "Content Posting Guide",
+        "content": "Ensure content is authentic and valuable when posting. Recommended shares: study application experience, school life, rental guides, job opportunities, life hacks, etc. Avoid posting: advertising, politically sensitive topics, personal privacy information. High-quality content will get more attention and interaction.",
+        "content_suggestions": [
+          "Study application experience sharing",
+          "School and major introduction",
+          "Rental, car buying, and other life experiences",
+          "Job hunting and internship experience",
+          "Travel destination recommendations",
+          "Food and restaurant sharing"
+        ]
+      }
+    ],
+    "common_issues": [
+      {
+        "issue": "Cannot Login",
+        "solution": "Check if username and password are correct (case sensitive). Confirm network connection is normal. Clear browser cache and cookies and try again. If still unable to login, the account may be locked, please contact the administrator.",
+        "troubleshooting": [
+          "Verify username spelling",
+          "Confirm password input accuracy (case sensitive)",
+          "Try refreshing the page or changing browsers",
+          "Clear browser cache and cookies"
+        ]
+      },
+      {
+        "issue": "Image Upload Failed",
+        "solution": "Ensure image size does not exceed 5MB and format is JPG, PNG, or GIF. Check network connection stability. If the image is too large, use a compression tool to reduce file size and try again.",
+        "image_requirements": {
+          "max_size": "5MB",
+          "formats": ["JPG", "JPEG", "PNG", "GIF"],
+          "recommended_resolution": "Not exceeding 4096x4096 pixels"
+        }
+      },
+      {
+        "issue": "Message Send Failed",
+        "solution": "Check network connection. Confirm the other party has not blocked you. Ensure message content does not contain prohibited information. Try again later; if failure persists, contact administrator.",
+        "reasons": [
+          "Unstable network connection",
+          "Recipient may have privacy settings",
+          "Message content triggered sensitive word filter",
+          "Temporary server fault"
+        ]
+      },
+      {
+        "issue": "Cannot See Latest Updates",
+        "solution": "Try refreshing the page (F5). Check if 'All Posts' or 'Following' is selected. Clear browser cache. If the issue persists, it may be network latency, please try again later."
+      },
+      {
+        "issue": "No Response to Comment or Like",
+        "solution": "Confirm you are logged in. Refresh the page to see if it was successful. Check network connection. If the post was deleted or user banned, operations may not be possible."
+      },
+      {
+        "issue": "No Unread Message Notification",
+        "solution": "Ensure you are on the 'Messages' tab for real-time unread count updates. Refresh the page to see the latest status. Check if the browser has blocked notification permissions."
+      }
+    ],
+    "canada_info": {
+      "study": {
+        "category": "Study",
+        "application_process": [
+          "Choose school and major: Select based on interest, grades, and budget",
+          "Prepare application materials: Transcripts, recommendation letters, personal statement, language scores, etc.",
+          "Submit application: Via school website or application platform",
+          "Receive Letter of Acceptance (LOA): Usually takes 2-8 weeks",
+          "Apply for Study Permit: Requires LOA, proof of funds, etc.",
+          "Prepare for departure: Book tickets, arrange accommodation, pack luggage"
+        ],
+        "visa_requirements": [
+          "Valid passport",
+          "School Letter of Acceptance",
+          "Tuition receipt or proof of funds",
+          "Medical exam report",
+          "Police certificate",
+          "Language scores (IELTS/TOEFL, etc.)",
+          "Study plan"
+        ],
+        "tips": [
+          "Prepare LOA and proof of funds early for study permit application (suggest preparing 1st year tuition + living expenses)",
+          "Remember to get SIN (Social Insurance Number) after arrival, essential for work and tax",
+          "Can apply for on-campus or off-campus work permit for work experience, max 20 hours/week (full-time during breaks)",
+          "Join the Chinese Students Association to integrate quickly, find friends, and get info",
+          "Adapt to English environment early, participate in class discussions and group work"
+        ],
+        "popular_schools": [
+          "University of Toronto",
+          "University of British Columbia (UBC)",
+          "McGill University",
+          "University of Waterloo - Strong in CS",
+          "Queen's University",
+          "Western University - Known for Business",
+          "York University - Business and Arts",
+          "Simon Fraser University (SFU)"
+        ]
+      },
+      "immigration": {
+        "category": "Immigration",
+        "pathways": [
+          "Express Entry: For applicants with work experience and high language scores",
+          "Provincial Nominee Program (PNP): Provincial immigration programs with flexible requirements",
+          "Canadian Experience Class (CEC): For applicants with Canadian work experience",
+          "Federal Skilled Worker (FSW): For overseas skilled workers",
+          "International Student Immigration: Gain work experience after graduation, apply via CEC or PNP",
+          "Family Sponsorship: Family members with PR or citizenship can sponsor"
+        ],
+        "express_entry_score": {
+          "factors": [
+            "Age (Max 30 pts): 25-29 years old scores highest",
+            "Education (Max 150 pts): Master's or higher scores high",
+            "Language (Max 160 pts): CLB 9+ (IELTS L8 R7 W7 S7)",
+            "Work Experience (Max 80 pts): 3+ years Canadian work experience",
+            "Bonus Points: Spouse, PNP, Canadian education, job offer, etc."
+          ],
+          "minimum_score": "Usually requires 470-500+ points to be invited"
+        },
+        "tips": [
+          "Express Entry is the most common pathway, competing via CRS score",
+          "PNP can add 600 points to your application, almost guaranteeing an invitation",
+          "Good language scores (IELTS/CELPIP) are crucial, high weight in scoring",
+          "Accumulating local Canadian work experience helps greatly",
+          "Plan immigration path early, prepare materials and improve score",
+          "Consider consulting an immigration consultant or lawyer to avoid pitfalls"
+        ],
+        "post_graduation_work_permit": {
+          "description": "PGWP allows international students to work in Canada after graduation",
+          "duration": "Depends on study length, max 3 years",
+          "eligibility": [
+            "Completed at least 8 months program at a DLI",
+            "Held valid study permit",
+            "Apply within 180 days of graduation"
+          ],
+          "tips": [
+            "PGWP can only be applied for once, plan wisely",
+            "Can apply for immigration via CEC after gaining work experience",
+            "Work duration and job category affect immigration application"
+          ]
+        }
+      },
+      "living": {
+        "category": "Living",
+        "housing": {
+          "rental_platforms": [
+            "Kijiji.ca - Most used for second-hand and rentals",
+            "Facebook Marketplace - Good for short-term rentals and furniture",
+            "Craigslist.ca - Rentals and second-hand",
+            "Rental sites: Rentals.ca, PadMapper, Zumper",
+            "School website or student union - Sometimes offer housing info"
+          ],
+          "rental_tips": [
+            "Check water, heating, internet when viewing",
+            "Understand lease terms, lease period, deposit, utilities inclusion",
+            "Take photos of initial condition to avoid deposit disputes",
+            "Communicate lifestyle and expense sharing with roommates early",
+            "Beware of rental scams, do not transfer money before viewing"
+          ],
+          "average_rent": {
+            "Toronto": "1-bed apt $2000-2500/mo, shared $800-1500/mo",
+            "Vancouver": "1-bed apt $2200-2800/mo, shared $900-1600/mo",
+            "Montreal": "1-bed apt $1200-1600/mo, shared $600-1000/mo",
+            "Ottawa": "1-bed apt $1500-2000/mo, shared $700-1200/mo"
+          }
+        },
+        "banking": {
+          "recommended_banks": [
+            "RBC - Largest bank, many branches",
+            "TD - Long hours, open weekends",
+            "Scotiabank - Many student perks",
+            "BMO - Historic bank",
+            "CIBC"
+          ],
+          "account_types": [
+            "Chequing Account - Daily use",
+            "Savings Account - Earns interest",
+            "Student Account - Usually no monthly fee"
+          ],
+          "tips": [
+            "Bring passport, study permit, LOA to open account",
+            "Choose student account to waive monthly fees",
+            "Apply for Debit and Credit Card (Credit card builds credit history)",
+            "Download bank App for easy access and transfers"
+          ]
+        },
+        "shopping": {
+          "supermarkets": [
+            "Costco - Membership, bulk is cheap, good for stocking up",
+            "Walmart - Wide variety, moderate prices",
+            "No Frills - Budget supermarket",
+            "Loblaws/Real Canadian Superstore - Good quality, slightly higher price",
+            "T&T - Asian supermarket, complete Chinese ingredients",
+            "Foodie Mart - Chinese supermarket"
+          ],
+          "online_shopping": [
+            "Amazon.ca - Most complete, Prime free shipping",
+            "Best Buy - Electronics",
+            "Wayfair - Furniture",
+            "Instacart - Grocery delivery"
+          ],
+          "saving_tips": [
+            "Get supermarket membership cards for points",
+            "Check weekly Flyers for deals",
+            "Use Rakuten, Honey cashback plugins",
+            "Stock up during Black Friday, Boxing Day, Prime Day"
+          ]
+        },
+        "transportation": {
+          "public_transit": [
+            "Toronto: TTC (Subway, Bus, Streetcar), Presto Card",
+            "Vancouver: TransLink (Skytrain, Bus, SeaBus), Compass Card",
+            "Montreal: STM (Metro, Bus), OPUS Card",
+            "Students can buy monthly passes, cheaper than single rides"
+          ],
+          "driving": [
+            "License: G1 written test -> G2 road test -> Full G",
+            "Buying car: Kijiji, AutoTrader, Facebook Marketplace",
+            "Insurance: New drivers expensive, compare via broker",
+            "Winter driving safety, change winter tires (Nov-Apr)"
+          ],
+          "tips": [
+            "Student discount with student ID on transit",
+            "Uber/Lyft convenient but pricey, for emergencies",
+            "Bicycle is good for short distances",
+            "Dress warm in winter, wait times can be long"
+          ]
+        },
+        "healthcare": {
+          "provincial_health_insurance": [
+            "OHIP (Ontario) - Students usually wait 3 months",
+            "MSP (BC)",
+            "RAMQ (Quebec)"
+          ],
+          "tips": [
+            "Intl students must buy health insurance, usually provided by school",
+            "Find a Family Doctor to establish medical record",
+            "Book appointment with Family Doctor, go to Walk-in Clinic or ER for emergencies",
+            "Buy prescription drugs at Pharmacy, keep receipts for reimbursement",
+            "Dental and vision not covered by public health, need extra insurance"
+          ]
+        },
+        "phone_internet": {
+          "phone_providers": [
+            "Rogers - Best coverage but expensive",
+            "Bell - Major carrier",
+            "Telus - Good western coverage",
+            "Fido, Virgin, Koodo - Budget sub-brands",
+            "Freedom Mobile, Chatr - Low cost options"
+          ],
+          "internet_providers": [
+            "Bell, Rogers - Major carriers",
+            "Teksavvy, Start.ca - Independent, cheaper"
+          ],
+          "tips": [
+            "Student plans have discounts",
+            "Watch for Black Friday deals",
+            "Share family plan with roommates to save money"
+          ]
+        },
+        "general_tips": [
+          "Recommend RBC, TD, Scotiabank for banking, student accounts usually free",
+          "Find housing via Kijiji, Facebook Marketplace, beware of safety",
+          "Shop at Costco (membership), Walmart, No Frills; T&T for Chinese food",
+          "Get SIN card to work legally",
+          "Tax return is important, file even with no income for refunds/benefits",
+          "Join Chinese communities/WeChat groups for info",
+          "Winter is cold, prepare down jacket, snow boots, gloves"
+        ]
+      },
+      "employment": {
+        "category": "Employment",
+        "job_search_platforms": [
+          "Indeed.ca - Most used job site",
+          "LinkedIn - Professional networking and jobs",
+          "Glassdoor - Company reviews and salaries",
+          "Workopolis - Local job site",
+          "School Career Center - Internships and jobs",
+          "Company Website - Apply directly"
+        ],
+        "resume_tips": [
+          "Use Canadian format (no photo, age, marital status)",
+          "Highlight quantified results (e.g., increased sales by 30%)",
+          "Tailor resume for different positions",
+          "Add LinkedIn link",
+          "Ask Career Center or friends to review"
+        ],
+        "work_permit_options": [
+          "On-campus: Work with study permit, no extra permit needed",
+          "Off-campus: Max 20 hrs/week during study, full-time during breaks",
+          "Co-op/Internship: Need Co-op Work Permit",
+          "PGWP: Apply after graduation, max 3 years"
+        ],
+        "tips": [
+          "Use Career Services for resume and interview prep",
+          "Attend Career Fairs and Networking events",
+          "Apply for internships (Co-op) to gain local experience",
+          "Consider certifications (CPA, PMP) to boost competitiveness",
+          "Join industry LinkedIn groups and associations"
+        ]
+      }
     },
-    "summer": {
-      "season": "夏季（6月-8月）",
-      "tips": [
-        "温度适宜，多参加户外活动",
-        "学生可以全职工作赚生活费",
-        "加拿大国庆日 7月1日 Canada Day 有庆祝活动",
-        "注意防晒，紫外线强"
-      ]
+    "seasonal_tips": {
+      "winter": {
+        "season": "Winter (Nov-Mar)",
+        "tips": [
+          "Prepare down jacket, snow boots, gloves, hat, scarf",
+          "Change winter tires, watch for icy roads",
+          "Indoor heating is strong, dress in layers",
+          "Moisturize, indoor air is dry",
+          "Try skiing, skating"
+        ]
+      },
+      "spring": {
+        "season": "Spring (Apr-May)",
+        "tips": [
+          "Weather warms up, big temp difference day/night",
+          "Cherry blossom season",
+          "Prepare tax return (deadline Apr 30)",
+          "Start looking for summer internships/jobs"
+        ]
+      },
+      "summer": {
+        "season": "Summer (Jun-Aug)",
+        "tips": [
+          "Good temperature, outdoor activities",
+          "Students can work full-time",
+          "Canada Day July 1st celebrations",
+          "Sun protection, strong UV"
+        ]
+      },
+      "fall": {
+        "season": "Fall (Sep-Oct)",
+        "tips": [
+          "Back to school, prepare courses/books",
+          "Beautiful scenery, maple leaf viewing",
+          "Thanksgiving (2nd Mon in Oct)",
+          "Prepare winter clothes and tires"
+        ]
+      }
     },
-    "fall": {
-      "season": "秋季（9月-10月）",
+    "emergency_contacts": {
+      "emergency": "Emergency call 911 (Police, Fire, Ambulance)",
+      "non_emergency_police": "Contact local police for non-emergency",
+      "chinese_embassy": {
+        "Ottawa": "Chinese Embassy: +1-613-789-3434",
+        "Toronto": "Chinese Consulate Toronto: +1-416-964-7260",
+        "Vancouver": "Chinese Consulate Vancouver: +1-604-734-7492"
+      },
       "tips": [
-        "开学季，准备新学期课程和教材",
-        "秋季景色美，可以去赏枫叶",
-        "感恩节（10月第二个周一）Thanksgiving",
-        "准备冬季衣物和雪胎"
+        "Memorize your address and postal code",
+        "Save important contact numbers",
+        "Call 911 for medical emergencies",
+        "Contact consulate immediately if passport lost"
       ]
     }
-  },
-  "emergency_contacts": {
-    "emergency": "紧急情况拨打 911（警察、消防、救护车）",
-    "non_emergency_police": "非紧急情况联系当地警局",
-    "chinese_embassy": {
-      "Ottawa": "中国驻加拿大大使馆：+1-613-789-3434",
-      "Toronto": "中国驻多伦多总领馆：+1-416-964-7260",
-      "Vancouver": "中国驻温哥华总领馆：+1-604-734-7492"
-    },
-    "tips": [
-      "记住你的地址和邮编",
-      "保存重要联系人电话",
-      "医疗紧急情况先拨 911",
-      "护照丢失立即联系领馆"
-    ]
   }
 }

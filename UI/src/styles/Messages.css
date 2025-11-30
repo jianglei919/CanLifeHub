@@ -365,12 +365,14 @@
   color: white;
   border-bottom-right-radius: 4px;
   box-shadow: var(--shadow-sm);
+  margin-right: 12px;
 }
 
 .message.other .message-bubble {
   background: var(--slate-100);
   color: var(--text-main);
   border-bottom-left-radius: 4px;
+  margin-left: 12px;
 }
 
 .message-bubble p {

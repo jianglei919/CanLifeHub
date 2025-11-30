@@ -1,9 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { postsApi } from "../api/http";
+import { useLanguage } from "../../context/LanguageContext";
 import '../styles/CreatePost.css';
 
 export default function CreatePost() {
+  const { t } = useLanguage();
   // 状态管理
   const [title, setTitle] = useState(""); // 新增标题状态
   const [content, setContent] = useState("");
@@ -66,13 +68,13 @@ export default function CreatePost() {
 
   // 添加话题
   const addTopic = useCallback(() => {
-    const topicText = prompt("请输入话题名称:");
+    const topicText = prompt(t('enterTopic'));
     if (topicText && topicText.trim() && !topics.includes(topicText.trim())) {
       setTopics(prev => [...prev, topicText.trim()]);
       // 在文本内容中自动添加话题标签
       setContent(prev => prev + ` #${topicText.trim()}`);
     }
-  }, [topics]);
+  }, [topics, t]);
 
   // 移除话题
   const removeTopic = useCallback((index) => {
@@ -81,13 +83,13 @@ export default function CreatePost() {
 
   // 添加@用户
   const addMention = useCallback(() => {
-    const username = prompt("请输入用户名:");
+    const username = prompt(t('enterUsername'));
     if (username && username.trim() && !mentions.includes(username.trim())) {
       setMentions(prev => [...prev, username.trim()]);
       // 在文本内容中自动添加@用户
       setContent(prev => prev + ` @${username.trim()}`);
     }
-  }, [mentions]);
+  }, [mentions, t]);
 
   // 移除@用户
   const removeMention = useCallback((index) => {
@@ -96,11 +98,11 @@ export default function CreatePost() {
 
   // 添加位置
   const addLocation = useCallback(() => {
-    const locationName = prompt("请输入位置名称:");
+    const locationName = prompt(t('enterLocation'));
     if (locationName && locationName.trim()) {
       setLocation(locationName.trim());
     }
-  }, []);
+  }, [t]);
 
   // 移除位置
   const removeLocation = useCallback(() => {
@@ -130,12 +132,12 @@ export default function CreatePost() {
   const handlePost = async () => {
     // 验证标题和内容
     if (!title.trim()) {
-      toast.error("请输入标题！");
+      toast.error(t('enterTitle'));
       return;
     }
     
     if (!content.trim() && mediaFiles.length === 0) {
-      toast.error("内容和媒体文件不能都为空！");
+      toast.error(t('enterContent'));
       return;
     }
 
@@ -174,7 +176,7 @@ export default function CreatePost() {
       const { data } = await postsApi.create(postData);
       
       console.log("发布成功:", data);
-      toast.success("发帖成功！");
+      toast.success(t('postSuccess'));
       
       // 清除草稿
       localStorage.removeItem('postDraft');
@@ -189,7 +191,7 @@ export default function CreatePost() {
       }, 500);
     } catch (error) {
       console.error('发布出错:', error);
-      toast.error("发布失败，请稍后再试。");
+      toast.error(t('postFailed'));
     } finally {
       setIsPosting(false);
     }
@@ -210,7 +212,7 @@ export default function CreatePost() {
     // 保存到本地存储
     localStorage.setItem('postDraft', JSON.stringify(draftData));
     setHasDraft(true);
-    toast.success("草稿已保存！");
+    toast.success(t('draftSaved'));
     
     // 关闭模态框
     handleCloseModal();
@@ -229,10 +231,10 @@ export default function CreatePost() {
         setMentions(draftData.mentions || []);
         setVisibility(draftData.visibility || "public");
         
-        toast.success("草稿已加载！");
+        toast.success(t('draftLoaded'));
       } catch (error) {
         console.error("加载草稿失败:", error);
-        toast.error("加载草稿失败，请重试。");
+        toast.error(t('draftLoadFailed'));
       }
     }
   };
@@ -241,7 +243,7 @@ export default function CreatePost() {
   const deleteDraft = () => {
     localStorage.removeItem('postDraft');
     setHasDraft(false);
-    toast.success("草稿已删除！");
+    toast.success(t('draftDeleted'));
   };
 
   // 关闭模态框
@@ -266,7 +268,7 @@ export default function CreatePost() {
     // 如果有草稿，询问是否加载
     if (hasDraft) {
       setTimeout(() => {
-        const shouldLoadDraft = window.confirm("检测到有保存的草稿，是否加载？");
+        const shouldLoadDraft = window.confirm(t('loadDraftConfirm'));
         if (shouldLoadDraft) {
           loadDraft();
         }
@@ -280,14 +282,14 @@ export default function CreatePost() {
   return (
     <>
       <button className="create-post-btn" onClick={handleOpenModal}>
-        ✏️ 发帖 {hasDraft && "📝"}
+        ✏️ {t('createPost')} {hasDraft && "📝"}
       </button>
 
       {showModal && (
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>发布新帖 {hasDraft && <span style={{color: '#ffc107', fontSize: '14px'}}>(有草稿)</span>}</h3>
+              <h3>{t('postTitle')} {hasDraft && <span style={{color: '#ffc107', fontSize: '14px'}}>{t('hasDraft')}</span>}</h3>
               <button className="modal-close" onClick={handleCloseModal}>✕</button>
             </div>
 
@@ -296,7 +298,7 @@ export default function CreatePost() {
               <input
                 type="text"
                 className="post-title-input"
-                placeholder="输入标题（必填）"
+                placeholder={t('titlePlaceholder')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={100}
@@ -305,7 +307,7 @@ export default function CreatePost() {
               <textarea
                 ref={textareaRef}
                 className="post-textarea"
-                placeholder="分享你的想法、照片或视频..."
+                placeholder={t('contentPlaceholder')}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
               />
@@ -331,7 +333,7 @@ export default function CreatePost() {
                           ✕
                         </button>
                         <div className="media-type-badge">
-                          {media.type === 'image' ? '图片' : '视频'}
+                          {media.type === 'image' ? t('image') : t('video')}
                         </div>
                       </div>
                     ))}
@@ -340,7 +342,7 @@ export default function CreatePost() {
                   {/* 封面选择 */}
                   {mediaFiles.length > 1 && (
                     <div className="cover-selection">
-                      <h4>选择封面：</h4>
+                      <h4>{t('selectCover')}</h4>
                       <div className="cover-options">
                         {mediaFiles.map((media, index) => (
                           <div 
@@ -406,9 +408,9 @@ export default function CreatePost() {
                 value={visibility}
                 onChange={(e) => setVisibility(e.target.value)}
               >
-                <option value="public">公开</option>
-                <option value="followers">仅粉丝</option>
-                <option value="private">私密</option>
+                <option value="public">{t('public')}</option>
+                <option value="followers">{t('followersOnly')}</option>
+                <option value="private">{t('private')}</option>
               </select>
 
               {/* 工具栏 */}
@@ -425,31 +427,31 @@ export default function CreatePost() {
                   className="toolbar-btn" 
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  📷 图片/视频
+                  📷 {t('imageVideo')}
                 </button>
                 <button 
                   className="toolbar-btn" 
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 >
-                  😊 表情
+                  😊 {t('emoji')}
                 </button>
                 <button 
                   className="toolbar-btn"
                   onClick={addLocation}
                 >
-                  📍 位置
+                  📍 {t('location')}
                 </button>
                 <button 
                   className="toolbar-btn"
                   onClick={addTopic}
                 >
-                  # 话题
+                  # {t('topic')}
                 </button>
                 <button 
                   className="toolbar-btn"
                   onClick={addMention}
                 >
-                  @ 好友
+                  @ {t('mention')}
                 </button>
               </div>
 
@@ -476,7 +478,7 @@ export default function CreatePost() {
                   onClick={saveDraft}
                   disabled={!canSaveDraft}
                 >
-                  💾 保存草稿
+                  💾 {t('saveDraft')}
                 </button>
                 {hasDraft && (
                   <button 
@@ -484,7 +486,7 @@ export default function CreatePost() {
                     onClick={deleteDraft}
                     style={{ marginLeft: '10px', backgroundColor: '#dc3545' }}
                   >
-                    🗑️ 删除草稿
+                    🗑️ {t('deleteDraft')}
                   </button>
                 )}
               </div>
@@ -494,14 +496,14 @@ export default function CreatePost() {
                   onClick={handleCloseModal} 
                   disabled={isPosting}
                 >
-                  取消
+                  {t('cancel')}
                 </button>
                 <button 
                   className="btn-submit" 
                   onClick={handlePost} 
                   disabled={!canPost}
                 >
-                  {isPosting ? '发布中...' : '发布'}
+                  {isPosting ? t('publishing') : t('publish')}
                 </button>
               </div>
             </div>

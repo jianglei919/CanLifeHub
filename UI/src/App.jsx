@@ -12,6 +12,7 @@ import AdminDashboard from '../src/pages/AdminDashboard.jsx';
 import axios from 'axios';                           // 引入 Axios 库，用于发送 HTTP 请求
 import { Toaster } from 'react-hot-toast';          // 引入 react-hot-toast 库中的 Toaster 组件，用于显示通知
 import { UserContextProvider, UserContext } from '../context/userContext'; // 导入用户上下文提供者组件
+import { LanguageProvider } from '../context/LanguageContext';
 import { useContext } from 'react';
 
 axios.defaults.baseURL = 'http://localhost:8000';    // 设置 Axios 的默认基础 URL，所有通过 Axios 发送的请求都会以这个 URL 为前缀
@@ -34,32 +35,34 @@ function AdminRoute({ children }) {
 function App() {
   return (
     <UserContextProvider>
-      <Toaster position='bottom-right' toastOptions={{ duration: 2000 }}/>
-      <Routes>
-        {/* 新首页 */}
-        <Route path="/" element={<Home />} />
-        {/* 论坛页面 (原 Dashboard) */}
-        <Route path="/forum" element={<Dashboard />} />
-        {/* 兼容旧路径 */}
-        <Route path="/dashboard" element={<Navigate to="/forum" replace />} />
+      <LanguageProvider>
+        <Toaster position='bottom-right' toastOptions={{ duration: 2000 }}/>
+        <Routes>
+          {/* 新首页 */}
+          <Route path="/" element={<Home />} />
+          {/* 论坛页面 (原 Dashboard) */}
+          <Route path="/forum" element={<Dashboard />} />
+          {/* 兼容旧路径 */}
+          <Route path="/dashboard" element={<Navigate to="/forum" replace />} />
 
-        <Route path="/register" element={<AuthGuard><Register /></AuthGuard>} />
-        <Route path="/login" element={<AuthGuard><Login /></AuthGuard>} />
+          <Route path="/register" element={<AuthGuard><Register /></AuthGuard>} />
+          <Route path="/login" element={<AuthGuard><Login /></AuthGuard>} />
 
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route
-          path="/admin"
-          element={(
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
-          )}
-        />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route
+            path="/admin"
+            element={(
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            )}
+          />
 
-        {/* 其余路径回到首页 */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* 其余路径回到首页 */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </LanguageProvider>
     </UserContextProvider>
   );
 }

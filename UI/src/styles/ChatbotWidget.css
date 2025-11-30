@@ -67,6 +67,12 @@
   font-weight: 500;
 }
 
+.chatbot-drag-hint {
+  font-size: 11px;
+  opacity: 0.7;
+  font-weight: 400;
+}
+
 .chatbot-header-actions {
   display: flex;
   gap: 8px;
@@ -86,6 +92,7 @@
   font-size: 14px;
   color: white;
   backdrop-filter: blur(4px);
+  user-select: none;
 }
 
 .chatbot-action-btn:hover {
@@ -167,10 +174,38 @@
   box-shadow: var(--shadow-md);
 }
 
+.message-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.chatbot-message:hover .message-actions {
+  opacity: 1;
+}
+
 .message-time {
   font-size: 11px;
   color: var(--text-muted);
-  padding: 0 4px;
+}
+
+.message-copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px;
+  opacity: 0.6;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.message-copy-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 /* ==================== 打字指示器 ==================== */
@@ -240,6 +275,7 @@
   text-align: left;
   transition: all 0.2s;
   font-weight: 500;
+  user-select: none;
 }
 
 .quick-question-btn:hover {
@@ -296,6 +332,7 @@
   font-size: 18px;
   flex-shrink: 0;
   box-shadow: var(--shadow-sm);
+  user-select: none;
 }
 
 .chatbot-send-btn:hover:not(:disabled) {
@@ -328,6 +365,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  user-select: none;
 }
 
 .chatbot-toggle-btn:hover {

@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { commentsApi } from '../api/http';
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function CommentsBox({ targetType = 'post', targetId, onCountChange }) {
+  const { t } = useLanguage();
   const [sort, setSort] = useState('new');
   const [page, setPage] = useState(1);
   const pageSize = 10;
@@ -32,7 +34,7 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
       setItems(data.items || []);
       setTotal(data.total || 0);
     } catch (e) {
-      setErr(e.message || '加载评论失败');
+      setErr(e.message || t('loadCommentsFailed'));
     } finally {
       setLoading(false);
     }
@@ -65,7 +67,7 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
       setPage(1);
       await fetchList();
     } catch (e) {
-      setErr(e.message || '发布失败（需登录）');
+      setErr(e.message || t('postCommentFailed'));
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,7 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
 
   return (
     <div className="comments-box">
-      <h3 className="comments-title">💬 评论区</h3>
+      <h3 className="comments-title">💬 {t('commentsSection')}</h3>
 
       {/* 输入框 */}
       <div className="comment-input-wrapper">
@@ -83,31 +85,31 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
           className="comment-input"
           value={newContent}
           onChange={(e) => setNewContent(e.target.value)}
-          placeholder="写下你的评论…（需登录）"
+          placeholder={t('commentPlaceholder')}
           disabled={loading || isUnauthorized}
           onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && onCreate()}
         />
         <button className="comment-submit-btn" onClick={onCreate} disabled={loading || !newContent.trim() || isUnauthorized}>
-          {loading ? '发布中...' : '发布'}
+          {loading ? t('publishing') : t('publish')}
         </button>
       </div>
 
       {/* 工具栏 */}
       <div className="comments-toolbar">
         <div className="sort-selector">
-          <label>📊 排序：</label>
+          <label>📊 {t('sortBy')}：</label>
           <select className="sort-dropdown" value={sort} onChange={(e) => setSort(e.target.value)}>
-            <option value="new">🕒 最新</option>
-            <option value="hot">🔥 热度</option>
+            <option value="new">🕒 {t('latest')}</option>
+            <option value="hot">🔥 {t('hottest')}</option>
           </select>
         </div>
-        <div className="comments-count">共 {total} 条评论</div>
+        <div className="comments-count">{t('totalComments')} {total}</div>
       </div>
 
       {err && (
         <div className="comments-error">
           {isUnauthorized ? (
-            <>未授权，<Link to="/login" className="login-link">请先登录</Link></>
+            <>{t('unauthorized')} <Link to="/login" className="login-link">{t('pleaseLogin')}</Link></>
           ) : (
             err
           )}
@@ -115,11 +117,11 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
       )}
 
       {loading ? (
-        <div className="comments-loading">⏳ 加载中…</div>
+        <div className="comments-loading">⏳ {t('loading')}</div>
       ) : (
         <div className="comments-list">
           {items.length === 0 ? (
-            <div className="comments-empty">💭 暂无评论，来发表第一条评论吧！</div>
+            <div className="comments-empty">💭 {t('noCommentsYet')}</div>
           ) : (
             items.map((c) => <CommentItem key={c._id} item={c} onAnyCommentChange={notifyDelta} />)
           )}
@@ -130,11 +132,11 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
       {total > pageSize && (
         <div className="comments-pagination">
           <button className="pagination-btn" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-            ← 上一页
+            ← {t('prevPage')}
           </button>
-          <span className="pagination-info">第 {page} 页 / 共 {totalPages} 页</span>
+          <span className="pagination-info">{t('pageInfo')} {page} / {t('totalComments')} {totalPages}</span>
           <button className="pagination-btn" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
-            下一页 →
+            {t('nextPage')} →
           </button>
         </div>
       )}
@@ -143,6 +145,7 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
 }
 
 function CommentItem({ item, onAnyCommentChange }) {
+  const { t } = useLanguage();
   const [repliesOpen, setRepliesOpen] = useState(false);
   const [replies, setReplies] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -161,7 +164,7 @@ function CommentItem({ item, onAnyCommentChange }) {
       setReplies(data.items || []);
       setRepliesOpen(true);
     } catch (e) {
-      setErr(e.message || '加载回复失败');
+      setErr(e.message || t('loadRepliesFailed'));
     } finally {
       setLoading(false);
     }
@@ -181,7 +184,7 @@ function CommentItem({ item, onAnyCommentChange }) {
       setReplies(data.items || []);
       setRepliesOpen(true);
     } catch (e) {
-      setErr(e.message || '回复失败（需登录）');
+      setErr(e.message || t('replyFailed'));
     } finally {
       setLoading(false);
     }
@@ -194,25 +197,25 @@ function CommentItem({ item, onAnyCommentChange }) {
       <div className="comment-header">
         <span className="comment-avatar">👤</span>
         <div className="comment-meta">
-          <span className="comment-author">{item.authorId?.name || '匿名用户'}</span>
+          <span className="comment-author">{item.authorId?.name || t('anonymousUser')}</span>
           <span className="comment-time">{ts ? ts.toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</span>
         </div>
       </div>
       <div className="comment-content">{item.content}</div>
       <div className="comment-actions">
         <button className="reply-btn" onClick={toggleReplies}>
-          {repliesOpen ? '▲ 收起回复' : '▼ 查看回复'}
+          {repliesOpen ? `▲ ${t('hideReplies')}` : `▼ ${t('viewReplies')}`}
         </button>
       </div>
 
       {repliesOpen && (
         <div className="replies-section">
           {loading ? (
-            <div className="replies-loading">加载中…</div>
+            <div className="replies-loading">{t('loading')}</div>
           ) : (
             <>
               {replies.length === 0 ? (
-                <div className="replies-empty">暂无回复</div>
+                <div className="replies-empty">{t('noReplies')}</div>
               ) : (
                 <div className="replies-list">
                   {replies.map((r) => (
@@ -220,7 +223,7 @@ function CommentItem({ item, onAnyCommentChange }) {
                       <span className="reply-avatar">💬</span>
                       <div className="reply-content-wrapper">
                         <div className="reply-meta">
-                          <span className="reply-author">{r.authorId?.name || '匿名用户'}</span>
+                          <span className="reply-author">{r.authorId?.name || t('anonymousUser')}</span>
                           <span className="reply-time">{r.createdAt ? new Date(r.createdAt).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</span>
                         </div>
                         <div className="reply-text">{r.content}</div>
@@ -232,7 +235,7 @@ function CommentItem({ item, onAnyCommentChange }) {
               {err && (
                 <div className="reply-error">
                   {unauthorized ? (
-                    <>未授权，<Link to="/login" className="login-link">请先登录</Link></>
+                    <>{t('unauthorized')} <Link to="/login" className="login-link">{t('pleaseLogin')}</Link></>
                   ) : (
                     err
                   )}
@@ -243,12 +246,12 @@ function CommentItem({ item, onAnyCommentChange }) {
                   className="reply-input"
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="写回复…（需登录）"
+                  placeholder={t('replyPlaceholder')}
                   disabled={loading || unauthorized}
                   onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendReply()}
                 />
                 <button className="reply-submit-btn" onClick={sendReply} disabled={loading || !replyText.trim() || unauthorized}>
-                  {loading ? '...' : '回复'}
+                  {loading ? '...' : t('reply')}
                 </button>
               </div>
             </>

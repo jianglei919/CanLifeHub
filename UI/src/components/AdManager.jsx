@@ -1,43 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { adsApi } from '../api/http';
-
-const STATUS_OPTIONS = [
-  { value: 'all', label: '全部' },
-  { value: 'pending_review', label: '待审核' },
-  { value: 'changes_requested', label: '待补充' },
-  { value: 'approved', label: '已审核' },
-  { value: 'scheduled', label: '已排期' },
-  { value: 'running', label: '投放中' },
-  { value: 'paused', label: '已暂停' },
-  { value: 'rejected', label: '已拒绝' },
-  { value: 'completed', label: '已完成' },
-];
-
-const PAYMENT_OPTIONS = [
-  { value: 'pending', label: '待支付' },
-  { value: 'processing', label: '核对中' },
-  { value: 'paid', label: '已支付' },
-  { value: 'failed', label: '失败' },
-  { value: 'refunded', label: '已退款' },
-];
-
-const STATUS_LABELS = {
-  pending_review: '待审核',
-  changes_requested: '待补充',
-  approved: '已审核',
-  scheduled: '已排期',
-  running: '投放中',
-  paused: '已暂停',
-  rejected: '已拒绝',
-  completed: '已完成',
-};
-
-const PLACEMENT_LABELS = {
-  sidebar: '侧边栏',
-  feed: '信息流',
-  interstitial: '开屏',
-};
+import { useLanguage } from '../../context/LanguageContext';
 
 const pad = (num) => String(num).padStart(2, '0');
 const toDatetimeLocal = (value) => {
@@ -52,18 +16,56 @@ const formatCurrency = (value) => {
   return `¥${value.toFixed(2)}`;
 };
 
-const formatDate = (value) => {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-};
-
 export default function AdManager() {
+  const { t, language } = useLanguage();
   const [ads, setAds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('pending_review');
   const [scheduleDrafts, setScheduleDrafts] = useState({});
   const [refreshToken, setRefreshToken] = useState(0);
+
+  const STATUS_OPTIONS = [
+    { value: 'all', label: t('statusAll') },
+    { value: 'pending_review', label: t('statusPendingReview') },
+    { value: 'changes_requested', label: t('statusChangesRequested') },
+    { value: 'approved', label: t('statusApproved') },
+    { value: 'scheduled', label: t('adScheduled') },
+    { value: 'running', label: t('statusRunning') },
+    { value: 'paused', label: t('statusPaused') },
+    { value: 'rejected', label: t('statusRejected') },
+    { value: 'completed', label: t('statusCompleted') },
+  ];
+
+  const PAYMENT_OPTIONS = [
+    { value: 'pending', label: t('payPending') },
+    { value: 'processing', label: t('payProcessing') },
+    { value: 'paid', label: t('payPaid') },
+    { value: 'failed', label: t('payFailed') },
+    { value: 'refunded', label: t('payRefunded') },
+  ];
+
+  const STATUS_LABELS = {
+    pending_review: t('statusPendingReview'),
+    changes_requested: t('statusChangesRequested'),
+    approved: t('statusApproved'),
+    scheduled: t('adScheduled'),
+    running: t('statusRunning'),
+    paused: t('statusPaused'),
+    rejected: t('statusRejected'),
+    completed: t('statusCompleted'),
+  };
+
+  const PLACEMENT_LABELS = {
+    sidebar: t('placeSidebar'),
+    feed: t('placeFeed'),
+    interstitial: t('placeSplash'),
+  };
+
+  const formatDate = (value) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '—';
+    return date.toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  };
 
   const fetchAds = useCallback(async () => {
     setLoading(true);
@@ -81,11 +83,11 @@ export default function AdManager() {
       });
       setScheduleDrafts(drafts);
     } catch (error) {
-      toast.error(error.message || '加载广告失败');
+      toast.error(error.message || t('adLoadFailed'));
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, t]);
 
   useEffect(() => {
     fetchAds();
@@ -108,32 +110,32 @@ export default function AdManager() {
   };
 
   const handleStatusChange = async (adId, status) => {
-    const auditNotes = window.prompt('审核备注（可选）', '');
+    const auditNotes = window.prompt(t('adAuditNote'), '');
     try {
       await adsApi.updateStatus(adId, { status, auditNotes });
-      notifyAndRefresh('广告状态已更新');
+      notifyAndRefresh(t('adStatusUpdated'));
     } catch (error) {
-      toast.error(error.message || '更新状态失败');
+      toast.error(error.message || t('adStatusUpdateFailed'));
     }
   };
 
   const handlePaymentChange = async (adId, paymentStatus) => {
     try {
       await adsApi.updateBilling(adId, { paymentStatus });
-      notifyAndRefresh('收费状态已更新');
+      notifyAndRefresh(t('adBillingUpdated'));
     } catch (error) {
-      toast.error(error.message || '更新收费状态失败');
+      toast.error(error.message || t('adBillingUpdateFailed'));
     }
   };
 
   const handleScheduleUpdate = async (adId) => {
     const draft = scheduleDrafts[adId];
     if (!draft?.startAt || !draft?.endAt) {
-      toast.error('请完善排期时间');
+      toast.error(t('adScheduleIncomplete'));
       return;
     }
     if (draft.endAt <= draft.startAt) {
-      toast.error('结束时间必须晚于开始时间');
+      toast.error(t('adScheduleInvalid'));
       return;
     }
     try {
@@ -141,9 +143,9 @@ export default function AdManager() {
         startAt: new Date(draft.startAt).toISOString(),
         endAt: new Date(draft.endAt).toISOString(),
       });
-      notifyAndRefresh('排期已更新');
+      notifyAndRefresh(t('adScheduleUpdated'));
     } catch (error) {
-      toast.error(error.message || '更新排期失败');
+      toast.error(error.message || t('adScheduleUpdateFailed'));
     }
   };
 
@@ -151,8 +153,8 @@ export default function AdManager() {
     <div className="ad-manager">
       <div className="ad-manager-header">
         <div>
-          <p className="ad-eyebrow">广告控制台</p>
-          <h3>投放审核与排期</h3>
+          <p className="ad-eyebrow">{t('adConsole')}</p>
+          <h3>{t('adReviewSchedule')}</h3>
         </div>
         <select className="ad-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           {STATUS_OPTIONS.map((option) => (
@@ -163,19 +165,19 @@ export default function AdManager() {
 
       <div className="ad-status-summary">
         <div className="ad-status-card">
-          <span>总计</span>
+          <span>{t('adTotal')}</span>
           <strong>{summary.total}</strong>
         </div>
         <div className="ad-status-card">
-          <span>待审核</span>
+          <span>{t('adPendingReview')}</span>
           <strong>{summary.pending_review || 0}</strong>
         </div>
         <div className="ad-status-card">
-          <span>投放中</span>
+          <span>{t('adRunning')}</span>
           <strong>{summary.running || 0}</strong>
         </div>
         <div className="ad-status-card">
-          <span>已排期</span>
+          <span>{t('adScheduled')}</span>
           <strong>{summary.scheduled || 0}</strong>
         </div>
       </div>
@@ -184,7 +186,7 @@ export default function AdManager() {
 
       {!loading && ads.length === 0 && (
         <div className="ad-empty">
-          暂无符合条件的广告，稍后再来看看。
+          {t('adNoAds')}
         </div>
       )}
 
@@ -203,26 +205,26 @@ export default function AdManager() {
 
               <div className="ad-card-body">
                 <div>
-                  <small>投放窗口</small>
+                  <small>{t('adWindow')}</small>
                   <strong>{formatDate(ad.schedule?.startAt)} - {formatDate(ad.schedule?.endAt)}</strong>
                 </div>
                 <div>
-                  <small>预估曝光</small>
-                  <strong>{ad.billing?.estimatedImpressions?.toLocaleString?.() || '—'} 次</strong>
+                  <small>{t('adEstExposure')}</small>
+                  <strong>{ad.billing?.estimatedImpressions?.toLocaleString?.() || '—'} {t('times')}</strong>
                 </div>
                 <div>
-                  <small>应收金额</small>
+                  <small>{t('adAmountDue')}</small>
                   <strong>{formatCurrency(ad.billing?.totalDue)}</strong>
                 </div>
                 <div>
-                  <small>支付状态</small>
+                  <small>{t('adPaymentStatus')}</small>
                   <strong>{PAYMENT_OPTIONS.find((option) => option.value === ad.billing?.paymentStatus)?.label || '—'}</strong>
                 </div>
               </div>
 
               <div className="ad-card-controls">
                 <label>
-                  <span>审核状态</span>
+                  <span>{t('adReviewStatus')}</span>
                   <select value={ad.status} onChange={(e) => handleStatusChange(ad._id, e.target.value)}>
                     {STATUS_OPTIONS.filter((option) => option.value !== 'all').map((option) => (
                       <option key={option.value} value={option.value}>{option.label}</option>
@@ -230,7 +232,7 @@ export default function AdManager() {
                   </select>
                 </label>
                 <label>
-                  <span>收费状态</span>
+                  <span>{t('adBillingStatus')}</span>
                   <select value={ad.billing?.paymentStatus || 'pending'} onChange={(e) => handlePaymentChange(ad._id, e.target.value)}>
                     {PAYMENT_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>{option.label}</option>
@@ -238,7 +240,7 @@ export default function AdManager() {
                   </select>
                 </label>
                 <div className="ad-schedule-editor">
-                  <span>投放排期</span>
+                  <span>{t('adSchedule')}</span>
                   <div className="ad-schedule-inputs">
                     <input type="datetime-local" value={scheduleDrafts[ad._id]?.startAt || ''} onChange={(e) => setScheduleDrafts((prev) => ({
                       ...prev,
@@ -249,7 +251,7 @@ export default function AdManager() {
                       [ad._id]: { ...prev[ad._id], endAt: e.target.value },
                     }))} />
                     <button type="button" className="ad-btn-update" onClick={() => handleScheduleUpdate(ad._id)}>
-                      更新
+                      {t('adUpdate')}
                     </button>
                   </div>
                 </div>

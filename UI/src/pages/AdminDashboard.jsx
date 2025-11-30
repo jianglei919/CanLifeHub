@@ -2,24 +2,10 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { UserContext } from '../../context/userContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { adminApi } from '../api/http';
 import AdManager from '../components/AdManager';
 import '../styles/AdminDashboard.css';
-
-const sideNav = [
-  { id: 'overview', icon: '📊', label: '仪表盘' },
-  { id: 'users', icon: '👥', label: '用户管理' },
-  { id: 'posts', icon: '📝', label: '内容审核' },
-  { id: 'ads', icon: '📢', label: '广告活动' },
-  { id: 'reports', icon: '📈', label: '数据报表' },
-];
-
-const postStatuses = [
-  { value: 'active', label: '正常' },
-  { value: 'pending', label: '待审' },
-  { value: 'hidden', label: '隐藏' },
-  { value: 'deleted', label: '已删除' },
-];
 
 const MOCK_ORDERS = [
   { _id: 'ORD-MOCK1', title: 'Summer Sale Campaign', advertiser: { contactName: 'Nike Inc.', contactEmail: 'marketing@nike.com' }, billing: { totalDue: 5000 }, schedule: { dailyBudget: 200 }, status: 'running', createdAt: new Date().toISOString() },
@@ -31,6 +17,7 @@ const MOCK_ORDERS = [
 
 export default function AdminDashboard() {
   const { user } = useContext(UserContext);
+  const { t, language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('overview');
   const [overview, setOverview] = useState(null);
@@ -47,6 +34,21 @@ export default function AdminDashboard() {
   const [reportsData, setReportsData] = useState({ userGrowth: [], topPosts: [] });
   const [loadingReports, setLoadingReports] = useState(false);
 
+  const sideNav = [
+    { id: 'overview', icon: '📊', label: t('dashboard') },
+    { id: 'users', icon: '👥', label: t('userManagement') },
+    { id: 'posts', icon: '📝', label: t('contentModeration') },
+    { id: 'ads', icon: '📢', label: t('adCampaigns') },
+    { id: 'reports', icon: '📈', label: t('dataReports') },
+  ];
+
+  const postStatuses = [
+    { value: 'active', label: t('statusActive') },
+    { value: 'pending', label: t('statusPending') },
+    { value: 'hidden', label: t('statusHidden') },
+    { value: 'deleted', label: t('statusDeleted') },
+  ];
+
   const fetchOverview = async () => {
     try {
       setLoadingOverview(true);
@@ -55,7 +57,7 @@ export default function AdminDashboard() {
         setOverview(data);
       }
     } catch (error) {
-      toast.error(error.message || '加载仪表盘失败');
+      toast.error(error.message || t('loadReportsFailed'));
     } finally {
       setLoadingOverview(false);
     }
@@ -78,11 +80,11 @@ export default function AdminDashboard() {
         });
       }
     } catch (error) {
-      toast.error(error.message || '加载用户失败');
+      toast.error(error.message || t('loadUsersFailed'));
     } finally {
       setUsersLoading(false);
     }
-  }, [usersData.page, usersData.pageSize, usersData.search]);
+  }, [usersData.page, usersData.pageSize, usersData.search, t]);
 
   const fetchPosts = useCallback(async (overrides = {}) => {
     const params = {
@@ -102,11 +104,11 @@ export default function AdminDashboard() {
         });
       }
     } catch (error) {
-      toast.error(error.message || '加载帖子失败');
+      toast.error(error.message || t('loadPostsFailed'));
     } finally {
       setPostsLoading(false);
     }
-  }, [postsData.page, postsData.pageSize, postsData.search, postsData.status]);
+  }, [postsData.page, postsData.pageSize, postsData.search, postsData.status, t]);
 
   const fetchReports = useCallback(async () => {
     try {
@@ -119,11 +121,11 @@ export default function AdminDashboard() {
         });
       }
     } catch (error) {
-      toast.error(error.message || '加载报表失败');
+      toast.error(error.message || t('loadReportsFailed'));
     } finally {
       setLoadingReports(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchOverview();
@@ -144,39 +146,39 @@ export default function AdminDashboard() {
   const handleRoleChange = async (userId, role) => {
     try {
       await adminApi.updateUserRole(userId, { role });
-      toast.success('角色已更新');
+      toast.success(t('roleUpdated'));
       fetchUsers();
     } catch (error) {
-      toast.error(error.message || '更新角色失败');
+      toast.error(error.message || t('roleUpdateFailed'));
     }
   };
 
   const handlePostStatusChange = async (postId, status) => {
     try {
       await adminApi.updatePostStatus(postId, { status });
-      toast.success('帖子状态已更新');
+      toast.success(t('postStatusUpdated'));
       fetchPosts();
     } catch (error) {
-      toast.error(error.message || '更新帖子状态失败');
+      toast.error(error.message || t('postStatusUpdateFailed'));
     }
   };
 
   const renderHero = () => (
     <section className="admin-hero">
       <div className="hero-card">
-        <p className="hero-label">总用户数</p>
+        <p className="hero-label">{t('totalUsers')}</p>
         <h3>{overview?.overview?.userCount || 0}</h3>
-        <span className="hero-meta">注册用户</span>
+        <span className="hero-meta">{t('registeredUsers')}</span>
       </div>
       <div className="hero-card">
-        <p className="hero-label">总帖子数</p>
+        <p className="hero-label">{t('totalPosts')}</p>
         <h3>{overview?.overview?.postCount || 0}</h3>
-        <span className="hero-meta">社区内容</span>
+        <span className="hero-meta">{t('communityContent')}</span>
       </div>
       <div className="hero-card">
-        <p className="hero-label">投放活动</p>
+        <p className="hero-label">{t('activeCampaigns')}</p>
         <h3>{overview?.overview?.runningAds || 0}</h3>
-        <span className="hero-meta">{overview?.overview?.pendingAds || 0} 个待审</span>
+        <span className="hero-meta">{overview?.overview?.pendingAds || 0} {t('pendingAdsCount')}</span>
       </div>
     </section>
   );
@@ -199,27 +201,27 @@ export default function AdminDashboard() {
         <section className="admin-section admin-orders">
           <div className="admin-section-header">
             <div>
-              <p className="breadcrumb">Home · Orders</p>
-              <h2>Orders</h2>
-              <small>Classic list view with filters, row actions.</small>
+              <p className="breadcrumb">{t('breadcrumbOrders')}</p>
+              <h2>{t('ordersTitle')}</h2>
+              <small>{t('ordersSubtitle')}</small>
             </div>
           </div>
           <div className="filter-toolbar">
             <input
               type="text"
-              placeholder="Search by ID, advertiser"
+              placeholder={t('searchOrdersPlaceholder')}
               value={adSearch}
               onChange={(e) => setAdSearch(e.target.value)}
               className="search-input"
             />
             <select value={adStatus} onChange={(e) => setAdStatus(e.target.value)}>
-              <option value="">All status</option>
-              <option value="draft">Draft</option>
-              <option value="pending_review">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="running">Running</option>
-              <option value="paused">Paused</option>
-              <option value="rejected">Rejected</option>
+              <option value="">{t('allStatus')}</option>
+              <option value="draft">{t('statusDraft')}</option>
+              <option value="pending_review">{t('statusPendingReview')}</option>
+              <option value="approved">{t('statusApproved')}</option>
+              <option value="running">{t('statusRunning')}</option>
+              <option value="paused">{t('statusPaused')}</option>
+              <option value="rejected">{t('statusRejected')}</option>
             </select>
           </div>
           {loadingOverview ? (
@@ -229,13 +231,13 @@ export default function AdminDashboard() {
               <table>
                 <thead>
                   <tr>
-                    <th>订单</th>
-                    <th>客户</th>
-                    <th>素材</th>
-                    <th>收费</th>
-                    <th>预算</th>
-                    <th>状态</th>
-                    <th>创建时间</th>
+                    <th>{t('colOrder')}</th>
+                    <th>{t('colClient')}</th>
+                    <th>{t('colCreative')}</th>
+                    <th>{t('colBilling')}</th>
+                    <th>{t('colBudget')}</th>
+                    <th>{t('colStatus')}</th>
+                    <th>{t('colCreatedAt')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -246,7 +248,7 @@ export default function AdminDashboard() {
                         <div className="cell-title">{ad.advertiser?.contactName || 'Unknown'}</div>
                         <small className="muted-text">{ad.advertiser?.contactEmail || '-'}</small>
                       </td>
-                      <td>{ad.title || 'Untitled Ad'}</td>
+                      <td>{ad.title || t('untitled')}</td>
                       <td>¥{ad.billing?.totalDue || 0}</td>
                       <td>¥{ad.schedule?.dailyBudget || 0}</td>
                       <td>
@@ -257,7 +259,7 @@ export default function AdminDashboard() {
                   ))}
                   {!filtered.length && (
                     <tr>
-                      <td colSpan={7} className="muted-text">暂无广告活动</td>
+                      <td colSpan={7} className="muted-text">{t('noAdsFound')}</td>
                     </tr>
                   )}
                 </tbody>
@@ -273,17 +275,17 @@ export default function AdminDashboard() {
     <div className="admin-section">
       <div className="admin-section-header">
         <div>
-          <p className="eyebrow">用户资产</p>
-          <h2>用户与权限控制</h2>
+          <p className="eyebrow">{t('userAssets')}</p>
+          <h2>{t('userAccessControl')}</h2>
         </div>
         <div className="filter-tools">
           <input
             type="text"
-            placeholder="搜索姓名/邮箱"
+            placeholder={t('searchUsersPlaceholder')}
             value={usersData.search}
             onChange={(e) => setUsersData((prev) => ({ ...prev, search: e.target.value }))}
           />
-          <button className="ghost-btn" onClick={() => fetchUsers({ page: 1 })}>搜索</button>
+          <button className="ghost-btn" onClick={() => fetchUsers({ page: 1 })}>{t('searchBtn')}</button>
         </div>
       </div>
       {usersLoading ? (
@@ -293,12 +295,12 @@ export default function AdminDashboard() {
           <table>
             <thead>
               <tr>
-                <th>姓名</th>
-                <th>邮箱</th>
-                <th>角色</th>
-                <th>粉丝</th>
-                <th>关注</th>
-                <th>加入时间</th>
+                <th>{t('colName')}</th>
+                <th>{t('colEmail')}</th>
+                <th>{t('colRole')}</th>
+                <th>{t('colFollowers')}</th>
+                <th>{t('colFollowing')}</th>
+                <th>{t('colJoinDate')}</th>
               </tr>
             </thead>
             <tbody>
@@ -308,8 +310,8 @@ export default function AdminDashboard() {
                   <td>{item.email}</td>
                   <td>
                     <select value={item.role} onChange={(e) => handleRoleChange(item._id, e.target.value)}>
-                      <option value="user">普通用户</option>
-                      <option value="admin">管理员</option>
+                      <option value="user">{t('roleUser')}</option>
+                      <option value="admin">{t('roleAdmin')}</option>
                     </select>
                   </td>
                   <td>{item.followersCount || 0}</td>
@@ -320,7 +322,7 @@ export default function AdminDashboard() {
               {!usersData.items.length && (
                 <tr>
                   <td colSpan={6} className="muted-text">
-                    暂无数据
+                    {t('noData')}
                   </td>
                 </tr>
               )}
@@ -335,13 +337,13 @@ export default function AdminDashboard() {
     <div className="admin-section">
       <div className="admin-section-header">
         <div>
-          <p className="eyebrow">内容库</p>
-          <h2>帖子审核与风控</h2>
+          <p className="eyebrow">{t('contentLibrary')}</p>
+          <h2>{t('postModeration')}</h2>
         </div>
         <div className="filter-tools">
           <input
             type="text"
-            placeholder="搜索标题/正文"
+            placeholder={t('searchPostsPlaceholder')}
             value={postsData.search || ''}
             onChange={(e) => setPostsData((prev) => ({ ...prev, search: e.target.value }))}
           />
@@ -349,12 +351,12 @@ export default function AdminDashboard() {
             value={postsData.status || ''}
             onChange={(e) => setPostsData((prev) => ({ ...prev, status: e.target.value }))}
           >
-            <option value="">全部状态</option>
+            <option value="">{t('allStatuses')}</option>
             {postStatuses.map((status) => (
               <option key={status.value} value={status.value}>{status.label}</option>
             ))}
           </select>
-          <button className="ghost-btn" onClick={() => fetchPosts({ page: 1 })}>筛选</button>
+          <button className="ghost-btn" onClick={() => fetchPosts({ page: 1 })}>{t('filterBtn')}</button>
         </div>
       </div>
       {postsLoading ? (
@@ -364,17 +366,17 @@ export default function AdminDashboard() {
           <table>
             <thead>
               <tr>
-                <th>标题</th>
-                <th>作者</th>
-                <th>状态</th>
-                <th>互动</th>
-                <th>发布时间</th>
+                <th>{t('colTitle')}</th>
+                <th>{t('colAuthor')}</th>
+                <th>{t('colStatus')}</th>
+                <th>{t('colInteraction')}</th>
+                <th>{t('colPublishDate')}</th>
               </tr>
             </thead>
             <tbody>
               {postsData.items.map((post) => (
                 <tr key={post._id}>
-                  <td>{post.title || (post.content || '').slice(0, 20) || '未命名'}</td>
+                  <td>{post.title || (post.content || '').slice(0, 20) || t('untitled')}</td>
                   <td>{post.authorId?.name || '-'}</td>
                   <td>
                     <select value={post.status} onChange={(e) => handlePostStatusChange(post._id, e.target.value)}>
@@ -391,7 +393,7 @@ export default function AdminDashboard() {
               ))}
               {!postsData.items.length && (
                 <tr>
-                  <td colSpan={5} className="muted-text">暂无帖子</td>
+                  <td colSpan={5} className="muted-text">{t('noPostsFound')}</td>
                 </tr>
               )}
             </tbody>
@@ -405,8 +407,8 @@ export default function AdminDashboard() {
     <div className="admin-section">
       <div className="admin-section-header">
         <div>
-          <p className="eyebrow">广告引擎</p>
-          <h2>投放排期与收费</h2>
+          <p className="eyebrow">{t('adEngine')}</p>
+          <h2>{t('adScheduleBilling')}</h2>
         </div>
       </div>
       <AdManager />
@@ -422,8 +424,8 @@ export default function AdminDashboard() {
       <div className="admin-section">
         <div className="admin-section-header">
           <div>
-            <p className="eyebrow">运营洞察</p>
-            <h2>数据报表</h2>
+            <p className="eyebrow">{t('opsInsights')}</p>
+            <h2>{t('dataReportsTitle')}</h2>
           </div>
         </div>
         {loadingReports ? (
@@ -432,7 +434,7 @@ export default function AdminDashboard() {
           <div className="report-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', width: '100%' }}>
             {/* User Growth Chart */}
             <div className="panel-card" style={{ background: '#fff', padding: '24px', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', minHeight: '300px' }}>
-              <h3>用户增长趋势 (近7天)</h3>
+              <h3>{t('userGrowthTitle')}</h3>
               {reportsData.userGrowth.length > 0 ? (
                 <div className="chart-container">
                   {reportsData.userGrowth.map((item) => (
@@ -449,20 +451,20 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', color: '#94a3b8' }}>
-                  暂无数据
+                  {t('noData')}
                 </div>
               )}
             </div>
 
             {/* Top Posts Chart */}
             <div className="panel-card" style={{ background: '#fff', padding: '24px', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', minHeight: '300px' }}>
-              <h3>热门帖子排行</h3>
+              <h3>{t('topPostsTitle')}</h3>
               {reportsData.topPosts.length > 0 ? (
                 <div className="horizontal-chart">
                   {reportsData.topPosts.map((post) => (
                     <div key={post._id} className="h-bar-group">
                       <div className="h-bar-info">
-                        <span className="h-bar-title">{post.title || 'Untitled'}</span>
+                        <span className="h-bar-title">{post.title || t('untitled')}</span>
                         <span style={{ fontWeight: 600 }}>{post.likesCount} likes</span>
                       </div>
                       <div className="h-bar-track">
@@ -476,7 +478,7 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', color: '#94a3b8' }}>
-                  暂无数据
+                  {t('noData')}
                 </div>
               )}
             </div>
@@ -516,11 +518,11 @@ export default function AdminDashboard() {
           <div className="logo-area">
             <div className="logo-icon">A</div>
             <div>
-              <p className="eyebrow">Workspace</p>
-              <h1>Management<br/>Console</h1>
+              <p className="eyebrow">{t('workspace')}</p>
+              <h1>{t('managementConsole')}</h1>
             </div>
           </div>
-          <span className="mock-pill">preview</span>
+          <span className="mock-pill">{t('previewTag')}</span>
         </div>
         <nav className="sidebar-nav">
           {sideNav.map((item) => (
@@ -535,7 +537,14 @@ export default function AdminDashboard() {
           ))}
         </nav>
         <div className="sidebar-footer">
-          <button className="ghost-btn" onClick={handleBackToApp}>返回前台</button>
+          <button className="ghost-btn" onClick={handleBackToApp}>{t('backToApp')}</button>
+          <button 
+            className="ghost-btn" 
+            onClick={toggleLanguage} 
+            style={{ marginTop: '8px', fontSize: '0.9em', opacity: 0.8 }}
+          >
+            {language === 'zh' ? 'English' : '中文'}
+          </button>
         </div>
       </aside>
       <div className="admin-content">
@@ -552,7 +561,7 @@ export default function AdminDashboard() {
                 </defs>
               </svg>
             </span>
-            <input type="text" placeholder="Search orders, users, posts..." />
+            <input type="text" placeholder={t('globalSearchPlaceholder')} />
           </div>
         </div>
         <div className="admin-body">

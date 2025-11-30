@@ -9,26 +9,26 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 // ===================== Chatbot 对话接口 /chat =====================
 const chatWithBot = async (req, res) => {
   try {
-    const { message, conversationHistory } = req.body;
+    const { message, conversationHistory, language = 'zh' } = req.body;
     
-    console.log('[Chatbot] Received message:', message);
+    console.log(`[Chatbot] Received message (${language}):`, message);
     
     if (!message) {
-      return res.json({ error: '请输入消息' });
+      return res.json({ error: language === 'zh' ? '请输入消息' : 'Please enter a message' });
     }
 
     // 搜索知识库
-    const searchResults = searchKnowledge(message);
+    const searchResults = searchKnowledge(message, language);
     console.log('[Chatbot] Found', searchResults.length, 'relevant knowledge items');
 
     // 使用 gemini-2.0-flash 模型（最新稳定版本）
     const model = genAI.getGenerativeModel({ 
       model: 'gemini-2.0-flash',
-      systemInstruction: buildSystemPrompt() // 添加系统提示词
+      systemInstruction: buildSystemPrompt(language) // 添加系统提示词
     });
 
     // 构建增强的用户消息（包含检索到的知识）
-    const enhancedMessage = buildEnhancedPrompt(message, searchResults);
+    const enhancedMessage = buildEnhancedPrompt(message, searchResults, language);
     console.log('[Chatbot] Enhanced prompt length:', enhancedMessage.length);
 
     // 简化方案：不使用对话历史，每次都是新对话
@@ -58,8 +58,9 @@ const chatWithBot = async (req, res) => {
   } catch (error) {
     console.error('[Chatbot] ERROR:', error.message);
     console.error('[Chatbot] Full error:', error);
+    const { language = 'zh' } = req.body;
     return res.status(500).json({ 
-      error: '抱歉，我现在无法回复。请稍后再试。',
+      error: language === 'zh' ? '抱歉，我现在无法回复。请稍后再试。' : 'Sorry, I cannot reply right now. Please try again later.',
       details: error.message 
     });
   }

@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { chatApi } from "../api/http";
+import { useLanguage } from "../../context/LanguageContext";
 import toast from "react-hot-toast";
 import "../styles/Messages.css";
 
 export default function Messages() {
+  const { t } = useLanguage();
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -52,7 +54,7 @@ export default function Messages() {
       }
     } catch (error) {
       console.error("加载会话列表失败:", error);
-      toast.error(error.message || "加载会话列表失败");
+      toast.error(error.message || t('loadConversationsFailed'));
     }
   };
 
@@ -81,7 +83,7 @@ export default function Messages() {
       }
     } catch (error) {
       console.error("加载消息失败:", error);
-      toast.error(error.message || "加载消息失败");
+      toast.error(error.message || t('loadMessagesFailed'));
       setLoading(false);
     }
   };
@@ -91,11 +93,11 @@ export default function Messages() {
     if (messageInput.trim() && selectedConversation) {
       // 检查是否被拉黑
       if (selectedConversation.isBlockedByOther) {
-        toast.error("对方已将您拉黑，无法发送消息");
+        toast.error(t('blockedByOther'));
         return;
       }
       if (selectedConversation.isBlocked) {
-        toast.error("您已拉黑对方，无法发送消息");
+        toast.error(t('blockedByUser'));
         return;
       }
 
@@ -115,7 +117,7 @@ export default function Messages() {
         }
       } catch (error) {
         console.error("发送消息失败:", error);
-        toast.error(error.message || "发送消息失败");
+        toast.error(error.message || t('sendMessageFailed'));
       }
     }
   };
@@ -127,23 +129,23 @@ export default function Messages() {
 
     // 检查是否被拉黑
     if (selectedConversation.isBlockedByOther) {
-      toast.error("对方已将您拉黑，无法发送消息");
+      toast.error(t('blockedByOther'));
       return;
     }
     if (selectedConversation.isBlocked) {
-      toast.error("您已拉黑对方，无法发送消息");
+      toast.error(t('blockedByUser'));
       return;
     }
 
     // 检查文件类型
     if (!file.type.startsWith("image/")) {
-      toast.error("请选择图片文件");
+      toast.error(t('selectImage'));
       return;
     }
 
     // 检查文件大小（5MB）
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("图片大小不能超过5MB");
+      toast.error(t('imageSizeLimit'));
       return;
     }
 
@@ -166,11 +168,11 @@ export default function Messages() {
             setMessages([...messages, response.data.message]);
             await loadConversations();
             scrollToBottom();
-            toast.success("图片发送成功");
+            toast.success(t('imageSent'));
           }
         } catch (error) {
           console.error("发送图片失败:", error);
-          toast.error(error.message || "发送图片失败");
+          toast.error(error.message || t('sendImageFailed'));
         } finally {
           setUploading(false);
           if (fileInputRef.current) {
@@ -180,14 +182,14 @@ export default function Messages() {
       };
 
       reader.onerror = () => {
-        toast.error("图片读取失败");
+        toast.error(t('readImageFailed'));
         setUploading(false);
       };
 
       reader.readAsDataURL(file);
     } catch (error) {
       console.error("处理图片失败:", error);
-      toast.error(error.message || "处理图片失败");
+      toast.error(error.message || t('processImageFailed'));
       setUploading(false);
     }
   };
@@ -202,7 +204,7 @@ export default function Messages() {
     // 拉黑前需要确认
     if (!isCurrentlyBlocked) {
       const confirmed = window.confirm(
-        `确定要拉黑 ${userName} 吗？\n\n拉黑后：\n· 你们将无法互相发送消息\n· 对方不会收到拉黑通知\n· 你可以随时取消拉黑`
+        `${t('confirmBlock')} ${userName} ?\n\n${t('blockWarning')}`
       );
       if (!confirmed) return;
     }
@@ -212,8 +214,8 @@ export default function Messages() {
       if (response.data.ok) {
         // 显示操作成功提示
         const successMessage = response.data.isBlocked
-          ? `已拉黑 ${userName}`
-          : `已取消拉黑 ${userName}`;
+          ? `${t('blocked')} ${userName}`
+          : `${t('unblocked')} ${userName}`;
         toast.success(successMessage);
 
         // 更新当前会话状态
@@ -226,7 +228,7 @@ export default function Messages() {
       }
     } catch (error) {
       console.error("操作失败:", error);
-      toast.error(error.message || "操作失败，请稍后重试");
+      toast.error(error.message || t('operationFailed'));
     }
   };
 
@@ -245,7 +247,7 @@ export default function Messages() {
       }
     } catch (error) {
       console.error("搜索用户失败:", error);
-      toast.error(error.message || "搜索用户失败");
+      toast.error(error.message || t('searchFailed'));
     }
   };
 
@@ -272,7 +274,7 @@ export default function Messages() {
       }
     } catch (error) {
       console.error("创建会话失败:", error);
-      toast.error(error.message || "创建会话失败");
+      toast.error(error.message || t('createChatFailed'));
     }
   };
 
@@ -511,15 +513,15 @@ export default function Messages() {
       <div className="messages-module">
         <div className="messages-title">
           <button onClick={() => { setShowNewChat(false); setSearchQuery(""); setSearchResults([]); }}>
-            ← 返回
+            ← {t('back')}
           </button>
-          <h3>新建私信</h3>
+          <h3>{t('newChat')}</h3>
         </div>
 
         <div className="search-users">
           <input
             type="text"
-            placeholder="搜索用户名或邮箱..."
+            placeholder={t('searchUserPlaceholder')}
             value={searchQuery}
             onChange={(e) => handleSearchUsers(e.target.value)}
             className="search-input"
@@ -528,7 +530,7 @@ export default function Messages() {
 
         <div className="search-results">
           {searchResults.length === 0 && searchQuery.trim().length > 0 && (
-            <div className="no-results">未找到用户</div>
+            <div className="no-results">{t('userNotFound')}</div>
           )}
           {searchResults.map((user) => (
             <div
@@ -557,14 +559,14 @@ export default function Messages() {
     return (
       <div className="messages-view">
         <div className="messages-header">
-          <button onClick={() => { setShowMessages(false); setMessages([]); }}>返回</button>
+          <button onClick={() => { setShowMessages(false); setMessages([]); }}>{t('back')}</button>
           <h3>{selectedConversation.otherUser?.name}</h3>
           <button
             onClick={handleToggleBlock}
             className={isBlocked ? "unblock-btn" : "block-btn"}
-            title={isBlocked ? "点击取消拉黑" : "点击拉黑该用户"}
+            title={isBlocked ? t('clickToUnblock') : t('clickToBlock')}
           >
-            {isBlocked ? "取消拉黑" : "拉黑"}
+            {isBlocked ? t('unblock') : t('block')}
           </button>
         </div>
 
@@ -572,14 +574,14 @@ export default function Messages() {
           <div className="block-notice">
             {isBlocked && (
               <div className="block-notice-item">
-                <p className="block-notice-title">⚠️ 您已拉黑该用户</p>
-                <p className="block-notice-desc">双方将无法互相发送消息，点击右上角"取消拉黑"按钮可恢复</p>
+                <p className="block-notice-title">⚠️ {t('youBlockedUser')}</p>
+                <p className="block-notice-desc">{t('blockDesc')}</p>
               </div>
             )}
             {isBlockedByOther && (
               <div className="block-notice-item">
-                <p className="block-notice-title">⚠️ 对方已将您拉黑</p>
-                <p className="block-notice-desc">您暂时无法给对方发送消息</p>
+                <p className="block-notice-title">⚠️ {t('userBlockedYou')}</p>
+                <p className="block-notice-desc">{t('cannotMessage')}</p>
               </div>
             )}
           </div>
@@ -587,9 +589,9 @@ export default function Messages() {
 
         <div className="messages-container">
           {loading ? (
-            <div className="loading">加载中...</div>
+            <div className="loading">{t('loading')}</div>
           ) : renderedMessages.length === 0 ? (
-            <div className="no-messages">暂无消息，开始聊天吧</div>
+            <div className="no-messages">{t('noMessagesStart')}</div>
           ) : (
             renderedMessages.map((msg) => (
               <div
@@ -602,12 +604,12 @@ export default function Messages() {
                   ) : (
                     <img
                       src={msg.imageUrl}
-                      alt="图片消息"
+                      alt={t('imageMessage')}
                       className="message-image"
                       loading="lazy"
                       onClick={() => openImagePreview(msg.imageUrl)}
                       onError={(e) => {
-                        e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23ddd' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3E加载失败%3C/text%3E%3C/svg%3E";
+                        e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23ddd' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3E" + t('loadFailed') + "%3C/text%3E%3C/svg%3E";
                       }}
                     />
                   )}
@@ -629,11 +631,11 @@ export default function Messages() {
             className="emoji-btn"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
             disabled={!canSendMessage}
-            title="选择表情"
+            title={t('selectEmoji')}
           />
           <input
             type="text"
-            placeholder={canSendMessage ? "输入消息..." : "无法发送消息"}
+            placeholder={canSendMessage ? t('typeMessage') : t('cannotSend')}
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && canSendMessage && handleSendMessage()}
@@ -645,7 +647,7 @@ export default function Messages() {
             className="send-btn"
             disabled={!canSendMessage || !messageInput.trim()}
           >
-            发送
+            {t('send')}
           </button>
           <input
             ref={fileInputRef}
@@ -658,14 +660,14 @@ export default function Messages() {
             className="image-btn"
             onClick={() => canSendMessage && fileInputRef.current?.click()}
             disabled={!canSendMessage || uploading}
-            title="发送图片"
+            title={t('sendImage')}
           />
 
           {/* Emoji选择器 */}
           {showEmojiPicker && (
             <div className="emoji-picker">
               <div className="emoji-picker-header">
-                <span className="emoji-picker-title">选择表情</span>
+                <span className="emoji-picker-title">{t('selectEmoji')}</span>
                 <button
                   className="emoji-picker-close"
                   onClick={() => setShowEmojiPicker(false)}
@@ -694,7 +696,7 @@ export default function Messages() {
             <button className="image-preview-close" onClick={closeImagePreview}>
               ✕
             </button>
-            <img src={previewImage} alt="预览" onClick={(e) => e.stopPropagation()} />
+            <img src={previewImage} alt={t('preview')} onClick={(e) => e.stopPropagation()} />
           </div>
         )}
       </div>
@@ -705,14 +707,14 @@ export default function Messages() {
   return (
     <div className="messages-module">
       <div className="messages-title">
-        <h3>私信</h3>
-        <button className="new-message-btn" onClick={() => setShowNewChat(true)} title="发起新会话"></button>
+        <h3>{t('messages')}</h3>
+        <button className="new-message-btn" onClick={() => setShowNewChat(true)} title={t('startNewChat')}></button>
       </div>
 
       <div className="conversations-list">
         {conversations.length === 0 ? (
           <div className="no-conversations">
-            暂无私信，点击右上角 ➕ 开始新对话
+            {t('noConversations')}
           </div>
         ) : (
           conversations.map((conv) => (
@@ -732,13 +734,13 @@ export default function Messages() {
                   {conv.unreadCount > 0 && (
                     <span className="unread-badge-inline">{conv.unreadCount > 99 ? '99+' : conv.unreadCount}</span>
                   )}
-                  {conv.isBlocked && <span className="blocked-badge">已拉黑</span>}
-                  {conv.isBlockedByOther && <span className="blocked-badge">被拉黑</span>}
+                  {conv.isBlocked && <span className="blocked-badge">{t('blocked')}</span>}
+                  {conv.isBlockedByOther && <span className="blocked-badge">{t('blockedBy')}</span>}
                 </div>
                 <div className="conv-message">
                   {conv.lastMessage?.messageType === "image"
-                    ? "[图片]"
-                    : conv.lastMessage?.content || "暂无消息"}
+                    ? t('imageLabel')
+                    : conv.lastMessage?.content || t('noMessageContent')}
                 </div>
               </div>
             </div>

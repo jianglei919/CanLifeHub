@@ -2,6 +2,8 @@
 import { useContext, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
+import { useLanguage } from "../../context/LanguageContext";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import { authApi, chatApi } from "../api/http";
 import toast from "react-hot-toast";
 import PostList from "../components/PostList";
@@ -14,6 +16,7 @@ import "../styles/Dashboard.css";
 
 export default function Dashboard() {
   const { user, setUser } = useContext(UserContext);
+  const { t } = useLanguage();
   const isAuthenticated = !!user;
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("feed");
@@ -64,7 +67,7 @@ export default function Dashboard() {
   const handleLogout = async () => {
     // 确认对话框
     const confirmed = window.confirm(
-      "确定要退出登录吗？\n"
+      t('confirmLogout')
     );
 
     if (!confirmed) {
@@ -74,11 +77,11 @@ export default function Dashboard() {
     try {
       await authApi.logout();
       setUser(null);
-      toast.success("已退出登录");
+      toast.success(t('logoutSuccess'));
       navigate("/login");
     } catch (err) {
       console.error("退出登录失败:", err);
-      toast.error("退出登录失败");
+      toast.error(t('logoutFailed'));
     }
   };
 
@@ -93,20 +96,20 @@ export default function Dashboard() {
 
           <nav className="tab-navigation">
             <button className="tab-item" onClick={() => navigate('/')}>
-              🏠 首页
+              🏠 {t('home')}
             </button>
             <button
               className={`tab-item ${activeTab === "feed" ? "active" : ""}`}
               onClick={() => setActiveTab("feed")}
             >
-              💬 论坛
+              💬 {t('forum')}
             </button>
             {isAuthenticated && (
               <button
                 className={`tab-item ${activeTab === "messages" ? "active" : ""}`}
                 onClick={() => setActiveTab("messages")}
               >
-                💬 私信
+                💬 {t('messages')}
                 {totalUnreadCount > 0 && (
                   <span className="unread-badge">{totalUnreadCount > 99 ? '99+' : totalUnreadCount}</span>
                 )}
@@ -117,27 +120,28 @@ export default function Dashboard() {
                 className={`tab-item ${activeTab === "profile" ? "active" : ""}`}
                 onClick={() => setActiveTab("profile")}
               >
-                👤 我的资料
+                👤 {t('profile')}
               </button>
             )}
           </nav>
 
           <div className="user-section">
+            <LanguageSwitcher />
             {user ? (
               <>
                 {user.role === 'admin' && (
                   <button className="admin-link-btn" onClick={() => navigate('/admin')}>
-                    后台
+                    {t('admin')}
                   </button>
                 )}
                 <span className="greeting">{user.name || "用户"}</span>
-                <button className="logout-btn" onClick={handleLogout} title="退出登录">
-                  退出
+                <button className="logout-btn" onClick={handleLogout} title={t('logout')}>
+                  {t('logout')}
                 </button>
               </>
             ) : (
-              <button className="login-btn" onClick={() => navigate('/login')} title="登录">
-                登录
+              <button className="login-btn" onClick={() => navigate('/login')} title={t('login')}>
+                {t('login')}
               </button>
             )}
           </div>
@@ -158,14 +162,14 @@ export default function Dashboard() {
                   className={`type-btn ${feedType === "all" ? "active" : ""}`}
                   onClick={() => setFeedType("all")}
                 >
-                  全部动态
+                  {t('allPosts')}
                 </button>
                 {isAuthenticated && (
                   <button
                     className={`type-btn ${feedType === "following" ? "active" : ""}`}
                     onClick={() => setFeedType("following")}
                   >
-                    关注的人
+                    {t('followingPosts')}
                   </button>
                 )}
               </div>

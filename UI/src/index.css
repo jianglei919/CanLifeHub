@@ -273,6 +273,7 @@ button:focus-visible {
   padding: 60px 40px;
   position: relative;
   overflow: hidden;
+  user-select: none;
 }
 
 .auth-brand-section::before {

@@ -4,10 +4,13 @@ import { toast } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../api/http";
 import { UserContext } from "../../context/userContext";
+import { useLanguage } from "../../context/LanguageContext";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 export default function Login() {
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
+  const { t } = useLanguage();
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -28,7 +31,7 @@ export default function Login() {
         try {
           const { data: profile } = await authApi.profile();
           setUser(profile);
-          toast.success("登录成功");
+          toast.success(t('loginSuccess'));
           navigate("/forum");
         } catch (err) {
           console.error("获取用户信息失败:", err);
@@ -37,7 +40,7 @@ export default function Login() {
       }
     } catch (err) {
       console.error("登录失败:", err);
-      toast.error("登录失败，请稍后重试");
+      toast.error(t('loginFailed'));
     }
   };
 
@@ -46,29 +49,29 @@ export default function Login() {
       {/* 左侧品牌展示区 */}
       <div className="auth-brand-section">
         <div className="brand-content">
-          <div className="brand-logo">📱</div>
+          <div className="brand-logo">🍁</div>
           <h1 className="brand-title">CanLifeHub</h1>
-          <p className="brand-slogan">连接加拿大华人，分享生活点滴</p>
+          <p className="brand-slogan">{t('brandSlogan')}</p>
           <div className="brand-features">
             <div className="feature-item">
               <div className="feature-icon">🏡</div>
               <div className="feature-text">
-                <h3>生活分享</h3>
-                <p>记录并分享你在加拿大的精采生活</p>
+                <h3>{t('featureShare')}</h3>
+                <p>{t('featureShareDesc')}</p>
               </div>
             </div>
             <div className="feature-item">
               <div className="feature-icon">👥</div>
               <div className="feature-text">
-                <h3>社区互动</h3>
-                <p>结识志同道合的朋友，建立社交圈</p>
+                <h3>{t('featureCommunity')}</h3>
+                <p>{t('featureCommunityDesc')}</p>
               </div>
             </div>
             <div className="feature-item">
               <div className="feature-icon">💡</div>
               <div className="feature-text">
-                <h3>经验交流</h3>
-                <p>获取实用的生活建议和留学攻略</p>
+                <h3>{t('featureTips')}</h3>
+                <p>{t('featureTipsDesc')}</p>
               </div>
             </div>
           </div>
@@ -77,19 +80,22 @@ export default function Login() {
 
       {/* 右侧登录表单区 */}
       <div className="auth-form-section">
+        <div style={{ position: 'absolute', top: '20px', right: '20px' }}>
+          <LanguageSwitcher />
+        </div>
         <div className="form-container">
           <div className="form-header">
-            <h2 className="form-title">欢迎回来</h2>
-            <p className="form-subtitle">登录你的 CanLifeHub 账号，继续你的旅程</p>
+            <h2 className="form-title">{t('welcomeBack')}</h2>
+            <p className="form-subtitle">{t('loginSubtitle')}</p>
           </div>
           
           <form onSubmit={loginUser} className="login-form">
             <div className="form-group">
-              <label className="label">邮箱地址</label>
+              <label className="label">{t('emailLabel')}</label>
               <input
                 className="input"
                 type="email"
-                placeholder="请输入邮箱"
+                placeholder={t('emailPlaceholder')}
                 value={data.email}
                 onChange={(e) => setData({ ...data, email: e.target.value })}
                 required
@@ -97,12 +103,12 @@ export default function Login() {
             </div>
 
             <div className="form-group">
-              <label className="label">密码</label>
+              <label className="label">{t('passwordLabel')}</label>
               <div style={{ position: "relative" }}>
                 <input
                   className="input"
                   type={showPassword ? "text" : "password"}
-                  placeholder="请输入密码"
+                  placeholder={t('passwordPlaceholder')}
                   value={data.password}
                   onChange={(e) => setData({ ...data, password: e.target.value })}
                   required
@@ -112,22 +118,22 @@ export default function Login() {
                   className="btn btn-secondary password-toggle"
                   onClick={() => setShowPassword((v) => !v)}
                 >
-                  {showPassword ? "隐藏" : "显示"}
+                  {showPassword ? t('hide') : t('show')}
                 </button>
               </div>
               <div style={{ marginTop: "8px", textAlign: "right" }}>
                 <Link to="/forgot-password" className="footer-link" style={{ fontSize: "14px" }}>
-                  忘记密码？
+                  {t('forgotPassword')}
                 </Link>
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-login">登录账户</button>
+            <button type="submit" className="btn btn-primary btn-login">{t('loginBtn')}</button>
           </form>
           
           <div className="form-footer">
             <p className="footer-text">
-              还没有账户？<Link to="/register" className="footer-link">立即注册</Link>
+              {t('noAccount')} <Link to="/register" className="footer-link">{t('registerNow')}</Link>
             </p>
           </div>
         </div>

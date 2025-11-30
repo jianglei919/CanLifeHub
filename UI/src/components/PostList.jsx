@@ -1,5 +1,6 @@
 import { useContext, useState, useEffect, useCallback } from "react";
 import { UserContext } from "../../context/userContext";
+import { useLanguage } from "../../context/LanguageContext";
 import CommentsBox from "./CommentsBox";
 import { feedApi, postsApi, followApi } from "../api/http";
 import CreatePost from "./CreatePost";
@@ -11,6 +12,7 @@ import { toast } from "react-hot-toast";
 const TEST_POST_ID = import.meta.env.VITE_TEST_POST_ID || '64c1f0e9f7c5a4b123456789';
 
 export default function PostList({ feedType = "all" }) {
+  const { t } = useLanguage();
   const { user } = useContext(UserContext);
   const [posts, setPosts] = useState([]);
   const [expandedComments, setExpandedComments] = useState({});
@@ -31,15 +33,15 @@ const [detailMode, setDetailMode] = useState('view'); // 'view' 或 'edit'
     const now = new Date();
     const postTime = new Date(isoString);
     const diffInHours = (now - postTime) / (1000 * 60 * 60);
-    if (diffInHours < 1) return `${Math.floor(diffInHours * 60)}分钟前`;
-    if (diffInHours < 24) return `${Math.floor(diffInHours)}小时前`;
-    return `${Math.floor(diffInHours / 24)}天前`;
+    if (diffInHours < 1) return `${Math.floor(diffInHours * 60)}${t('minutesAgo')}`;
+    if (diffInHours < 24) return `${Math.floor(diffInHours)}${t('hoursAgo')}`;
+    return `${Math.floor(diffInHours / 24)}${t('daysAgo')}`;
   };
 
   const transformPostData = (apiPost) => {
     return {
       id: apiPost._id,
-      author: apiPost.authorId?.name || "匿名用户",
+      author: apiPost.authorId?.name || t('anonymousUser'),
       authorId: apiPost.authorId?._id,
       avatar: apiPost.authorId?.avatar || "👤",
       timestamp: formatTime(apiPost.createdAt),
@@ -152,7 +154,7 @@ const [detailMode, setDetailMode] = useState('view'); // 'view' 或 'edit'
       }
     } catch (err) {
       console.error('点赞操作失败:', err);
-      alert(err.message || '点赞失败，请重试');
+      alert(err.message || t('likeFailed'));
     }
   };
 
@@ -165,14 +167,14 @@ const [detailMode, setDetailMode] = useState('view'); // 'view' 或 'edit'
 
   const handleDeletePost = async (postId) => {
     const result = await Swal.fire({
-      title: '确认删除？',
-      text: "删除后无法恢复此帖子！",
+      title: t('confirmDelete'),
+      text: t('deleteWarning'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: '确认删除',
-      cancelButtonText: '取消',
+      confirmButtonText: t('delete'),
+      cancelButtonText: t('cancel'),
       reverseButtons: true,
       customClass: {
         confirmButton: 'swal2-confirm',
@@ -185,10 +187,10 @@ const [detailMode, setDetailMode] = useState('view'); // 'view' 或 'edit'
         await postsApi.delete(postId);
         setPosts(posts.filter(post => post.id !== postId));
         setShowMenuForPost(null);
-        Swal.fire('已删除!', '帖子已成功删除。', 'success');
+        Swal.fire(t('deleted'), t('deleteSuccess'), 'success');
       } catch (err) {
         console.error('删除帖子失败:', err);
-        Swal.fire('错误!', '删除失败，请重试。', 'error');
+        Swal.fire(t('error'), t('deleteFailed'), 'error');
       }
     }
   };
@@ -218,28 +220,28 @@ const [detailMode, setDetailMode] = useState('view'); // 'view' 或 'edit'
   // 简洁版举报函数
 const handleReportPost = async (postId) => {
   const reportReasons = {
-    spam: '垃圾营销',
-    porn: '色情内容', 
-    violence: '暴力血腥',
-    harassment: '骚扰谩骂',
-    illegal: '违法违规',
-    false_info: '不实信息',
-    privacy: '侵犯隐私',
-    other: '其他原因'
+    spam: t('spam'),
+    porn: t('porn'), 
+    violence: t('violence'),
+    harassment: t('harassment'),
+    illegal: t('illegal'),
+    false_info: t('false_info'),
+    privacy: t('privacy'),
+    other: t('other')
   };
 
   const { value: reason } = await Swal.fire({
-    title: '举报帖子',
+    title: t('report'),
     input: 'select',
     inputOptions: reportReasons,
-    inputPlaceholder: '请选择举报理由',
+    inputPlaceholder: t('reportReason'),
     showCancelButton: true,
-    confirmButtonText: '提交举报',
-    cancelButtonText: '取消',
+    confirmButtonText: t('submitReport'),
+    cancelButtonText: t('cancel'),
     confirmButtonColor: '#dc3545',
     inputValidator: (value) => {
       if (!value) {
-        return '请选择举报理由';
+        return t('reportReason');
       }
     }
   });
@@ -250,7 +252,7 @@ const handleReportPost = async (postId) => {
       // await postsApi.report(postId, reason);
       
       setShowMenuForPost(null);
-      toast.success('举报提交成功！');
+      toast.success(t('reportSuccess'));
       
       console.log('举报信息:', {
         postId,
@@ -259,7 +261,7 @@ const handleReportPost = async (postId) => {
       
     } catch (error) {
       console.error('举报失败:', error);
-      toast.error('举报失败，请稍后重试');
+      toast.error(t('reportFailed'));
     }
   }
 };
@@ -364,36 +366,36 @@ const handleReportPost = async (postId) => {
     <div className="post-list">
       {/* 排序选择器 */}
       <div className="sort-selector-container">
-        <label className="sort-label">📊 排序方式：</label>
+        <label className="sort-label">📊 {t('sortBy')}：</label>
         <select 
           className="sort-select" 
           value={sortBy} 
           onChange={(e) => setSortBy(e.target.value)}
           disabled={loading}
         >
-          <option value="time">⏰ 最新发布</option>
-          <option value="hot">🔥 热度排序（点赞数）</option>
+          <option value="time">⏰ {t('latest')}</option>
+          <option value="hot">🔥 {t('hottest')}</option>
         </select>
       </div>
 
       {loading && posts.length === 0 && (
-        <div className="loading">加载中...</div>
+        <div className="loading">{t('loading')}</div>
       )}
 
       {error && (
         <div className="error">
           {error}
           <button onClick={() => fetchPosts(false)} className="retry-btn">
-            重试
+            {t('retry')}
           </button>
         </div>
       )}
 
       {posts.length === 0 && !loading ? (
         <div className="empty-state">
-          <p>没有内容了</p>
+          <p>{t('noMoreContent')}</p>
           <button onClick={() => fetchPosts(false)} className="retry-btn">
-            刷新
+            {t('refresh')}
           </button>
         </div>
       ) : (
@@ -405,7 +407,7 @@ const handleReportPost = async (postId) => {
                   <span 
                     className="post-avatar clickable" 
                     onClick={(e) => handleAvatarClick(post.authorId, e)}
-                    title="查看用户资料"
+                    title={t('viewProfile')}
                   >
                     {post.avatar}
                   </span>
@@ -413,7 +415,7 @@ const handleReportPost = async (postId) => {
                     <div 
                       className="post-author-name clickable"
                       onClick={(e) => handleAvatarClick(post.authorId, e)}
-                      title="查看用户资料"
+                      title={t('viewProfile')}
                     >
                       {post.author}
                     </div>
@@ -431,9 +433,9 @@ const handleReportPost = async (postId) => {
                       {followLoadingUsers.has(post.authorId) ? (
                         '...'
                       ) : followingUsers.has(post.authorId) ? (
-                        '✓ 已关注'
+                        `✓ ${t('followed')}`
                       ) : (
-                        '+ 关注'
+                        `+ ${t('follow')}`
                       )}
                     </button>
                   )}
@@ -459,13 +461,13 @@ const handleReportPost = async (postId) => {
                               setShowMenuForPost(null);
                             }}
                           >
-                            编辑
+                            {t('edit')}
                           </button>
                           <button
                             className="menu-item delete"
                             onClick={() => handleDeletePost(post.id)}
                           >
-                            删除
+                            {t('delete')}
                           </button>
                         </>
                       )}
@@ -473,7 +475,7 @@ const handleReportPost = async (postId) => {
                         className="menu-item"
                         onClick={() => handleReportPost(post.id)}
                       >
-                        举报
+                        {t('report')}
                       </button>
                     </div>
                   )}
@@ -499,14 +501,14 @@ const handleReportPost = async (postId) => {
                   onClick={() => toggleComments(post.id)}
                 >
                   {/* —— 这里由原来的 (0) 改为展示真实 commentsCount —— */}
-                  💬 评论 ({post.commentsCount || 0})
+                  💬 {t('comments')} ({post.commentsCount || 0})
                 </button>
 
                 <button
                   className={`post-action-btn ${post.isLiked ? 'liked' : ''}`}
                   onClick={() => handleLike(post.id)}
                 >
-                  {post.isLiked ? '❤️' : '👍'} 赞 ({post.likes || 0})
+                  {post.isLiked ? '❤️' : '👍'} {t('likes')} ({post.likes || 0})
                 </button>
               </div>
 
@@ -531,14 +533,14 @@ const handleReportPost = async (postId) => {
                 disabled={loading}
                 className="load-more-btn"
               >
-                {loading ? '加载中...' : '加载更多'}
+                {loading ? t('loading') : t('loadMore')}
               </button>
             </div>
           )}
 
           {!hasMore && posts.length > 0 && (
             <div className="no-more-posts">
-              <p>没有更多内容了</p>
+              <p>{t('noMoreContent')}</p>
             </div>
           )}
         </>

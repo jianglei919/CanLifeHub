@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { adsApi } from '../api/http';
+import { useLanguage } from "../../context/LanguageContext";
 import AdSubmissionModal from './AdSubmissionModal';
 
 function formatDate(value) {
@@ -15,6 +16,7 @@ function formatDate(value) {
 }
 
 export default function Advertisement({ isAuthenticated }) {
+  const { t } = useLanguage();
   const [ads, setAds] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -68,7 +70,7 @@ export default function Advertisement({ isAuthenticated }) {
 
   const handleOpenForm = () => {
     if (!isAuthenticated) {
-      toast.error('请先登录，再提交广告投放申请');
+      toast.error(t('loginToAdvertise'));
       return;
     }
     setShowForm(true);
@@ -78,11 +80,11 @@ export default function Advertisement({ isAuthenticated }) {
     <div className="advertisement">
       <div className="ad-header">
         <div>
-          <p className="ad-eyebrow">品牌合作专区</p>
-          <h5>精准投放 · 预约排期</h5>
+          <p className="ad-eyebrow">{t('brandZone')}</p>
+          <h5>{t('preciseTargeting')}</h5>
         </div>
         <button className="ad-banner-btn" onClick={handleOpenForm}>
-          我要投放
+          {t('iWantToAdvertise')}
         </button>
       </div>
 
@@ -90,35 +92,23 @@ export default function Advertisement({ isAuthenticated }) {
 
       {!loading && activeAd && (
         <div className="ad-card">
-          <span className="ad-placement-tag">{activeAd.placement === 'feed' ? '信息流' : activeAd.placement === 'interstitial' ? '开屏' : '侧边栏'}</span>
+          <span className="ad-placement-tag">{activeAd.placement === 'feed' ? t('feedAd') : activeAd.placement === 'interstitial' ? t('splashAd') : t('sidebarAd')}</span>
           <img src={activeAd.creative.mediaUrl} alt={activeAd.creative.headline} className="ad-media" />
           <div className="ad-content">
             <h4>{activeAd.creative.headline}</h4>
             <p>{activeAd.creative.body || activeAd.description}</p>
           </div>
-          <div className="ad-meta">
-            <div>
-              <small>投放时间</small>
-              <strong>
-                {formatDate(activeAd.schedule?.startAt)} - {formatDate(activeAd.schedule?.endAt)}
-              </strong>
-            </div>
-            <div>
-              <small>预估曝光</small>
-              <strong>{activeAd.billing?.estimatedImpressions?.toLocaleString?.() || '—'} 次</strong>
-            </div>
-          </div>
           <button className="ad-cta" onClick={() => handleCtaClick(activeAd)}>
-            {activeAd.creative.ctaLabel || '了解详情'}
+            {activeAd.creative.ctaLabel || t('learnMore')}
           </button>
         </div>
       )}
 
       {!loading && !activeAd && (
         <div className="ad-empty">
-          <p>目前暂无正在投放的广告，欢迎成为第一位投放者。</p>
+          <p>{t('noAds')}</p>
           <button className="ad-banner-btn" onClick={handleOpenForm}>
-            预约档期
+            {t('bookSlot')}
           </button>
         </div>
       )}

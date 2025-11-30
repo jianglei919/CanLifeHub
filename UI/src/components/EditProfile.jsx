@@ -7,8 +7,11 @@ import '../styles/EditProfile.css';
 export default function EditProfile({ user, onClose, onUpdate }) {
   const [formData, setFormData] = useState({
     name: user?.name || '',
-    bio: user?.bio || ''
+    bio: user?.bio || '',
+    avatar: user?.avatar || ''
   });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(user?.avatar || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -16,8 +19,10 @@ export default function EditProfile({ user, onClose, onUpdate }) {
     if (user) {
       setFormData({
         name: user.name || '',
-        bio: user.bio || ''
+        bio: user.bio || '',
+        avatar: user.avatar || ''
       });
+      setPreviewUrl(user.avatar || '');
     }
   }, [user]);
 
@@ -27,6 +32,18 @@ export default function EditProfile({ user, onClose, onUpdate }) {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('图片大小不能超过 2MB');
+        return;
+      }
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -47,11 +64,27 @@ export default function EditProfile({ user, onClose, onUpdate }) {
     setLoading(true);
 
     try {
-      console.log('提交更新资料:', { name: formData.name.trim(), bio: formData.bio.trim() });
+      let avatarUrl = formData.avatar;
+
+      // 如果选择了新图片，先上传
+      if (selectedFile) {
+        const uploadData = new FormData();
+        uploadData.append('avatar', selectedFile);
+        const uploadRes = await authApi.uploadAvatar(uploadData);
+        
+        if (uploadRes.data.ok) {
+          avatarUrl = uploadRes.data.url;
+        } else {
+          throw new Error(uploadRes.data.error || '头像上传失败');
+        }
+      }
+
+      console.log('提交更新资料:', { name: formData.name.trim(), bio: formData.bio.trim(), avatar: avatarUrl });
       
       const response = await authApi.updateProfile({
         name: formData.name.trim(),
-        bio: formData.bio.trim()
+        bio: formData.bio.trim(),
+        avatar: avatarUrl
       });
 
       console.log('更新资料响应:', response.data);
@@ -89,6 +122,21 @@ export default function EditProfile({ user, onClose, onUpdate }) {
     }
   };
 
+  // Helper to determine if avatar is an image URL
+  const isImageUrl = (url) => {
+    return url && (url.startsWith('http') || url.startsWith('/') || url.startsWith('data:'));
+  };
+
+  // Helper to get full image URL
+  const getImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
+    // Assuming backend is on localhost:8000 for dev, or relative if proxied
+    // For now, let's assume we need to prepend the API base if it's relative and not data URI
+    // But wait, if we use Vite proxy, /uploads/... should work relative to current page
+    return url; 
+  };
+
   return (
     <div className="edit-profile-overlay" onClick={handleOverlayClick}>
       <div className="edit-profile-modal">
@@ -102,6 +150,35 @@ export default function EditProfile({ user, onClose, onUpdate }) {
         <form onSubmit={handleSubmit}>
           <div className="edit-profile-body">
             {error && <div className="error-message">{error}</div>}
+
+            <div className="form-group avatar-upload-group">
+              <label>头像</label>
+              <div className="avatar-preview-container">
+                <div className="avatar-preview">
+                  {isImageUrl(previewUrl) ? (
+                    <img src={getImageUrl(previewUrl)} alt="Avatar Preview" />
+                  ) : (
+                    <span className="avatar-emoji">{previewUrl || "👤"}</span>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  id="avatar-upload"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                  disabled={loading}
+                />
+                <button 
+                  type="button" 
+                  className="upload-btn"
+                  onClick={() => document.getElementById('avatar-upload').click()}
+                  disabled={loading}
+                >
+                  更换头像
+                </button>
+              </div>
+            </div>
 
             <div className="form-group">
               <label htmlFor="name">用户名</label>

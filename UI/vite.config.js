@@ -14,6 +14,10 @@ export default defineConfig({
         secure: false,
         // 若后端没有 /api 前缀才需要 rewrite，这里不需要
         // rewrite: p => p.replace(/^\/api/, '')
+      },
+      '/uploads': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
       }
     }
   }

@@ -323,8 +323,9 @@ const handleReportPost = async (postId) => {
 
     const getFullUrl = (url) => {
       if (!url) return '';
-      if (url.startsWith('http')) return url;
-      return `http://localhost:8000${url}`;
+      if (url.startsWith('http') || url.startsWith('data:')) return url;
+      // Use relative path which will be proxied
+      return url;
     };
 
     return (
@@ -408,8 +409,13 @@ const handleReportPost = async (postId) => {
                     className="post-avatar clickable" 
                     onClick={(e) => handleAvatarClick(post.authorId, e)}
                     title={t('viewProfile')}
+                    style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
-                    {post.avatar}
+                    {post.avatar && (post.avatar.startsWith('http') || post.avatar.startsWith('/') || post.avatar.startsWith('data:')) ? (
+                      <img src={post.avatar} alt={post.author} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                    ) : (
+                      post.avatar || "👤"
+                    )}
                   </span>
                   <div className="post-author-meta">
                     <div 

@@ -115,7 +115,13 @@ export default function UserProfileModal({ userId, onClose }) {
         <button className="modal-close" onClick={onClose}>×</button>
         
         <div className="user-profile-header">
-          <span className="user-profile-avatar">{user.avatar}</span>
+          <span className="user-profile-avatar" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {user.avatar && (user.avatar.startsWith('http') || user.avatar.startsWith('/') || user.avatar.startsWith('data:')) ? (
+              <img src={user.avatar} alt={user.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+            ) : (
+              user.avatar || "👤"
+            )}
+          </span>
           <div className="user-profile-info">
             <h2>{user.name}</h2>
             <p>{user.bio}</p>

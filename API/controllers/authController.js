@@ -387,7 +387,7 @@ const updateProfile = async (req, res) => {
     
     console.log('[updateProfile] 用户ID:', userId);
 
-    const { name, bio } = req.body;
+    const { name, bio, avatar } = req.body;
 
     // 查找用户
     const user = await User.findById(userId);
@@ -396,7 +396,7 @@ const updateProfile = async (req, res) => {
       return res.status(404).json({ error: '用户不存在' });
     }
 
-    console.log('[updateProfile] 更新前:', { name: user.name, bio: user.bio });
+    console.log('[updateProfile] 更新前:', { name: user.name, bio: user.bio, avatar: user.avatar });
 
     // 更新字段（只更新提供的字段）
     if (name !== undefined && name.trim()) {
@@ -407,9 +407,13 @@ const updateProfile = async (req, res) => {
       user.bio = bio.trim();
     }
 
+    if (avatar !== undefined) {
+      user.avatar = avatar;
+    }
+
     await user.save();
     
-    console.log('[updateProfile] 更新后:', { name: user.name, bio: user.bio });
+    console.log('[updateProfile] 更新后:', { name: user.name, bio: user.bio, avatar: user.avatar });
 
     // 如果修改了姓名，需要更新 JWT
     let newToken = token;
@@ -449,6 +453,28 @@ const updateProfile = async (req, res) => {
       return res.status(401).json({ error: 'Token 无效，请重新登录' });
     }
     return res.status(500).json({ error: '更新资料失败' });
+  }
+};
+
+// ===================== 上传头像接口 /upload-avatar =====================
+const uploadAvatar = (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: '请选择要上传的图片' });
+    }
+    
+    // 构建文件URL
+    // 返回相对路径，前端拼接 base URL
+    const fileUrl = `/uploads/avatars/${req.file.filename}`;
+    
+    res.json({ 
+      ok: true, 
+      url: fileUrl,
+      message: '头像上传成功' 
+    });
+  } catch (error) {
+    console.error('Upload avatar error:', error);
+    res.status(500).json({ error: '头像上传失败' });
   }
 };
 
@@ -499,4 +525,5 @@ module.exports = {             //把 test 函数导出，让其他文件可以�
     resetPassword,
     logout,
     updateProfile,
+    uploadAvatar,
 }

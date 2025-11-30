@@ -127,6 +127,7 @@ const [detailMode, setDetailMode] = useState('view');
       ...prev,
       name: updatedUser.name,
       bio: updatedUser.bio,
+      avatar: updatedUser.avatar || prev.avatar,
       followers: updatedUser.followersCount || prev.followers,
       following: updatedUser.followingCount || prev.following,
     }));
@@ -140,6 +141,11 @@ const [detailMode, setDetailMode] = useState('view');
     setTimeout(() => {
       window.location.reload();
     }, 1200);
+  };
+
+  // Helper to check if avatar is URL
+  const isImageUrl = (url) => {
+    return url && (url.startsWith('http') || url.startsWith('/') || url.startsWith('data:'));
   };
 
   // 未登录状态下的兜底 UI
@@ -156,7 +162,13 @@ const [detailMode, setDetailMode] = useState('view');
   return (
     <div className="user-module">
       <div className="user-header">
-        <span className="user-avatar">{user.avatar || "👤"}</span>
+        <span className="user-avatar" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {isImageUrl(user.avatar) ? (
+            <img src={user.avatar} alt={user.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+          ) : (
+            user.avatar || "👤"
+          )}
+        </span>
         <div className="user-info">
           <h3>{user.name || ""}</h3>
           <p>{user.bio || t('lazyBio')}</p>
@@ -247,10 +259,7 @@ const [detailMode, setDetailMode] = useState('view');
       {/* 编辑资料弹窗 */}
       {showEditModal && (
         <EditProfile
-          user={{
-            name: user.name,
-            bio: user.bio
-          }}
+          user={user}
           onClose={() => setShowEditModal(false)}
           onUpdate={handleProfileUpdate}
         />

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { commentsApi } from '../api/http';
+import { commentsApi, authApi } from '../api/http';
 import { useLanguage } from "../../context/LanguageContext";
 import { UserContext } from "../../context/userContext";
 
@@ -34,6 +34,28 @@ export default function CommentsBox({ targetType = 'post', targetId, onCountChan
       const { data } = await commentsApi.listByTarget(q);
       setItems(data.items || []);
       setTotal(data.total || 0);
+      // Refresh avatars for top-level comment authors
+      const ids = Array.from(new Set((data.items || [])
+        .map(c => (typeof c.authorId === 'object' ? (c.authorId._id || c.authorId.id) : c.authorId))
+        .filter(Boolean)));
+      if (ids.length > 0) {
+        try {
+          const entries = await Promise.all(ids.map(async (uid) => {
+            try {
+              const res = await authApi.getUserById(uid);
+              const avatar = res?.data?.user?.avatar || res?.data?.avatar || '👤';
+              return [uid, avatar];
+            } catch {
+              return [uid, avatarsMap[uid] || '👤'];
+            }
+          }));
+          setAvatarsMap(prev => {
+            const next = { ...prev };
+            entries.forEach(([uid, av]) => { next[uid] = av; });
+            return next;
+          });
+        } catch {}
+      }
     } catch (e) {
       setErr(e.message || t('loadCommentsFailed'));
     } finally {
@@ -153,6 +175,7 @@ function CommentItem({ item, onAnyCommentChange, onRefresh }) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [replyText, setReplyText] = useState('');
+  const [avatarsMap, setAvatarsMap] = useState({}); // userId -> latest avatar url/emoji
 
   const unauthorized = typeof err === 'string'
     && (err.includes('未授权') || err.includes('未登录') || err.toLowerCase().includes('unauthorized'));
@@ -163,6 +186,28 @@ function CommentItem({ item, onAnyCommentChange, onRefresh }) {
       setLoading(true);
       const { data } = await commentsApi.listReplies(item._id, { page: 1, pageSize: 20 });
       setReplies(data.items || []);
+      // After fetching replies, refresh avatars cache for unique authors
+      const ids = Array.from(new Set((data.items || [])
+        .map(r => (typeof r.authorId === 'object' ? (r.authorId._id || r.authorId.id) : r.authorId))
+        .filter(Boolean)));
+      if (ids.length > 0) {
+        try {
+          const entries = await Promise.all(ids.map(async (uid) => {
+            try {
+              const res = await authApi.getUserById(uid);
+              const avatar = res?.data?.user?.avatar || res?.data?.avatar || '👤';
+              return [uid, avatar];
+            } catch {
+              return [uid, avatarsMap[uid] || '👤'];
+            }
+          }));
+          setAvatarsMap(prev => {
+            const next = { ...prev };
+            entries.forEach(([uid, av]) => { next[uid] = av; });
+            return next;
+          });
+        } catch {}
+      }
     } catch (e) {
       setErr(e.message || t('loadRepliesFailed'));
     } finally {
@@ -219,11 +264,23 @@ function CommentItem({ item, onAnyCommentChange, onRefresh }) {
 
   const ts = item.createdAt ? new Date(item.createdAt) : null;
   const isAuthor = user && (user.id === item.authorId?._id || user.id === item.authorId);
+  const avatar = item.authorId?.avatar;
+  const isImg = avatar && (avatar.startsWith('http') || avatar.startsWith('/') || avatar.startsWith('data:'));
 
   return (
     <div className="comment-item-card">
       <div className="comment-header">
-        <span className="comment-avatar">👤</span>
+        <span className="comment-avatar" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {(() => {
+            const cid = typeof item.authorId === 'object' ? (item.authorId._id || item.authorId.id) : item.authorId;
+            const latest = cid ? avatarsMap[cid] : undefined;
+            const display = latest || avatar;
+            const showImg = display && (display.startsWith('http') || display.startsWith('/') || display.startsWith('data:'));
+            return showImg
+            ? <img src={display} alt="avatar" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+            : (display || "👤");
+          })()}
+        </span>
         <div className="comment-meta">
           <span className="comment-author">{item.authorId?.name || t('anonymousUser')}</span>
           <span className="comment-time">{ts ? ts.toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</span>
@@ -253,9 +310,21 @@ function CommentItem({ item, onAnyCommentChange, onRefresh }) {
                 <div className="replies-list">
                   {replies.map((r) => {
                     const isReplyAuthor = user && (user.id === r.authorId?._id || user.id === r.authorId);
+                    const rAvatar = r.authorId?.avatar;
+                    const rIsImg = rAvatar && (rAvatar.startsWith('http') || rAvatar.startsWith('/') || rAvatar.startsWith('data:'));
                     return (
                       <div key={r._id} className="reply-item">
-                        <span className="reply-avatar">💬</span>
+                        <span className="reply-avatar" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {(() => {
+                            const rid = typeof r.authorId === 'object' ? (r.authorId._id || r.authorId.id) : r.authorId;
+                            const latest = rid ? avatarsMap[rid] : undefined;
+                            const display = latest || rAvatar;
+                            const showImg = display && (display.startsWith('http') || display.startsWith('/') || display.startsWith('data:'));
+                            return showImg
+                            ? <img src={display} alt="avatar" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+                            : (display || "💬");
+                          })()}
+                        </span>
                         <div className="reply-content-wrapper">
                           <div className="reply-meta">
                             <span className="reply-author">{r.authorId?.name || t('anonymousUser')}</span>

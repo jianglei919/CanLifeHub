@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { chatApi } from "../api/http";
+import { chatApi, authApi } from "../api/http";
 import { useLanguage } from "../../context/LanguageContext";
 import toast from "react-hot-toast";
 import "../styles/Messages.css";
@@ -18,6 +18,7 @@ export default function Messages() {
   const [uploading, setUploading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
+  const [avatarsMap, setAvatarsMap] = useState({}); // userId -> latest avatar
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
   const pollingIntervalRef = useRef(null);
@@ -50,7 +51,30 @@ export default function Messages() {
     try {
       const response = await chatApi.getConversations();
       if (response.data.ok) {
-        setConversations(response.data.conversations);
+        const convs = response.data.conversations || [];
+        setConversations(convs);
+        // Refresh avatars for other users in conversations
+        const ids = Array.from(new Set(convs
+          .map(c => c.otherUser?._id)
+          .filter(Boolean)));
+        if (ids.length > 0) {
+          try {
+            const entries = await Promise.all(ids.map(async (uid) => {
+              try {
+                const res = await authApi.getUserById(uid);
+                const avatar = res?.data?.user?.avatar || res?.data?.avatar || '👤';
+                return [uid, avatar];
+              } catch {
+                return [uid, avatarsMap[uid] || '👤'];
+              }
+            }));
+            setAvatarsMap(prev => {
+              const next = { ...prev };
+              entries.forEach(([uid, av]) => { next[uid] = av; });
+              return next;
+            });
+          } catch {}
+        }
       }
     } catch (error) {
       console.error("加载会话列表失败:", error);
@@ -283,6 +307,29 @@ export default function Messages() {
     const d = new Date(date);
     return d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
   }, []);
+
+  // Helper to render avatar
+  const renderAvatar = (user, size = 40) => {
+    const uid = user?._id || user?.id;
+    const avatar = (uid && avatarsMap[uid]) || user?.avatar;
+    if (avatar && (avatar.startsWith('http') || avatar.startsWith('/') || avatar.startsWith('data:'))) {
+      return (
+        <img 
+          src={avatar} 
+          alt={user.name} 
+          style={{
+            width: `${size}px`, 
+            height: `${size}px`, 
+            borderRadius: '50%', 
+            objectFit: 'cover',
+            marginRight: '12px',
+            border: '1px solid #eee'
+          }} 
+        />
+      );
+    }
+    return <span className="conv-avatar" style={{width: `${size}px`, height: `${size}px`, fontSize: `${size/2}px`, lineHeight: `${size}px`}}>{avatar || "👤"}</span>;
+  };
 
   // 滚动到底部
   const scrollToBottom = useCallback(() => {
@@ -538,7 +585,7 @@ export default function Messages() {
               className="user-item"
               onClick={() => handleStartNewChat(user._id)}
             >
-              <span className="user-avatar">👤</span>
+              {renderAvatar(user)}
               <div className="user-info">
                 <div className="user-name">{user.name}</div>
                 <div className="user-email">{user.email}</div>
@@ -727,7 +774,7 @@ export default function Messages() {
                 setShowMessages(true);
               }}
             >
-              <span className="conv-avatar">👤</span>
+              {renderAvatar(conv.otherUser)}
               <div className="conv-info">
                 <div className="conv-name">
                   {conv.otherUser?.name}

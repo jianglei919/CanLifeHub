@@ -57,6 +57,9 @@ export const authApi = {
   resetPassword: (payload) => http.post('/auth/reset-password', payload),
   logout: () => http.post('/auth/logout'),
   updateProfile: (payload) => http.put('/auth/update-profile', payload), // 更新用户资料
+  uploadAvatar: (formData) => http.post('/auth/upload-avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
   // logout: () => http.post('/auth/logout'),     // 后端未实现，若需要请在 API 端补一条路由
 };
 

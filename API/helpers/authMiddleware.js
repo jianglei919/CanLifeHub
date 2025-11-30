@@ -47,5 +47,17 @@ const requireAuth = async (req, res, next) => {
   }
 };
 
-module.exports = { requireAuth };
+const requireAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: '未授权，请先登录' });
+  }
+
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: '需要管理员权限' });
+  }
+
+  next();
+};
+
+module.exports = { requireAuth, requireAdmin };
 

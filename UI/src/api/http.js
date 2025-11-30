@@ -132,6 +132,25 @@ export const chatbotApi = {
 };
 
 //todo: 新增 API 放在这里！！！！
+export const adminApi = {
+  getOverview: () => http.get('/admin/overview'),
+  listUsers: (params = {}) => http.get('/admin/users', { params }),
+  updateUserRole: (userId, payload) => http.patch(`/admin/users/${userId}/role`, payload),
+  listPosts: (params = {}) => http.get('/admin/posts', { params }),
+  updatePostStatus: (postId, payload) => http.patch(`/admin/posts/${postId}/status`, payload),
+  getReports: () => http.get('/admin/reports'),
+};
+
+export const adsApi = {
+  submit: (payload) => http.post('/ads', payload),
+  list: (params = {}) => http.get('/ads', { params }),
+  getActive: (params = {}) => http.get('/ads/active', { params }),
+  updateStatus: (adId, payload) => http.patch(`/ads/${adId}/status`, payload),
+  updateSchedule: (adId, payload) => http.patch(`/ads/${adId}/schedule`, payload),
+  updateBilling: (adId, payload) => http.patch(`/ads/${adId}/billing`, payload),
+  trackMetric: (adId, payload) => http.post(`/ads/${adId}/metrics`, payload),
+};
+
 export const postsApi = {
   uploadMedia: (formData) => http.post('/posts/upload-media', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }

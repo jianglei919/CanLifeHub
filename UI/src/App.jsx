@@ -7,6 +7,7 @@ import Login from '../src/pages/Login.jsx';          // 导入登录页面组件
 import Dashboard from '../src/pages/Dashboard.jsx';// 导入用户仪表盘组件
 import ForgotPassword from '../src/pages/ForgotPassword.jsx'; // 导入忘记密码页面
 import ResetPassword from '../src/pages/ResetPassword.jsx';   // 导入重置密码页面
+import AdminDashboard from '../src/pages/AdminDashboard.jsx';
 import axios from 'axios';                           // 引入 Axios 库，用于发送 HTTP 请求
 import { Toaster } from 'react-hot-toast';          // 引入 react-hot-toast 库中的 Toaster 组件，用于显示通知
 import { UserContextProvider, UserContext } from '../context/userContext'; // 导入用户上下文提供者组件
@@ -19,6 +20,13 @@ axios.defaults.withCredentials = true                // 配置 Axios 以在跨�
 function AuthGuard({ children }) {
   const { user } = useContext(UserContext);
   if (user) return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
+function AdminRoute({ children }) {
+  const { user } = useContext(UserContext);
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'admin') return <Navigate to="/" replace />;
   return children;
 }
 
@@ -37,6 +45,14 @@ function App() {
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route
+          path="/admin"
+          element={(
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          )}
+        />
 
         {/* 其余路径回到首页 */}
         <Route path="*" element={<Navigate to="/" replace />} />

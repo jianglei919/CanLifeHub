@@ -56,7 +56,7 @@ const registerUser = async (req, res) => {
              console.error('send verification email failed', err);
            });
 
-           const safeUser = { _id: exist._id, name: exist.name, email: exist.email, verified: exist.verified };
+           const safeUser = { _id: exist._id, name: exist.name, email: exist.email, verified: exist.verified, role: exist.role };
            return res.json({ 
              ok: true, 
              user: safeUser, 
@@ -96,7 +96,7 @@ const registerUser = async (req, res) => {
        });
         
        // Step 8. 返回结果（不返回密码）
-       const safeUser = { _id: user._id, name: user.name, email: user.email, verified: user.verified };
+      const safeUser = { _id: user._id, name: user.name, email: user.email, verified: user.verified, role: user.role };
        return res.json({ ok: true, user: safeUser });
 
    } catch (error) {
@@ -147,7 +147,8 @@ const loginUser = async (req, res) => {
             avatar: user.avatar || '👤',
             followersCount: user.followersCount || 0,
             followingCount: user.followingCount || 0,
-            verified: user.verified
+            verified: user.verified,
+            role: user.role || 'user'
           };
           res.cookie('token', token).json(userProfile);
         }
@@ -189,7 +190,8 @@ const getProfile = async (req, res) => {
         avatar: user.avatar || '👤',
         followersCount: user.followersCount || 0,
         followingCount: user.followingCount || 0,
-        verified: user.verified
+        verified: user.verified,
+        role: user.role || 'user'
       };
       
       res.json({ user: userProfile });
@@ -429,7 +431,8 @@ const updateProfile = async (req, res) => {
       avatar: user.avatar,
       followersCount: user.followersCount || 0,
       followingCount: user.followingCount || 0,
-      verified: user.verified
+      verified: user.verified,
+      role: user.role || 'user'
     };
 
     console.log('[updateProfile] 返回用户信息:', updatedUser);
@@ -473,7 +476,8 @@ const getUserById = async (req, res) => {
       avatar: user.avatar || '👤',
       followersCount: user.followersCount || 0,
       followingCount: user.followingCount || 0,
-      verified: user.verified
+      verified: user.verified,
+      role: user.role || 'user'
     };
 
     res.json({ ok: true, user: userProfile });

@@ -13,6 +13,8 @@ const postRoutes = require('./routes/postRoutes');
 const feedRoutes = require('./routes/feedRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const followRoutes = require('./routes/followRoutes'); // 关注路由
+const adRoutes = require('./routes/adRoutes'); // 广告投放路由
+const adminRoutes = require('./routes/adminRoutes'); // 后台管理路由
 // =============
 //todo: 新增路由放在这里！！！！
 
@@ -44,6 +46,8 @@ app.use('/api/posts', postRoutes);
 app.use('/api/feed', feedRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/follow', followRoutes);
+app.use('/api/ads', adRoutes);
+app.use('/api/admin', adminRoutes);
 //todo: 新增接口均以api开头放在这里！！！！
 
 /** 404 */

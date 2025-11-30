@@ -6,6 +6,7 @@ const userSchema = new Schema({
   name: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  role: { type: String, enum: ['user', 'admin'], default: 'user', index: true },
   bio: { type: String, default: '' }, // 个人简介
   avatar: { type: String, default: '' }, // 头像URL
   followersCount: { type: Number, default: 0 }, // 粉丝数

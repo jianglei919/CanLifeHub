@@ -122,6 +122,11 @@ export default function Dashboard() {
           <div className="user-section">
             {user ? (
               <>
+                {user.role === 'admin' && (
+                  <button className="admin-link-btn" onClick={() => navigate('/admin')}>
+                    后台
+                  </button>
+                )}
                 <span className="greeting">{user.name || "用户"}</span>
                 <button className="logout-btn" onClick={handleLogout} title="退出登录">
                   退出
@@ -164,12 +169,10 @@ export default function Dashboard() {
 
               <PostList feedType={feedType} />
             </div>
-            {isAuthenticated && (
-              <div className="feed-sidebar">
-                <UserModule />
-                <Advertisement />
-              </div>
-            )}
+            <div className="feed-sidebar">
+              {isAuthenticated && <UserModule />}
+              <Advertisement isAuthenticated={isAuthenticated} />
+            </div>
           </div>
         )}
 
@@ -186,6 +189,7 @@ export default function Dashboard() {
             <Messages />
           </div>
         )}
+
       </main>
 
       {/* AI 聊天助手 - 仅登录后可见 */}

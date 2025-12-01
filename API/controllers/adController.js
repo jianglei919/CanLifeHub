@@ -7,7 +7,7 @@ const PLACEMENT_PRICING = {
     dailyRate: 80,
     reviewFee: 25,
     estimatedDailyReach: 1200,
-    description: '右侧栏展示，适合品牌曝光',
+    description: 'Right-side display, ideal for brand exposure',
   },
   feed: {
     dailyRate: 150,

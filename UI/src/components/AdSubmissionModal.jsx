@@ -3,15 +3,15 @@ import toast from 'react-hot-toast';
 import { adsApi } from '../api/http';
 
 const BILLING_PLANS = [
-  { value: 'daily', label: '按日计费' },
-  { value: 'flat', label: '整段买断' },
-  { value: 'impression', label: '按曝光计费' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'flat', label: 'Flat' },
+  { value: 'impression', label: 'Per Impression' },
 ];
 
 const PLACEMENT_OPTIONS = [
-  { value: 'sidebar', label: '侧边栏' },
-  { value: 'feed', label: '信息流' },
-  { value: 'interstitial', label: '开屏/弹窗' },
+  { value: 'sidebar', label: 'Sidebar' },
+  { value: 'feed', label: 'Feed' },
+  { value: 'interstitial', label: 'Interstitial' },
 ];
 
 function toDatetimeLocal(value) {
@@ -28,7 +28,7 @@ function createDefaultForm(placement = 'sidebar') {
   const end = new Date(start.getTime() + 3 * 24 * 60 * 60 * 1000);
   return {
     title: '',
-    objective: '品牌曝光',
+    objective: 'Brand Awareness',
     description: '',
     placement,
     billingPlan: 'daily',
@@ -45,7 +45,7 @@ function createDefaultForm(placement = 'sidebar') {
       body: '',
       mediaUrl: '',
       mediaType: 'image',
-      ctaLabel: '立即查看',
+      ctaLabel: 'Learn More',
       ctaLink: '',
       fallbackText: '',
     },
@@ -159,20 +159,20 @@ export default function AdSubmissionModal({ isOpen, onClose, defaultPlacement })
     <div className="ad-modal-backdrop">
       <div className="ad-modal">
         <button className="ad-modal-close" onClick={onClose} aria-label="关闭">×</button>
-        <h3>提交广告投放需求</h3>
-        <p className="ad-modal-desc">填写投放目标、预算与素材，我们将在 1 个工作日内完成审核并反馈报价。</p>
+        <h3>Submit Ad Request</h3>
+        <p className="ad-modal-desc">Fill in objective, budget and creative. We will review within 1 business day and provide a quote.</p>
         <form onSubmit={handleSubmit} className="ad-form">
           <div className="ad-form-grid">
             <label className="ad-form-group">
-              <span>广告标题 *</span>
+              <span>Ad Title *</span>
               <input type="text" value={form.title} onChange={(e) => handleChange('title', e.target.value)} required />
             </label>
             <label className="ad-form-group">
-              <span>投放目的</span>
+              <span>Objective</span>
               <input type="text" value={form.objective} onChange={(e) => handleChange('objective', e.target.value)} />
             </label>
             <label className="ad-form-group">
-              <span>投放位置 *</span>
+              <span>Placement *</span>
               <select value={form.placement} onChange={(e) => handleChange('placement', e.target.value)}>
                 {PLACEMENT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -180,7 +180,7 @@ export default function AdSubmissionModal({ isOpen, onClose, defaultPlacement })
               </select>
             </label>
             <label className="ad-form-group">
-              <span>计费方式</span>
+              <span>Billing Plan</span>
               <select value={form.billingPlan} onChange={(e) => handleChange('billingPlan', e.target.value)}>
                 {BILLING_PLANS.map((plan) => (
                   <option key={plan.value} value={plan.value}>{plan.label}</option>
@@ -190,93 +190,93 @@ export default function AdSubmissionModal({ isOpen, onClose, defaultPlacement })
           </div>
 
           <label className="ad-form-group">
-            <span>广告摘要</span>
-            <textarea rows={3} value={form.description} onChange={(e) => handleChange('description', e.target.value)} placeholder="简单描述推广亮点或素材规范" />
+            <span>Ad Summary</span>
+            <textarea rows={3} value={form.description} onChange={(e) => handleChange('description', e.target.value)} placeholder="Briefly describe highlights or creative requirements" />
           </label>
 
           <div className="ad-form-section">
-            <h4>投放排期</h4>
+            <h4>Schedule</h4>
             <div className="ad-form-grid">
               <label className="ad-form-group">
-                <span>开始时间 *</span>
+                <span>Start Time *</span>
                 <input type="datetime-local" value={form.schedule.startAt} onChange={(e) => handleChange('schedule.startAt', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>结束时间 *</span>
+                <span>End Time *</span>
                 <input type="datetime-local" value={form.schedule.endAt} onChange={(e) => handleChange('schedule.endAt', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>优先展示时段 (0-23)</span>
-                <input type="text" value={form.schedule.preferredHoursInput} onChange={(e) => handleChange('schedule.preferredHoursInput', e.target.value)} placeholder="如：9,12,20" />
+                <span>Preferred Hours (0-23)</span>
+                <input type="text" value={form.schedule.preferredHoursInput} onChange={(e) => handleChange('schedule.preferredHoursInput', e.target.value)} placeholder="e.g.: 9,12,20" />
               </label>
               <label className="ad-form-group">
-                <span>预计日预算 (可选)</span>
+                <span>Estimated Daily Budget (optional)</span>
                 <input type="number" value={form.schedule.dailyBudget} onChange={(e) => handleChange('schedule.dailyBudget', e.target.value)} />
               </label>
             </div>
           </div>
 
           <div className="ad-form-section">
-            <h4>广告主信息</h4>
+            <h4>Advertiser Information</h4>
             <div className="ad-form-grid">
               <label className="ad-form-group">
-                <span>公司 / 品牌 *</span>
+                <span>Company / Brand *</span>
                 <input type="text" value={form.advertiser.company} onChange={(e) => handleChange('advertiser.company', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>联系人 *</span>
+                <span>Contact Person *</span>
                 <input type="text" value={form.advertiser.contactName} onChange={(e) => handleChange('advertiser.contactName', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>邮箱 *</span>
+                <span>Email *</span>
                 <input type="email" value={form.advertiser.contactEmail} onChange={(e) => handleChange('advertiser.contactEmail', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>电话</span>
+                <span>Phone</span>
                 <input type="tel" value={form.advertiser.contactPhone} onChange={(e) => handleChange('advertiser.contactPhone', e.target.value)} />
               </label>
             </div>
           </div>
 
           <div className="ad-form-section">
-            <h4>投放素材</h4>
+            <h4>Creative</h4>
             <div className="ad-form-grid">
               <label className="ad-form-group">
-                <span>主标题 *</span>
+                <span>Headline *</span>
                 <input type="text" value={form.creative.headline} onChange={(e) => handleChange('creative.headline', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>副标题</span>
+                <span>Subheadline</span>
                 <input type="text" value={form.creative.subHeadline} onChange={(e) => handleChange('creative.subHeadline', e.target.value)} />
               </label>
               <label className="ad-form-group">
-                <span>封面图 URL *</span>
+                <span>Cover Image URL *</span>
                 <input type="url" value={form.creative.mediaUrl} onChange={(e) => handleChange('creative.mediaUrl', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>跳转链接 *</span>
+                <span>CTA Link *</span>
                 <input type="url" value={form.creative.ctaLink} onChange={(e) => handleChange('creative.ctaLink', e.target.value)} required />
               </label>
             </div>
             <label className="ad-form-group">
-              <span>广告文案</span>
+              <span>Ad Copy</span>
               <textarea rows={3} value={form.creative.body} onChange={(e) => handleChange('creative.body', e.target.value)} />
             </label>
           </div>
 
           <div className="ad-form-section">
-            <h4>定向需求 (可选)</h4>
+            <h4>Targeting (optional)</h4>
             <div className="ad-form-grid">
               <label className="ad-form-group">
-                <span>目标城市（逗号分隔）</span>
+                <span>Target Cities (comma-separated)</span>
                 <input type="text" value={form.targeting.regionsInput} onChange={(e) => handleChange('targeting.regionsInput', e.target.value)} />
               </label>
               <label className="ad-form-group">
-                <span>兴趣标签</span>
+                <span>Interests</span>
                 <input type="text" value={form.targeting.interestsInput} onChange={(e) => handleChange('targeting.interestsInput', e.target.value)} />
               </label>
               <label className="ad-form-group">
-                <span>屏蔽关键词</span>
+                <span>Exclude Keywords</span>
                 <input type="text" value={form.targeting.keywordsInput} onChange={(e) => handleChange('targeting.keywordsInput', e.target.value)} />
               </label>
             </div>
@@ -284,36 +284,36 @@ export default function AdSubmissionModal({ isOpen, onClose, defaultPlacement })
 
           <div className="ad-form-actions">
             <button type="button" className="ad-secondary-btn" onClick={onClose}>
-              稍后再说
+              Maybe Later
             </button>
             <button type="submit" className="ad-primary-btn" disabled={submitting}>
-              {submitting ? '提交中...' : '提交审核'}
+              {submitting ? 'Submitting...' : 'Submit for Review'}
             </button>
           </div>
         </form>
 
         {quote && (
           <div className="ad-quote-panel">
-            <h4>试算报价</h4>
+            <h4>Estimated Quote</h4>
             <div className="ad-quote-grid">
               <div>
-                <small>投放天数</small>
-                <strong>{quote.durationDays} 天</strong>
+                <small>Duration</small>
+                <strong>{quote.durationDays} days</strong>
               </div>
               <div>
-                <small>预计曝光</small>
-                <strong>{quote.estimatedImpressions?.toLocaleString?.() || '-'} 次</strong>
+                <small>Estimated Impressions</small>
+                <strong>{quote.estimatedImpressions?.toLocaleString?.() || '-'} views</strong>
               </div>
               <div>
-                <small>服务费(含稅)</small>
+                <small>Service Fee (incl. tax)</small>
                 <strong>¥{quote.totalDue?.toFixed?.(2)}</strong>
               </div>
               <div>
-                <small>计费说明</small>
-                <strong>{quote.placementNotes || '按官方价目表执行'}</strong>
+                <small>Billing Notes</small>
+                <strong>{quote.placementNotes || 'Based on standard price list'}</strong>
               </div>
             </div>
-            <p className="ad-quote-tip">最终费用以审核通过后的合同为准，如需加急排期，请联系运营。</p>
+            <p className="ad-quote-tip">Final cost is subject to contract. Contact ops for expedited scheduling.</p>
           </div>
         )}
       </div>

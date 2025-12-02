@@ -7,12 +7,15 @@ Canadian Lifestyle Sharing Platform · 加拿大生活分享平台
 ### `UI/` (Vite + React)
 - `context/` — Auth & user context.（登录态与用户信息上下文）
   - `userContext.jsx` — Provide `user/loading/login/register/logout` via React Context.（暴露登录相关方法）
+  - `LanguageContext.jsx` — Multi-language support.（多语言上下文）
 - `src/` — Application source code.（前端源码）
   - `api/` — API layer & HTTP client.（接口封装与请求客户端）
     - `http.js` — Axios instance (`baseURL=/api`, `withCredentials=true`, error interceptor).（统一 axios 实例与错误拦截）
   - `assets/` — Static resources (images, icons, etc.).（静态资源）
-  - `components/` — Reusable UI components (e.g., `Navbar`, `ProtectedRoute`).（可复用组件）
-  - `pages/` — Page components (e.g., `Home`, `Login`, `Register`, `Dashboard`).（页面组件）
+  - `components/` — Reusable UI components.（可复用组件）
+    - `Navbar`, `PostList`, `CreatePost`, `CommentsBox`, `ChatbotWidget`, `AdManager`...
+  - `pages/` — Page components.（页面组件）
+    - `Home`, `Login`, `Register`, `Dashboard`, `AdminDashboard`, `DetailPost`...
   - `styles/` — Global or modular styles.（样式文件）
   - `App.jsx` — App shell & routes definition.（应用骨架与路由定义）
   - `main.jsx` — React root mount.（React 挂载入口）
@@ -25,18 +28,61 @@ Canadian Lifestyle Sharing Platform · 加拿大生活分享平台
 
 ### `API/` (Node.js + Express)
 - `controllers/` — Business logic handlers.（业务控制器）
-  - `authController.js` — Auth endpoints: register/login/profile/test.（注册/登录/个人信息/测试）
+  - `authController.js`, `postController.js`, `feedController.js`, `chatController.js`, `adController.js`, `adminController.js`...
 - `helpers/` — Utilities & helpers.（工具与辅助函数）
-  - `auth.js` — Password hashing & comparison.（密码哈希与校验）
+  - `auth.js`, `email.js`, `upload.js`...
 - `models/` — Mongoose schemas.（数据模型）
-  - `user.js` — User schema.（用户模型）
+  - `user.js`, `post.js`, `comment.js`, `message.js`, `advertisement.js`...
 - `routes/` — Route definitions (relative paths only).（路由定义，仅写相对路径）
-  - `authRoutes.js` — `/register`, `/login`, `/profile`, `/`(test).（认证相关路由）
+  - `authRoutes.js`, `postRoutes.js`, `chatRoutes.js`, `adRoutes.js`, `adminRoutes.js`...
 - `app.js` — Express app assembly: CORS/cookie/json, health check, route mounting under `/api/*`, 404 & error handlers.（应用装配与中间件、统一前缀、错误处理）
 - `index.js` — Entry point: load `.env`, connect MongoDB, `app.listen`, graceful shutdown.（启动入口：环境、连库、监听、优雅退出）
 - `.env` — Environment variables (e.g., `PORT`, `MONGODB_URI`, `JWT_SECRET`, `CORS_ORIGIN`).（环境变量）
 - `package.json` — Backend dependencies & scripts.（后端依赖与脚本）
 - `node_modules/` — Installed packages.（依赖目录）
+
+---
+
+## 社交与内容模块 / Social & Content Module
+
+> 核心社区功能：支持用户发布图文、浏览信息流、互动评论与关注好友。
+
+### 核心设计
+- **帖子 (Post)**: 支持多图上传 (`uploadPostMedia.js`)，包含标题、内容、标签。
+- **互动 (Interaction)**:
+  - **评论 (Comment)**: 支持对帖子进行评论 (`commentController.js`)。
+  - **点赞 (Reaction)**: 支持多种表情回应 (`reaction.js`)。
+  - **关注 (Follow)**: 用户关注机制 (`followController.js`)，影响信息流推荐。
+- **信息流 (Feed)**: `feedController.js` 聚合关注人的动态与推荐内容。
+- **举报 (Report)**: 内容风控入口 (`reportController.js`)。
+
+### 相关 API
+| Method & Path | 说明 |
+| --- | --- |
+| `POST /api/posts` | 发布新帖子 (支持 `multipart/form-data`) |
+| `GET /api/feed` | 获取首页信息流 |
+| `POST /api/posts/:id/comments` | 评论帖子 |
+| `POST /api/posts/:id/react` | 点赞/互动 |
+| `POST /api/users/:id/follow` | 关注用户 |
+
+---
+
+## 即时通讯模块 / Messaging Module
+
+> 实时沟通能力：集成私信聊天与 AI 助手。
+
+### 核心设计
+- **私信 (Direct Message)**: `chatController.js` 实现用户间的一对一聊天，支持发送图片。
+- **AI 助手 (Chatbot)**: `chatbotController.js` 集成智能对话能力，解答平台相关问题。
+- **前端组件**: `Messages.jsx` (聊天窗口), `ChatbotWidget.jsx` (悬浮助手)。
+
+### 相关 API
+| Method & Path | 说明 |
+| --- | --- |
+| `GET /api/chat/conversations` | 获取会话列表 |
+| `GET /api/chat/:userId` | 获取与某人的聊天记录 |
+| `POST /api/chat/:userId` | 发送私信 |
+| `POST /api/chatbot/ask` | 向 AI 助手提问 |
 
 ---
 

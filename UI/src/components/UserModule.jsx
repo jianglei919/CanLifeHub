@@ -108,10 +108,36 @@ const [detailMode, setDetailMode] = useState('view');
     }
   };
 
+  // 获取用户点赞的帖子
+  const fetchUserLikes = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const currentUserId = ctxUser?.id || ctxUser?._id || "myself";
+      const queryParams = { page: 1, pageSize: 10 };
+      
+      const { data } = await postsApi.listLikedByUser(currentUserId, queryParams);
+      
+      setUser((prevUser) => ({
+        ...prevUser,
+        likedPosts: data?.items || [],
+      }));
+    } catch (err) {
+      console.error("获取点赞帖子失败:", err);
+      setError(err?.response?.data?.error || err?.message || t('error'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 组件挂载或切换到"我的帖子"时获取数据
   useEffect(() => {
-    if (activeTab === "posts" && ctxUser) {
-      fetchUserPosts();
+    if (ctxUser) {
+      if (activeTab === "posts") {
+        fetchUserPosts();
+      } else if (activeTab === "likes") {
+        fetchUserLikes();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, ctxUser?.id]);
@@ -251,7 +277,38 @@ const [detailMode, setDetailMode] = useState('view');
         )}
         {activeTab === "likes" && (
           <div className="likes-list">
-            <p>{t('noLikes')}</p>
+            {loading && <div className="loading">{t('loading')}</div>}
+            {error && <div className="error">{error}</div>}
+            {!loading && !error && (
+              <>
+                {(!user.likedPosts || user.likedPosts.length === 0) ? (
+                  <div className="empty-state">{t('noLikes')}</div>
+                ) : (
+                  user.likedPosts.map((post) => (
+                    <div 
+                      key={post._id || post.id} 
+                      className="user-post-item clickable"
+                      onClick={() => {
+                        setSelectedPostId(post._id || post.id);
+                        setDetailMode('view');
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {post.title && <h4>{post.title}</h4>}
+                      <p>{post.content}</p>
+                      <div className="post-meta">
+                        {post.createdAt && (
+                          <span className="post-date">
+                            {new Date(post.createdAt).toLocaleDateString()}
+                          </span>
+                        )}
+                        <span className="post-likes">❤️ {post.likesCount ?? post.likes ?? 0}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </>
+            )}
           </div>
         )}
       </div>

@@ -160,6 +160,7 @@ export const postsApi = {
   }),
   create: (params) => http.post('/posts', params),
   listByUser: (userId, params = {}) => http.get(`/posts/list/${userId}`, { params }),
+  listLikedByUser: (userId, params = {}) => http.get(`/posts/list-liked/${userId}`, { params }),
   getById: (postId) => http.get(`/posts/${postId}`),
   update: (postId, params) => http.patch(`/posts/${postId}`, params),
   delete: (postId) => http.delete(`/posts/${postId}`),

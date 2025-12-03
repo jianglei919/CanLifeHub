@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { adsApi } from '../api/http';
+import { useLanguage } from '../../context/LanguageContext';
 
 const BILLING_PLANS = [
-  { value: 'daily', label: 'Daily' },
-  { value: 'flat', label: 'Flat' },
-  { value: 'impression', label: 'Per Impression' },
+  { value: 'daily', labelKey: 'planDaily' },
+  { value: 'flat', labelKey: 'planFlat' },
+  { value: 'impression', labelKey: 'planImpression' },
 ];
 
 const PLACEMENT_OPTIONS = [
-  { value: 'sidebar', label: 'Sidebar' },
-  { value: 'feed', label: 'Feed' },
-  { value: 'interstitial', label: 'Interstitial' },
+  { value: 'sidebar', labelKey: 'sidebarAd' },
+  { value: 'feed', labelKey: 'feedAd' },
+  { value: 'interstitial', labelKey: 'placeInterstitial' },
 ];
 
 function toDatetimeLocal(value) {
@@ -65,6 +66,7 @@ function createDefaultForm(placement = 'sidebar') {
 }
 
 export default function AdSubmissionModal({ isOpen, onClose, defaultPlacement }) {
+  const { t } = useLanguage();
   const [form, setForm] = useState(() => createDefaultForm(defaultPlacement));
   const [submitting, setSubmitting] = useState(false);
   const [quote, setQuote] = useState(null);
@@ -103,7 +105,7 @@ export default function AdSubmissionModal({ isOpen, onClose, defaultPlacement })
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!form.title || !form.creative.mediaUrl || !form.creative.ctaLink) {
-      toast.error('请完整填写广告标题、素材与跳转链接');
+      toast.error(t('fillRequiredFields'));
       return;
     }
     setSubmitting(true);
@@ -111,12 +113,12 @@ export default function AdSubmissionModal({ isOpen, onClose, defaultPlacement })
       const startDate = new Date(form.schedule.startAt);
       const endDate = new Date(form.schedule.endAt);
       if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
-        toast.error('请提供合法的投放时间');
+        toast.error(t('invalidTime'));
         setSubmitting(false);
         return;
       }
       if (startDate >= endDate) {
-        toast.error('结束时间必须晚于开始时间');
+        toast.error(t('endTimeError'));
         setSubmitting(false);
         return;
       }
@@ -145,9 +147,9 @@ export default function AdSubmissionModal({ isOpen, onClose, defaultPlacement })
 
       const { data } = await adsApi.submit(payload);
       setQuote(data.quote);
-      toast.success('投放申请已提交，等待审核');
+      toast.success(t('submitSuccess'));
     } catch (error) {
-      toast.error(error.message || '提交失败');
+      toast.error(error.message || t('submitFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -159,124 +161,124 @@ export default function AdSubmissionModal({ isOpen, onClose, defaultPlacement })
     <div className="ad-modal-backdrop">
       <div className="ad-modal">
         <button className="ad-modal-close" onClick={onClose} aria-label="关闭">×</button>
-        <h3>Submit Ad Request</h3>
-        <p className="ad-modal-desc">Fill in objective, budget and creative. We will review within 1 business day and provide a quote.</p>
+        <h3>{t('submitAdRequest')}</h3>
+        <p className="ad-modal-desc">{t('adRequestDesc')}</p>
         <form onSubmit={handleSubmit} className="ad-form">
           <div className="ad-form-grid">
             <label className="ad-form-group">
-              <span>Ad Title *</span>
+              <span>{t('adTitle')}</span>
               <input type="text" value={form.title} onChange={(e) => handleChange('title', e.target.value)} required />
             </label>
             <label className="ad-form-group">
-              <span>Objective</span>
+              <span>{t('adObjective')}</span>
               <input type="text" value={form.objective} onChange={(e) => handleChange('objective', e.target.value)} />
             </label>
             <label className="ad-form-group">
-              <span>Placement *</span>
+              <span>{t('adPlacement')}</span>
               <select value={form.placement} onChange={(e) => handleChange('placement', e.target.value)}>
                 {PLACEMENT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
+                  <option key={option.value} value={option.value}>{t(option.labelKey)}</option>
                 ))}
               </select>
             </label>
             <label className="ad-form-group">
-              <span>Billing Plan</span>
+              <span>{t('adBillingPlan')}</span>
               <select value={form.billingPlan} onChange={(e) => handleChange('billingPlan', e.target.value)}>
                 {BILLING_PLANS.map((plan) => (
-                  <option key={plan.value} value={plan.value}>{plan.label}</option>
+                  <option key={plan.value} value={plan.value}>{t(plan.labelKey)}</option>
                 ))}
               </select>
             </label>
           </div>
 
           <label className="ad-form-group">
-            <span>Ad Summary</span>
-            <textarea rows={3} value={form.description} onChange={(e) => handleChange('description', e.target.value)} placeholder="Briefly describe highlights or creative requirements" />
+            <span>{t('adSummary')}</span>
+            <textarea rows={3} value={form.description} onChange={(e) => handleChange('description', e.target.value)} placeholder={t('adSummaryPlaceholder')} />
           </label>
 
           <div className="ad-form-section">
-            <h4>Schedule</h4>
+            <h4>{t('adScheduleSection')}</h4>
             <div className="ad-form-grid">
               <label className="ad-form-group">
-                <span>Start Time *</span>
+                <span>{t('adStartTime')}</span>
                 <input type="datetime-local" value={form.schedule.startAt} onChange={(e) => handleChange('schedule.startAt', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>End Time *</span>
+                <span>{t('adEndTime')}</span>
                 <input type="datetime-local" value={form.schedule.endAt} onChange={(e) => handleChange('schedule.endAt', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>Preferred Hours (0-23)</span>
-                <input type="text" value={form.schedule.preferredHoursInput} onChange={(e) => handleChange('schedule.preferredHoursInput', e.target.value)} placeholder="e.g.: 9,12,20" />
+                <span>{t('adPreferredHours')}</span>
+                <input type="text" value={form.schedule.preferredHoursInput} onChange={(e) => handleChange('schedule.preferredHoursInput', e.target.value)} placeholder={t('adPreferredHoursPlaceholder')} />
               </label>
               <label className="ad-form-group">
-                <span>Estimated Daily Budget (optional)</span>
+                <span>{t('adDailyBudget')}</span>
                 <input type="number" value={form.schedule.dailyBudget} onChange={(e) => handleChange('schedule.dailyBudget', e.target.value)} />
               </label>
             </div>
           </div>
 
           <div className="ad-form-section">
-            <h4>Advertiser Information</h4>
+            <h4>{t('advertiserInfoSection')}</h4>
             <div className="ad-form-grid">
               <label className="ad-form-group">
-                <span>Company / Brand *</span>
+                <span>{t('companyBrand')}</span>
                 <input type="text" value={form.advertiser.company} onChange={(e) => handleChange('advertiser.company', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>Contact Person *</span>
+                <span>{t('contactPerson')}</span>
                 <input type="text" value={form.advertiser.contactName} onChange={(e) => handleChange('advertiser.contactName', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>Email *</span>
+                <span>{t('contactEmail')}</span>
                 <input type="email" value={form.advertiser.contactEmail} onChange={(e) => handleChange('advertiser.contactEmail', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>Phone</span>
+                <span>{t('contactPhone')}</span>
                 <input type="tel" value={form.advertiser.contactPhone} onChange={(e) => handleChange('advertiser.contactPhone', e.target.value)} />
               </label>
             </div>
           </div>
 
           <div className="ad-form-section">
-            <h4>Creative</h4>
+            <h4>{t('creativeSection')}</h4>
             <div className="ad-form-grid">
               <label className="ad-form-group">
-                <span>Headline *</span>
+                <span>{t('adHeadline')}</span>
                 <input type="text" value={form.creative.headline} onChange={(e) => handleChange('creative.headline', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>Subheadline</span>
+                <span>{t('adSubHeadline')}</span>
                 <input type="text" value={form.creative.subHeadline} onChange={(e) => handleChange('creative.subHeadline', e.target.value)} />
               </label>
               <label className="ad-form-group">
-                <span>Cover Image URL *</span>
+                <span>{t('adCoverImage')}</span>
                 <input type="url" value={form.creative.mediaUrl} onChange={(e) => handleChange('creative.mediaUrl', e.target.value)} required />
               </label>
               <label className="ad-form-group">
-                <span>CTA Link *</span>
+                <span>{t('adCtaLink')}</span>
                 <input type="url" value={form.creative.ctaLink} onChange={(e) => handleChange('creative.ctaLink', e.target.value)} required />
               </label>
             </div>
             <label className="ad-form-group">
-              <span>Ad Copy</span>
+              <span>{t('adCopy')}</span>
               <textarea rows={3} value={form.creative.body} onChange={(e) => handleChange('creative.body', e.target.value)} />
             </label>
           </div>
 
           <div className="ad-form-section">
-            <h4>Targeting (optional)</h4>
+            <h4>{t('targetingSection')}</h4>
             <div className="ad-form-grid">
               <label className="ad-form-group">
-                <span>Target Cities (comma-separated)</span>
+                <span>{t('targetCities')}</span>
                 <input type="text" value={form.targeting.regionsInput} onChange={(e) => handleChange('targeting.regionsInput', e.target.value)} />
               </label>
               <label className="ad-form-group">
-                <span>Interests</span>
+                <span>{t('targetInterests')}</span>
                 <input type="text" value={form.targeting.interestsInput} onChange={(e) => handleChange('targeting.interestsInput', e.target.value)} />
               </label>
               <label className="ad-form-group">
-                <span>Exclude Keywords</span>
+                <span>{t('excludeKeywords')}</span>
                 <input type="text" value={form.targeting.keywordsInput} onChange={(e) => handleChange('targeting.keywordsInput', e.target.value)} />
               </label>
             </div>
@@ -284,36 +286,36 @@ export default function AdSubmissionModal({ isOpen, onClose, defaultPlacement })
 
           <div className="ad-form-actions">
             <button type="button" className="ad-secondary-btn" onClick={onClose}>
-              Maybe Later
+              {t('maybeLater')}
             </button>
             <button type="submit" className="ad-primary-btn" disabled={submitting}>
-              {submitting ? 'Submitting...' : 'Submit for Review'}
+              {submitting ? t('submitting') : t('submitReview')}
             </button>
           </div>
         </form>
 
         {quote && (
           <div className="ad-quote-panel">
-            <h4>Estimated Quote</h4>
+            <h4>{t('estimatedQuote')}</h4>
             <div className="ad-quote-grid">
               <div>
-                <small>Duration</small>
-                <strong>{quote.durationDays} days</strong>
+                <small>{t('duration')}</small>
+                <strong>{quote.durationDays} {t('daysUnit')}</strong>
               </div>
               <div>
-                <small>Estimated Impressions</small>
-                <strong>{quote.estimatedImpressions?.toLocaleString?.() || '-'} views</strong>
+                <small>{t('estImpressions')}</small>
+                <strong>{quote.estimatedImpressions?.toLocaleString?.() || '-'} {t('viewsUnit')}</strong>
               </div>
               <div>
-                <small>Service Fee (incl. tax)</small>
+                <small>{t('serviceFee')}</small>
                 <strong>¥{quote.totalDue?.toFixed?.(2)}</strong>
               </div>
               <div>
-                <small>Billing Notes</small>
-                <strong>{quote.placementNotes || 'Based on standard price list'}</strong>
+                <small>{t('billingNotes')}</small>
+                <strong>{quote.placementNotes || t('standardPriceList')}</strong>
               </div>
             </div>
-            <p className="ad-quote-tip">Final cost is subject to contract. Contact ops for expedited scheduling.</p>
+            <p className="ad-quote-tip">{t('quoteDisclaimer')}</p>
           </div>
         )}
       </div>

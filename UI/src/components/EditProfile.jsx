@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react';
 import { authApi } from '../api/http';
 import toast from 'react-hot-toast';
 import '../styles/EditProfile.css';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function EditProfile({ user, onClose, onUpdate }) {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: user?.name || '',
     bio: user?.bio || '',
@@ -38,7 +40,7 @@ export default function EditProfile({ user, onClose, onUpdate }) {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        toast.error('图片大小不能超过 2MB');
+        toast.error(t('imageSizeLimit'));
         return;
       }
       setSelectedFile(file);
@@ -52,12 +54,12 @@ export default function EditProfile({ user, onClose, onUpdate }) {
 
     // 验证
     if (!formData.name.trim()) {
-      setError('用户名不能为空');
+      setError(t('usernameRequired'));
       return;
     }
 
     if (formData.name.trim().length < 2) {
-      setError('用户名至少2个字符');
+      setError(t('usernameMinLength'));
       return;
     }
 
@@ -75,7 +77,7 @@ export default function EditProfile({ user, onClose, onUpdate }) {
         if (uploadRes.data.ok) {
           avatarUrl = uploadRes.data.url;
         } else {
-          throw new Error(uploadRes.data.error || '头像上传失败');
+          throw new Error(uploadRes.data.error || t('avatarUploadFailed'));
         }
       }
 
@@ -90,7 +92,7 @@ export default function EditProfile({ user, onClose, onUpdate }) {
       console.log('更新资料响应:', response.data);
 
       if (response.data.ok) {
-        toast.success(response.data.message || '资料更新成功');
+        toast.success(response.data.message || t('profileUpdateSuccess'));
         
         // 通知父组件更新用户信息
         if (onUpdate) {
@@ -103,14 +105,14 @@ export default function EditProfile({ user, onClose, onUpdate }) {
         }, 1000);
       } else {
         // 处理返回 ok: false 的情况
-        setError(response.data.error || '更新失败');
-        toast.error(response.data.error || '更新失败');
+        setError(response.data.error || t('profileUpdateFailed'));
+        toast.error(response.data.error || t('profileUpdateFailed'));
       }
     } catch (err) {
       console.error('更新资料失败:', err);
       console.error('错误详情:', err.response?.data);
-      setError(err.response?.data?.error || err.message || '更新资料失败，请稍后重试');
-      toast.error(err.response?.data?.error || err.message || '更新资料失败');
+      setError(err.response?.data?.error || err.message || t('profileUpdateError'));
+      toast.error(err.response?.data?.error || err.message || t('profileUpdateFailed'));
     } finally {
       setLoading(false);
     }
@@ -141,7 +143,7 @@ export default function EditProfile({ user, onClose, onUpdate }) {
     <div className="edit-profile-overlay" onClick={handleOverlayClick}>
       <div className="edit-profile-modal">
         <div className="edit-profile-header">
-          <h2>编辑资料</h2>
+          <h2>{t('editProfile')}</h2>
           <button className="close-btn" onClick={onClose} type="button">
             ×
           </button>
@@ -152,7 +154,7 @@ export default function EditProfile({ user, onClose, onUpdate }) {
             {error && <div className="error-message">{error}</div>}
 
             <div className="form-group avatar-upload-group">
-              <label>头像</label>
+              <label>{t('avatarLabel')}</label>
               <div className="avatar-preview-container">
                 <div className="avatar-preview">
                   {isImageUrl(previewUrl) ? (
@@ -175,40 +177,40 @@ export default function EditProfile({ user, onClose, onUpdate }) {
                   onClick={() => document.getElementById('avatar-upload').click()}
                   disabled={loading}
                 >
-                  更换头像
+                  {t('changeAvatarBtn')}
                 </button>
               </div>
             </div>
 
             <div className="form-group">
-              <label htmlFor="name">用户名</label>
+              <label htmlFor="name">{t('usernameLabel')}</label>
               <input
                 type="text"
                 id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="请输入用户名"
+                placeholder={t('namePlaceholder')}
                 maxLength={30}
                 disabled={loading}
               />
-              <div className="form-hint">2-30个字符，可包含中英文、数字</div>
+              <div className="form-hint">{t('usernameHint')}</div>
             </div>
 
             <div className="form-group">
-              <label htmlFor="bio">个人简介</label>
+              <label htmlFor="bio">{t('bioLabel')}</label>
               <textarea
                 id="bio"
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
-                placeholder="介绍一下自己吧..."
+                placeholder={t('bioPlaceholder')}
                 maxLength={200}
                 rows={4}
                 disabled={loading}
               />
               <div className="form-hint">
-                {formData.bio.length}/200 字符
+                {formData.bio.length}/200
               </div>
             </div>
           </div>
@@ -220,14 +222,14 @@ export default function EditProfile({ user, onClose, onUpdate }) {
               onClick={onClose}
               disabled={loading}
             >
-              取消
+              {t('cancel')}
             </button>
             <button
               type="submit"
               className="save-btn"
               disabled={loading}
             >
-              {loading ? '保存中...' : '保存'}
+              {loading ? t('savingBtn') : t('saveBtn')}
             </button>
           </div>
         </form>

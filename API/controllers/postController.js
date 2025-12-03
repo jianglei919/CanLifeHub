@@ -375,3 +375,53 @@ exports.unreact = async (req, res) => {
         res.status(500).json({ error: e.message || 'Failed to unreact to post' });
     }
 };
+
+/** GET /users/{id}/likes - 获取用户点赞的帖子列表 */
+exports.listLikedByUser = async (req, res) => {
+    try {
+        const currentUser = req.user;
+        if (!currentUser || !currentUser.id) return res.status(401).json({ error: 'Unauthorized' });
+
+        let { id } = req.params;
+        if (id == "myself") id = req.user._id;
+        if (!mongoose.isValidObjectId(id)) return res.status(400).json({ error: 'Invalid user id' });
+
+        const { skip, limit, page, pageSize } = getPaging(req.query);
+
+        // 1. 查找用户点赞的记录
+        const reactions = await Reaction.find({ userId: id, type: 'like' })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        const total = await Reaction.countDocuments({ userId: id, type: 'like' });
+
+        if (reactions.length === 0) {
+            return res.json({ page, pageSize, total, items: [] });
+        }
+
+        const postIds = reactions.map(r => r.postId);
+
+        // 2. 查找对应的帖子详情
+        const posts = await Post.find({ _id: { $in: postIds }, status: 'active' })
+            .populate('authorId', 'name avatar')
+            .lean();
+
+        // 3. 按照点赞顺序重新排列帖子
+        const postsMap = new Map(posts.map(p => [p._id.toString(), p]));
+        const items = reactions
+            .map(r => postsMap.get(r.postId.toString()))
+            .filter(p => p); // 过滤掉找不到的帖子
+
+        res.json({
+            page,
+            pageSize,
+            total,
+            items
+        });
+    } catch (e) {
+        console.error('[posts#listLikedByUser]', e);
+        res.status(500).json({ error: e.message || 'Failed to fetch liked posts' });
+    }
+};

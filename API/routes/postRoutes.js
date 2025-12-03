@@ -32,6 +32,10 @@ router.get('/:id', requireAuth, ctrl.getById);
 // GET /api/users/:id/posts?page=1&pageSize=20
 router.get('/list/:id', requireAuth, ctrl.listByUser);
 
+// 获取某用户点赞的帖子列表
+// GET /api/posts/list-liked/:id
+router.get('/list-liked/:id', requireAuth, ctrl.listLikedByUser);
+
 
 // ===================================
 // 互动（点赞、收藏、分享）

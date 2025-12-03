@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import { postsApi } from "../api/http";
+import { useLanguage } from "../../context/LanguageContext";
 import Swal from 'sweetalert2';
 import '../styles/CreatePost.css';
 import '../styles/DetailPost.css';
 
 export default function DetailPost({ postId, mode = 'view', onClose, onUpdate }) {
+  const { t } = useLanguage();
   // 状态管理
   const [post, setPost] = useState(null);
   const [title, setTitle] = useState("");
@@ -57,11 +59,11 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
       
     } catch (error) {
       console.error('加载帖子详情失败:', error);
-      toast.error("加载帖子详情失败");
+      toast.error(t('loadPostFailed'));
     } finally {
       setIsLoading(false);
     }
-  }, [postId]);
+  }, [postId, t]);
 
   // 组件挂载时加载数据
   useEffect(() => {
@@ -108,12 +110,12 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
   const addTopic = useCallback(() => {
     if (!isEditing) return;
     
-    const topicText = prompt("请输入话题名称:");
+    const topicText = prompt(t('enterTopic'));
     if (topicText && topicText.trim() && !topics.includes(topicText.trim())) {
       setTopics(prev => [...prev, topicText.trim()]);
       setContent(prev => prev + ` #${topicText.trim()}`);
     }
-  }, [topics, isEditing]);
+  }, [topics, isEditing, t]);
 
   const removeTopic = useCallback((index) => {
     if (!isEditing) return;
@@ -123,12 +125,12 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
   const addMention = useCallback(() => {
     if (!isEditing) return;
     
-    const username = prompt("请输入用户名:");
+    const username = prompt(t('enterUsername'));
     if (username && username.trim() && !mentions.includes(username.trim())) {
       setMentions(prev => [...prev, username.trim()]);
       setContent(prev => prev + ` @${username.trim()}`);
     }
-  }, [mentions, isEditing]);
+  }, [mentions, isEditing, t]);
 
   const removeMention = useCallback((index) => {
     if (!isEditing) return;
@@ -138,11 +140,11 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
   const addLocation = useCallback(() => {
     if (!isEditing) return;
     
-    const locationName = prompt("请输入位置名称:");
+    const locationName = prompt(t('enterLocation'));
     if (locationName && locationName.trim()) {
       setLocation(locationName.trim());
     }
-  }, [isEditing]);
+  }, [isEditing, t]);
 
   const removeLocation = useCallback(() => {
     if (!isEditing) return;
@@ -170,12 +172,12 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
   // 更新帖子
   const handleUpdate = async () => {
     if (!title.trim()) {
-      toast.error("请输入标题！");
+      toast.error(t('enterTitle'));
       return;
     }
     
     if (!content.trim() && mediaFiles.length === 0) {
-      toast.error("内容和媒体文件不能都为空！");
+      toast.error(t('enterContent'));
       return;
     }
 
@@ -218,7 +220,7 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
 
       await postsApi.update(postId, updateData);
       
-      toast.success("帖子更新成功！");
+      toast.success(t('postUpdateSuccess'));
       
       // 回调通知父组件
       if (onUpdate) {
@@ -230,7 +232,7 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
       
     } catch (error) {
       console.error('更新帖子失败:', error);
-      toast.error("更新失败，请稍后再试。");
+      toast.error(t('postUpdateFailed'));
     } finally {
       setIsUpdating(false);
     }
@@ -239,21 +241,21 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
   // 删除帖子
   const handleDelete = async () => {
     const result = await Swal.fire({
-      title: '确认删除？',
-      text: "删除后无法恢复此帖子！",
+      title: t('confirmDelete'),
+      text: t('deleteWarning'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: '确认删除',
-      cancelButtonText: '取消',
+      confirmButtonText: t('confirmDeleteBtn'),
+      cancelButtonText: t('cancel'),
       reverseButtons: true,
     });
 
     if (result.isConfirmed) {
       try {
         await postsApi.delete(postId);
-        toast.success("帖子删除成功！");
+        toast.success(t('deleteSuccess'));
         
         if (onClose) {
           onClose();
@@ -266,7 +268,7 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
         
       } catch (error) {
         console.error('删除帖子失败:', error);
-        Swal.fire('错误!', '删除失败，请重试。', 'error');
+        Swal.fire(t('error'), t('deleteFailed'), 'error');
       }
     }
   };
@@ -292,7 +294,7 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
     return (
       <div className="modal-overlay">
         <div className="modal-content">
-          <div className="loading">加载中...</div>
+          <div className="loading">{t('loading')}</div>
         </div>
       </div>
     );
@@ -303,12 +305,12 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
-            <h3>提示</h3>
+            <h3>{t('tips')}</h3>
             <button className="modal-close" onClick={onClose}>✕</button>
           </div>
           <div className="modal-body">
             <div className="error" style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
-              帖子不存在或已被删除
+              {t('postNotFound')}
             </div>
           </div>
         </div>
@@ -323,8 +325,8 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>
-            {isEditing ? '编辑帖子' : '帖子详情'}
-            {post.canEdit && !isEditing && <span style={{color: '#666', fontSize: '14px', marginLeft: '10px'}}>(可编辑)</span>}
+            {isEditing ? t('editPost') : t('postDetail')}
+            {post.canEdit && !isEditing && <span style={{color: '#666', fontSize: '14px', marginLeft: '10px'}}>{t('editable')}</span>}
           </h3>
           <button className="modal-close" onClick={onClose}>✕</button>
         </div>
@@ -337,7 +339,7 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
               <div className="author-name">{post.authorId?.name}</div>
               <div className="post-time">
                 {new Date(post.createdAt).toLocaleString()}
-                {post.updatedAt !== post.createdAt && ` (已编辑)`}
+                {post.updatedAt !== post.createdAt && ` ${t('edited')}`}
               </div>
             </div>
           </div>
@@ -354,7 +356,7 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
             <textarea
               ref={textareaRef}
               className="post-textarea"
-              placeholder="分享你的想法、照片或视频..."
+              placeholder={t('contentPlaceholder')}
               value={content}
               onChange={(e) => setContent(e.target.value)}
             />
@@ -386,7 +388,7 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
                       </button>
                     )}
                     <div className="media-type-badge">
-                      {media.type === 'image' ? '图片' : '视频'}
+                      {media.type === 'image' ? t('image') : t('video')}
                     </div>
                   </div>
                 ))}
@@ -395,7 +397,7 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
               {/* 封面选择（仅编辑模式） */}
               {false && mediaFiles.length > 1 && (
                 <div className="cover-selection">
-                  <h4>选择封面：</h4>
+                  <h4>{t('selectCover')}</h4>
                   <div className="cover-options">
                     {mediaFiles.map((media, index) => (
                       <div 
@@ -459,9 +461,9 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
               value={visibility}
               onChange={(e) => setVisibility(e.target.value)}
             >
-              <option value="public">公开</option>
-              <option value="followers">仅粉丝</option>
-              <option value="private">私密</option>
+              <option value="public">{t('public')}</option>
+              <option value="followers">{t('followersOnly')}</option>
+              <option value="private">{t('private')}</option>
             </select>
           )}
 
@@ -481,22 +483,22 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
                   className="toolbar-btn" 
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  📷 添加图片/视频
+                  📷 {t('addImageVideo')}
                 </button>
                 <button 
                   className="toolbar-btn" 
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 >
-                  😊 表情
+                  😊 {t('emoji')}
                 </button>
                 <button className="toolbar-btn" onClick={addLocation}>
-                  📍 位置
+                  📍 {t('location')}
                 </button>
                 <button className="toolbar-btn" onClick={addTopic}>
-                  # 话题
+                  # {t('topic')}
                 </button>
                 <button className="toolbar-btn" onClick={addMention}>
-                  @ 好友
+                  @ {t('mention')}
                 </button>
               </div>
 
@@ -527,7 +529,7 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
                 onClick={handleDelete}
                 style={{ backgroundColor: '#dc3545' }}
               >
-                🗑️ 删除帖子
+                🗑️ {t('deletePost')}
               </button>
             )}
           </div>
@@ -539,24 +541,24 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
                   onClick={handleCancelEdit}
                   disabled={isUpdating}
                 >
-                  取消
+                  {t('cancel')}
                 </button>
                 <button 
                   className="btn-submit" 
                   onClick={handleUpdate}
                   disabled={!canUpdate}
                 >
-                  {isUpdating ? '更新中...' : '更新'}
+                  {isUpdating ? t('updating') : t('update')}
                 </button>
               </>
             ) : (
               <>
                 <button className="btn-cancel" onClick={onClose}>
-                  关闭
+                  {t('close')}
                 </button>
                 {post.canEdit && (
                   <button className="btn-submit" onClick={handleEdit}>
-                    编辑
+                    {t('edit')}
                   </button>
                 )}
               </>

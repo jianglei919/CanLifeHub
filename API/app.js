@@ -42,15 +42,16 @@ console.log('[CORS DEBUG] allowList =', allowList);
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   console.log('[CORS DEBUG] Request origin:', origin);
-  console.log('[CORS DEBUG] Is in allowList:', allowList.includes(origin));
   
-  // 检查 origin 是否在白名单中
-  if (allowList.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+  // 如果没有 Origin 头（Render/Cloudflare 代理丢失），或者 origin 在白名单中，都允许
+  if (!origin || allowList.includes(origin)) {
+    // 如果没有 origin，使用前端域名作为默认值
+    const corsOrigin = origin || 'https://canlifehub-ui.onrender.com';
+    res.setHeader('Access-Control-Allow-Origin', corsOrigin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-    console.log('[CORS DEBUG] Setting CORS headers for origin:', origin);
+    console.log('[CORS DEBUG] Setting CORS headers for origin:', corsOrigin);
   } else {
     console.log('[CORS DEBUG] Origin not in allowList, not setting CORS headers');
   }

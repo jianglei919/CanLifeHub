@@ -1,19 +1,11 @@
 // API/routes/authRoutes.js
 // 负责接收前端（React 页面）发来的请求，并把请求转交给相应的“控制器（controller）”去处理
 const express = require('express');
-const router = express.Router();         //创建一个“路由对象（router）”
-const cors = require('cors');            //CORS 允许浏览器端（例如 React 前端 http://localhost:5173）访问这个后端服务器
+const router = express.Router();         //创建一个"路由对象（router）"
 const { test, registerUser, loginUser, getProfile, getUserById, verifyEmail, resendVerification, forgotPassword, resetPassword, logout, updateProfile, uploadAvatar } = require('../controllers/authController');        //从 authController.js 文件中引入 test 函数
 const { avatarUpload } = require('../helpers/uploadAdapter'); // 开发用本地，生产用 Cloudinary
 
-
-  //middleware
-  router.use(                            //用 CORS 中间件，允许跨域访问. 当 React 前端调用 fetch('http://localhost:8000/') 时，服务器不会拒绝跨域
-    cors({
-        credentials: true,               //允许携带凭证（如 cookies）
-        origin: 'http://localhost:5173'  //只允许来自这个前端地址（你的 React 应用）发起请求
-    }) 
-)
+// CORS 由全局中间件处理（app.js），此处无需重复配置
 
 router.get('/', test);                    //当收到对根路径 / 的 GET 请求时，调用 test 函数处理请求
 router.post('/register', registerUser);       //当收到对 /register 的 POST 请求时，调用 registerUser 函数处理请求

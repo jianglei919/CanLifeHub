@@ -297,7 +297,7 @@ const forgotPassword = async (req, res) => {
     await user.save();
 
     // 生成重置链接（前端URL）
-    const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendURL = process.env.FRONTEND_URL || 'https://canlifehub-ui.onrender.com';
     const resetLink = `${frontendURL}/reset-password/${resetToken}`;
 
     // 异步发送重置邮件

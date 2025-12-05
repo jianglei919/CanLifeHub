@@ -78,13 +78,13 @@ cat UI/package.json | grep '"start"'  # 应该没有任何输出
 
 | KEY | VALUE |
 |-----|-------|
-| `MONGODB_URI` | `mongodb+srv://victorren86:9278062@cluster0.3qwex02.mongodb.net/?appName=Cluster0` |
-| `JWT_SECRET` | `iC4sapHSzEPS2zQ5=efJ#7oMp*XDkWcRW$EjfAnFl#08BrrU` |
-| `RESEND_API_KEY` | `re_6pKCMCqJ_2HpnJDWzndpn4sun8n9tKPuz` |
-| `CLOUDINARY_CLOUD_NAME` | `dn2usxf20` |
-| `CLOUDINARY_API_KEY` | `518813527922257` |
-| `CLOUDINARY_API_SECRET` | `n--kB0Y4L1R7u4SQq2TZU2QBszY` |
-| `GEMINI_API_KEY` | `AIzaSyAwGjRzK7rpK8yY1HXFUO2_tEOWgeXnDdU` |
+| `MONGODB_URI` | `<your mongodb+srv uri>` |
+| `JWT_SECRET` | `<your 32+ char secret>` |
+| `RESEND_API_KEY` | `<your resend api key>` |
+| `CLOUDINARY_CLOUD_NAME` | `<your cloud name>` |
+| `CLOUDINARY_API_KEY` | `<your api key>` |
+| `CLOUDINARY_API_SECRET` | `<your api secret>` |
+| `GEMINI_API_KEY` | `<your gemini api key>` |
 | `EMAIL_FROM` | `CanLifeHub <noreply@example.com>` |
 | `CORS_ORIGIN` | `https://canlifehub-ui.onrender.com` |
 | `NODE_ENV` | `production` |

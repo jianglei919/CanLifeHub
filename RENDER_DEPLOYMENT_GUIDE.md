@@ -200,13 +200,13 @@ VITE_API_BASE=https://canlifehub.onrender.com
 
 | KEY | VALUE | 说明 |
 |-----|-------|------|
-| `MONGODB_URI` | `mongodb+srv://user:pwd@cluster.xxx.mongodb.net/?appName=CanLifeHub` | MongoDB Atlas 连接 |
-| `JWT_SECRET` | 32+ 位随机字符 | 令牌加密密钥 |
-| `RESEND_API_KEY` | `re_xxxxxxx` | 邮件服务 API Key |
-| `CLOUDINARY_CLOUD_NAME` | `你的 cloud name` | 图片存储账户 |
-| `CLOUDINARY_API_KEY` | `你的 API Key` | 图片存储 Key |
-| `CLOUDINARY_API_SECRET` | `你的 API Secret` | 图片存储密钥 |
-| `GEMINI_API_KEY` | `AIzaSy...` | AI 对话 API Key |
+| `MONGODB_URI` | `<your mongodb+srv uri>` | MongoDB Atlas 连接 |
+| `JWT_SECRET` | `<your 32+ char secret>` | 令牌加密密钥 |
+| `RESEND_API_KEY` | `<your resend api key>` | 邮件服务 API Key |
+| `CLOUDINARY_CLOUD_NAME` | `<your cloud name>` | 图片存储账户 |
+| `CLOUDINARY_API_KEY` | `<your api key>` | 图片存储 Key |
+| `CLOUDINARY_API_SECRET` | `<your api secret>` | 图片存储密钥 |
+| `GEMINI_API_KEY` | `<your gemini api key>` | AI 对话 API Key |
 | `EMAIL_FROM` | `CanLifeHub <noreply@example.com>` | 发件人邮箱 |
 | `CORS_ORIGIN` | `https://canlifehub-ui.onrender.com` | 前端域名 |
 | `NODE_ENV` | `production` | 运行环境 |

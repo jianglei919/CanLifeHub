@@ -29,9 +29,14 @@ app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 
 /** CORS（开发期：前端通过 Vite 代理即可；若直连也能工作） */
-const allowList = (process.env.CORS_ORIGIN || 'http://localhost:5173')
+const corsOriginEnv = process.env.CORS_ORIGIN || 'http://localhost:5173';
+console.log('[CORS DEBUG] process.env.CORS_ORIGIN =', corsOriginEnv);
+
+const allowList = corsOriginEnv
   .split(',')
   .map(s => s.trim());
+
+console.log('[CORS DEBUG] allowList =', allowList);
 
 const corsOptions = {
   origin: allowList,
@@ -39,6 +44,8 @@ const corsOptions = {
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
+
+console.log('[CORS DEBUG] corsOptions =', JSON.stringify(corsOptions, null, 2));
 
 app.use(cors(corsOptions));
 

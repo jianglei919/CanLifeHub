@@ -92,7 +92,7 @@ services:
     publishPath: dist
     envVars:
       - key: VITE_API_BASE
-        value: https://canlifehub.onrender.com  # ⭐ 改成你的实际 API 域名
+        value: https://canlifehub-api.onrender.com/api  # ⭐ 改成你的实际 API 域名，带 /api 前缀
         sync: false
 ```
 
@@ -152,9 +152,9 @@ export default {
 }
 ```
 
-#### ✅ UI/.env.production（生产 API 地址）
+#### ✅ UI/.env.production（生产 API 地址，带 /api 前缀）
 ```dotenv
-VITE_API_BASE=https://canlifehub.onrender.com
+VITE_API_BASE=https://canlifehub.onrender.com/api
 ```
 
 ---

@@ -39,5 +39,5 @@ services:
     publishPath: dist
     envVars:
       - key: VITE_API_BASE
-        value: https://canlifehub.onrender.com
+        value: https://canlifehub-api.onrender.com/api
         sync: false

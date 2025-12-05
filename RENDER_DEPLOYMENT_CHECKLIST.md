@@ -109,7 +109,7 @@ cat UI/package.json | grep '"start"'  # 应该没有任何输出
 
 | KEY | VALUE |
 |-----|-------|
-| `VITE_API_BASE` | `https://canlifehub.onrender.com` |
+| `VITE_API_BASE` | `https://canlifehub-api.onrender.com/api` |
 
 3. 点击 **Save**
 

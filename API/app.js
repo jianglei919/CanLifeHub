@@ -10,6 +10,14 @@ app.use(express.json({ limit: '50mb' })); // 增加JSON请求体大小限制，�
 app.use(express.urlencoded({ extended: false, limit: '50mb' })); // 增加URL编码请求体大小限制
 app.use(cookieParser());
 
+/** 禁用缓存（防止 304 Not Modified 错误）*/
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
 /** 静态文件服务（用于访问上传的图片） */
 app.use('/uploads', express.static('uploads'));
 

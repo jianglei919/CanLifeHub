@@ -41,12 +41,21 @@ console.log('[CORS DEBUG] allowList =', allowList);
 // 手动处理 CORS 而不使用 cors 包
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  console.log('[CORS DEBUG] Request origin:', origin);
+  console.log('[CORS DEBUG] Is in allowList:', allowList.includes(origin));
+  
+  // 检查 origin 是否在白名单中
   if (allowList.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+    console.log('[CORS DEBUG] Setting CORS headers for origin:', origin);
+  } else {
+    console.log('[CORS DEBUG] Origin not in allowList, not setting CORS headers');
   }
+  
+  // 预检请求直接返回 200
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }

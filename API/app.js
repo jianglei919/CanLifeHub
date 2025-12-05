@@ -32,7 +32,18 @@ app.use('/uploads', express.static('uploads'));
 const allowList = (process.env.CORS_ORIGIN || 'http://localhost:5173')
   .split(',')
   .map(s => s.trim());
-app.use(cors({ origin: allowList, credentials: true }));
+
+const corsOptions = {
+  origin: allowList,
+  credentials: true,
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+
+// 显式处理 OPTIONS 预检请求
+app.options('*', cors(corsOptions));
 
 /** 健康检查 */
 app.get('/healthz', (req, res) => res.status(200).send('ok'));

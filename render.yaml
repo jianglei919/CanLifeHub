@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: canlifehub-api
+    env: node
+    plan: free
+    rootDir: API
+    buildCommand: npm install
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: MONGODB_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: "CanLifeHub <noreply@example.com>"
+      - key: CORS_ORIGIN
+        value: https://your-frontend.onrender.com
+
+  - type: static_site
+    name: canlifehub-ui
+    rootDir: UI
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_API_BASE
+        sync: false

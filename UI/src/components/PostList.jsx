@@ -8,6 +8,7 @@ import UserProfileModal from "./UserProfileModal";
 import Swal from 'sweetalert2';
 import DetailPost from "./DetailPost";
 import { toast } from "react-hot-toast";
+import { getMediaUrl } from "../utils/media";
 
 const TEST_POST_ID = import.meta.env.VITE_TEST_POST_ID || '64c1f0e9f7c5a4b123456789';
 
@@ -321,33 +322,26 @@ const handleReportPost = async (postId) => {
   const renderMedia = (mediaArray) => {
     if (!mediaArray || mediaArray.length === 0) return null;
 
-    const getFullUrl = (url) => {
-      if (!url) return '';
-      if (url.startsWith('http') || url.startsWith('data:')) return url;
-      // Use relative path which will be proxied
-      return url;
-    };
-
     return (
       <div className="post-media">
         {mediaArray.map((media, index) => (
           <div key={index} className="media-item">
             {media.type === 'image' ? (
               <img
-                src={getFullUrl(media.url)}
+                src={getMediaUrl(media.url)}
                 alt={`帖子图片 ${index + 1}`}
                 className="media-image"
-                onClick={() => window.open(getFullUrl(media.url), '_blank')}
+                onClick={() => window.open(getMediaUrl(media.url), '_blank')}
                 style={{ cursor: 'pointer' }}
               />
             ) : media.type === 'video' ? (
               <video
                 controls
                 className="media-video"
-                poster={getFullUrl(media.thumbnail)}
+                poster={getMediaUrl(media.thumbnail)}
                 style={{ width: '100%', maxHeight: '400px' }}
               >
-                <source src={getFullUrl(media.url)} type="video/mp4" />
+                <source src={getMediaUrl(media.url)} type="video/mp4" />
                 您的浏览器不支持视频播放。
               </video>
             ) : null}
@@ -412,7 +406,7 @@ const handleReportPost = async (postId) => {
                     style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     {post.avatar && (post.avatar.startsWith('http') || post.avatar.startsWith('/') || post.avatar.startsWith('data:')) ? (
-                      <img src={post.avatar} alt={post.author} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                      <img src={getMediaUrl(post.avatar)} alt={post.author} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
                     ) : (
                       post.avatar || "👤"
                     )}

@@ -1,4 +1,8 @@
 // API/index.js
+const path = require('path');
+// Load env by NODE_ENV first, then fall back to .env
+const envFile = `.env.${process.env.NODE_ENV || 'development'}`;
+require('dotenv').config({ path: path.join(__dirname, envFile) });
 require('dotenv').config();
 const mongoose = require('mongoose');
 const app = require('./app');
@@ -25,14 +29,17 @@ async function bootstrap() {
     });
 
     /** 优雅退出 */
-    const shutdown = (signal) => {
+    const shutdown = async (signal) => {
       console.log(`[API] ${signal} received, shutting down...`);
-      server.close(() => {
-        mongoose.connection.close(false, () => {
-          console.log('[API] closed mongodb connection. Bye.');
-          process.exit(0);
-        });
-      });
+      try {
+        await new Promise((resolve) => server.close(resolve));
+        await mongoose.connection.close(false);
+        console.log('[API] closed mongodb connection. Bye.');
+      } catch (e) {
+        console.error('[API] error during shutdown:', e);
+      } finally {
+        process.exit(0);
+      }
     };
     process.on('SIGINT', () => shutdown('SIGINT'));
     process.on('SIGTERM', () => shutdown('SIGTERM'));

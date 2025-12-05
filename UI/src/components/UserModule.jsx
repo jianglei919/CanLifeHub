@@ -5,6 +5,7 @@ import { UserContext } from "../../context/userContext";
 import { useLanguage } from "../../context/LanguageContext";
 import EditProfile from "./EditProfile";
 import DetailPost from "./DetailPost";
+import { getMediaUrl } from "../utils/media";
 
 export default function UserModule() {
   const { t } = useLanguage();
@@ -190,7 +191,7 @@ const [detailMode, setDetailMode] = useState('view');
       <div className="user-header">
         <span className="user-avatar" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {isImageUrl(user.avatar) ? (
-            <img src={user.avatar} alt={user.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+            <img src={getMediaUrl(user.avatar)} alt={user.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
           ) : (
             user.avatar || "👤"
           )}

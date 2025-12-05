@@ -5,6 +5,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import Swal from 'sweetalert2';
 import '../styles/CreatePost.css';
 import '../styles/DetailPost.css';
+import { getMediaUrl } from "../utils/media";
 
 export default function DetailPost({ postId, mode = 'view', onClose, onUpdate }) {
   const { t } = useLanguage();
@@ -334,7 +335,7 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
         <div className="modal-body">
           {/* 作者信息 */}
           <div className="post-author">
-            <img src={post.authorId?.avatar || "https://cn.cravatar.com/wp-content/uploads/sites/9/2021/07/4.png"} alt={post.authorId?.name} className="author-avatar" />
+            <img src={getMediaUrl(post.authorId?.avatar) || "https://cn.cravatar.com/wp-content/uploads/sites/9/2021/07/4.png"} alt={post.authorId?.name} className="author-avatar" />
             <div className="author-info">
               <div className="author-name">{post.authorId?.name}</div>
               <div className="post-time">
@@ -375,9 +376,9 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
                 {mediaFiles.map((media, index) => (
                   <div key={index} className="media-preview-item">
                     {media.type === 'image' ? (
-                      <img src={`http://localhost:8000${media.url}`} alt={`媒体 ${index + 1}`} />
+                      <img src={getMediaUrl(media.url)} alt={`媒体 ${index + 1}`} />
                     ) : (
-                      <video src={`http://localhost:8000${media.url}`} controls />
+                      <video src={getMediaUrl(media.url)} controls />
                     )}
                     {false && (
                       <button 
@@ -406,9 +407,9 @@ export default function DetailPost({ postId, mode = 'view', onClose, onUpdate })
                         onClick={() => setCoverIndex(index)}
                       >
                         {media.type === 'image' ? (
-                          <img src={`http://localhost:8000${media.url}`} alt={`封面 ${index + 1}`} />
+                          <img src={getMediaUrl(media.url)} alt={`封面 ${index + 1}`} />
                         ) : (
-                          <video src={`http://localhost:8000${media.url}`} />
+                          <video src={getMediaUrl(media.url)} />
                         )}
                       </div>
                     ))}

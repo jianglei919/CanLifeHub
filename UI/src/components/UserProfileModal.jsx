@@ -2,6 +2,7 @@
 import { useState, useEffect, useContext } from "react";
 import { authApi, postsApi, followApi } from "../api/http";
 import { UserContext } from "../../context/userContext";
+import { getMediaUrl } from "../utils/media";
 
 export default function UserProfileModal({ userId, onClose }) {
   const { user: currentUser } = useContext(UserContext);
@@ -117,7 +118,7 @@ export default function UserProfileModal({ userId, onClose }) {
         <div className="user-profile-header">
           <span className="user-profile-avatar" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {user.avatar && (user.avatar.startsWith('http') || user.avatar.startsWith('/') || user.avatar.startsWith('data:')) ? (
-              <img src={user.avatar} alt={user.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+              <img src={getMediaUrl(user.avatar)} alt={user.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
             ) : (
               user.avatar || "👤"
             )}

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { commentsApi, authApi } from '../api/http';
 import { useLanguage } from "../../context/LanguageContext";
 import { UserContext } from "../../context/userContext";
+import { getMediaUrl } from '../utils/media';
 
 export default function CommentsBox({ targetType = 'post', targetId, onCountChange }) {
   const { t } = useLanguage();
@@ -277,7 +278,7 @@ function CommentItem({ item, onAnyCommentChange, onRefresh }) {
             const display = latest || avatar;
             const showImg = display && (display.startsWith('http') || display.startsWith('/') || display.startsWith('data:'));
             return showImg
-            ? <img src={display} alt="avatar" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+            ? <img src={getMediaUrl(display)} alt="avatar" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
             : (display || "👤");
           })()}
         </span>
@@ -321,7 +322,7 @@ function CommentItem({ item, onAnyCommentChange, onRefresh }) {
                             const display = latest || rAvatar;
                             const showImg = display && (display.startsWith('http') || display.startsWith('/') || display.startsWith('data:'));
                             return showImg
-                            ? <img src={display} alt="avatar" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+                            ? <img src={getMediaUrl(display)} alt="avatar" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
                             : (display || "💬");
                           })()}
                         </span>

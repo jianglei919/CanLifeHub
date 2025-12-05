@@ -463,9 +463,13 @@ const uploadAvatar = (req, res) => {
       return res.status(400).json({ error: '请选择要上传的图片' });
     }
     
-    // 构建文件URL
-    // 返回相对路径，前端拼接 base URL
-    const fileUrl = `/uploads/avatars/${req.file.filename}`;
+    // 构建文件URL：Cloudinary 返回 https://...，本地存储返回绝对路径，需转成 /uploads/...
+    let fileUrl = `/uploads/avatars/${req.file.filename}`;
+    if (req.file.path && req.file.path.startsWith('http')) {
+      fileUrl = req.file.path; // Cloudinary 完整 URL
+    }
+
+    console.log('[uploadAvatar] file.path=', req.file.path, '=> url:', fileUrl);
     
     res.json({ 
       ok: true, 

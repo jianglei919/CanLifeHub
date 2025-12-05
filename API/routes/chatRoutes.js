@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth } = require('../helpers/authMiddleware');
-const upload = require('../helpers/upload');
+const { chatImageUpload } = require('../helpers/uploadAdapter');
 const {
   getConversations,
   getOrCreateConversation,
@@ -32,14 +32,16 @@ router.get('/conversations/:conversationId/messages', getMessages);
 router.post('/conversations/:conversationId/messages', sendMessage);
 
 // 上传图片
-router.post('/upload-image', upload.single('image'), (req, res) => {
+router.post('/upload-image', chatImageUpload.single('image'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: '请选择要上传的图片' });
     }
 
     // 返回图片的访问URL
-    const imageUrl = `/uploads/chat-images/${req.file.filename}`;
+    const imageUrl = (req.file.path && req.file.path.startsWith('http'))
+      ? req.file.path // Cloudinary 完整 URL
+      : `/uploads/chat-images/${req.file.filename}`; // 本地相对路径
     res.json({ ok: true, imageUrl });
   } catch (error) {
     console.error('Upload image error:', error);

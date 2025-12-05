@@ -3,7 +3,7 @@ const router = express.Router();
 
 const ctrl = require('../controllers/postController');
 const { requireAuth } = require('../helpers/authMiddleware');
-const uploadPostMedia = require('../helpers/uploadPostMedia');
+const { postMediaUpload } = require('../helpers/uploadAdapter');
 
 // ===================================
 // 帖子 CRUD
@@ -50,7 +50,7 @@ router.post('/:id/react', requireAuth, ctrl.react);
 router.delete('/:id/react', requireAuth, ctrl.unreact);
 
 // routes/posts.js 或其他路由文件
-router.post('/upload-media', uploadPostMedia.array('media', 10), (req, res) => {
+router.post('/upload-media', postMediaUpload.array('media', 10), (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: '请选择要上传的媒体文件' });
@@ -59,9 +59,11 @@ router.post('/upload-media', uploadPostMedia.array('media', 10), (req, res) => {
     // 处理多个文件，返回文件信息数组
     const mediaFiles = req.files.map(file => {
       const mediaType = file.mimetype.startsWith('image/') ? 'image' : 'video';
-      
+      const url = (file.path && file.path.startsWith('http'))
+        ? file.path // Cloudinary 完整 URL
+        : `/uploads/posts/${file.filename}`; // 本地相对路径
       return {
-        url: `/uploads/posts/${file.filename}`,
+        url,
         type: mediaType,
         filename: file.filename,
         originalName: file.originalname,

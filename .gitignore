@@ -38,7 +38,6 @@ ios/
 .env.development
 .env.production
 .env.test
-.env.example
 
 # IDE & Editor junk
 .idea/

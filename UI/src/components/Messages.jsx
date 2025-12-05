@@ -3,6 +3,7 @@ import { chatApi, authApi } from "../api/http";
 import { useLanguage } from "../../context/LanguageContext";
 import toast from "react-hot-toast";
 import "../styles/Messages.css";
+import { getMediaUrl } from "../utils/media";
 
 export default function Messages() {
   const { t } = useLanguage();
@@ -315,7 +316,7 @@ export default function Messages() {
     if (avatar && (avatar.startsWith('http') || avatar.startsWith('/') || avatar.startsWith('data:'))) {
       return (
         <img 
-          src={avatar} 
+          src={getMediaUrl(avatar)} 
           alt={user.name} 
           style={{
             width: `${size}px`, 
@@ -650,7 +651,7 @@ export default function Messages() {
                     <p>{msg.content}</p>
                   ) : (
                     <img
-                      src={msg.imageUrl}
+                      src={getMediaUrl(msg.imageUrl)}
                       alt={t('imageMessage')}
                       className="message-image"
                       loading="lazy"
@@ -743,7 +744,7 @@ export default function Messages() {
             <button className="image-preview-close" onClick={closeImagePreview}>
               ✕
             </button>
-            <img src={previewImage} alt={t('preview')} onClick={(e) => e.stopPropagation()} />
+            <img src={getMediaUrl(previewImage)} alt={t('preview')} onClick={(e) => e.stopPropagation()} />
           </div>
         )}
       </div>

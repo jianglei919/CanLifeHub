@@ -4,6 +4,7 @@ import { authApi } from '../api/http';
 import toast from 'react-hot-toast';
 import '../styles/EditProfile.css';
 import { useLanguage } from '../../context/LanguageContext';
+import { getMediaUrl } from '../utils/media';
 
 export default function EditProfile({ user, onClose, onUpdate }) {
   const { t } = useLanguage();
@@ -129,16 +130,6 @@ export default function EditProfile({ user, onClose, onUpdate }) {
     return url && (url.startsWith('http') || url.startsWith('/') || url.startsWith('data:'));
   };
 
-  // Helper to get full image URL
-  const getImageUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http') || url.startsWith('data:')) return url;
-    // Assuming backend is on localhost:8000 for dev, or relative if proxied
-    // For now, let's assume we need to prepend the API base if it's relative and not data URI
-    // But wait, if we use Vite proxy, /uploads/... should work relative to current page
-    return url; 
-  };
-
   return (
     <div className="edit-profile-overlay" onClick={handleOverlayClick}>
       <div className="edit-profile-modal">
@@ -158,7 +149,7 @@ export default function EditProfile({ user, onClose, onUpdate }) {
               <div className="avatar-preview-container">
                 <div className="avatar-preview">
                   {isImageUrl(previewUrl) ? (
-                    <img src={getImageUrl(previewUrl)} alt="Avatar Preview" />
+                    <img src={getMediaUrl(previewUrl)} alt="Avatar Preview" />
                   ) : (
                     <span className="avatar-emoji">{previewUrl || "👤"}</span>
                   )}

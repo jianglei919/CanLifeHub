@@ -9,16 +9,28 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "20"
-      - key: MONGODB_URL
+      - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
         sync: false
       - key: RESEND_API_KEY
         sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
       - key: EMAIL_FROM
         value: "CanLifeHub <noreply@example.com>"
       - key: CORS_ORIGIN
-        value: https://your-frontend.onrender.com
+        value: https://canlifehub-ui.onrender.com
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8000"
 
   - type: static_site
     name: canlifehub-ui
@@ -27,4 +39,5 @@ services:
     publishPath: dist
     envVars:
       - key: VITE_API_BASE
+        value: https://canlifehub.onrender.com
         sync: false

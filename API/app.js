@@ -42,9 +42,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// 显式处理 OPTIONS 预检请求
-app.options('*', cors(corsOptions));
-
 /** 健康检查 */
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
 

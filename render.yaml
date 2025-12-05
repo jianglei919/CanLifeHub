@@ -26,7 +26,7 @@ services:
       - key: EMAIL_FROM
         value: "CanLifeHub <noreply@example.com>"
       - key: CORS_ORIGIN
-        value: https://canlifehub-ui.onrender.com
+        value: https://canlifehub-ui.onrender.com,http://localhost:5173
       - key: NODE_ENV
         value: production
       - key: PORT

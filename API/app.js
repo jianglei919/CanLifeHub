@@ -1,6 +1,5 @@
 // API/app.js
 const express = require('express');
-const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 // 路由
@@ -28,33 +27,17 @@ app.use(cookieParser());
 /** 静态文件服务（用于访问上传的图片） */
 app.use('/uploads', express.static('uploads'));
 
-/** CORS（开发期：前端通过 Vite 代理即可；若直连也能工作） */
-const corsOriginEnv = process.env.CORS_ORIGIN || 'http://localhost:5173';
-console.log('[CORS DEBUG] process.env.CORS_ORIGIN =', corsOriginEnv);
+/** CORS（手动实现，确保生效） */
+const corsOriginEnv = process.env.CORS_ORIGIN || 'https://canlifehub-ui.onrender.com';
+const allowList = corsOriginEnv.split(',').map(s => s.trim());
 
-const allowList = corsOriginEnv
-  .split(',')
-  .map(s => s.trim());
-
-console.log('[CORS DEBUG] allowList =', allowList);
-
-// 手动处理 CORS 而不使用 cors 包
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  console.log('[CORS DEBUG] Request origin:', origin);
-  
-  // 如果没有 Origin 头（Render/Cloudflare 代理丢失），或者 origin 在白名单中，都允许
-  if (!origin || allowList.includes(origin)) {
-    // 如果没有 origin，使用前端域名作为默认值
-    const corsOrigin = origin || 'https://canlifehub-ui.onrender.com';
-    res.setHeader('Access-Control-Allow-Origin', corsOrigin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-    console.log('[CORS DEBUG] Setting CORS headers for origin:', corsOrigin);
-  } else {
-    console.log('[CORS DEBUG] Origin not in allowList, not setting CORS headers');
-  }
+  // 设置 CORS 头给所有请求（Render/Cloudflare 可能会丢失 Origin）
+  const corsOrigin = 'https://canlifehub-ui.onrender.com';
+  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
   
   // 预检请求直接返回 200
   if (req.method === 'OPTIONS') {

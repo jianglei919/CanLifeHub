@@ -29,23 +29,18 @@ app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 
 /** CORS（开发期：前端通过 Vite 代理即可；若直连也能工作） */
-// 延迟初始化 CORS，确保环境变量已加载
-const corsMiddleware = (req, res, next) => {
-  const allowList = (process.env.CORS_ORIGIN || 'http://localhost:5173')
-    .split(',')
-    .map(s => s.trim());
-  
-  const corsOptions = {
-    origin: allowList,
-    credentials: true,
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  };
-  
-  cors(corsOptions)(req, res, next);
+const allowList = (process.env.CORS_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map(s => s.trim());
+
+const corsOptions = {
+  origin: allowList,
+  credentials: true,
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-app.use(corsMiddleware);
+app.use(cors(corsOptions));
 
 /** 健康检查 */
 app.get('/healthz', (req, res) => res.status(200).send('ok'));

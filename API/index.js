@@ -1,9 +1,12 @@
 // API/index.js
 const path = require('path');
-// Load env by NODE_ENV first, then fall back to .env
+
+// ⭐ 关键：在 require app 之前加载环境变量
 const envFile = `.env.${process.env.NODE_ENV || 'development'}`;
 require('dotenv').config({ path: path.join(__dirname, envFile) });
 require('dotenv').config();
+
+// 现在才 require app，此时环境变量已加载
 const mongoose = require('mongoose');
 const app = require('./app');
 const { startCleanupSchedule } = require('./helpers/cleanup'); // 引入清理任务

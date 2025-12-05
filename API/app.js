@@ -38,16 +38,20 @@ const allowList = corsOriginEnv
 
 console.log('[CORS DEBUG] allowList =', allowList);
 
-const corsOptions = {
-  origin: allowList,
-  credentials: true,
-  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-};
-
-console.log('[CORS DEBUG] corsOptions =', JSON.stringify(corsOptions, null, 2));
-
-app.use(cors(corsOptions));
+// 手动处理 CORS 而不使用 cors 包
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowList.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  }
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 /** 健康检查 */
 app.get('/healthz', (req, res) => res.status(200).send('ok'));

@@ -22,7 +22,6 @@ app.use((req, res, next) => {
 app.use('/uploads', express.static('uploads'));
 
 /** CORS */
-// Middleware
 const corsOptions = {
   origin: process.env.CORS_ORIGIN || '*',
   credentials: true,
@@ -30,8 +29,6 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // 路由
 //todo: 新增路由放在这里！！！！
